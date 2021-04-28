@@ -5,13 +5,14 @@ AuthBox consists of 2 applications: Oauth2 server `auth-box-server` and manageme
 Management portal provides a UI and restful API for querying and management of Oauth2 server.
 
 # Table of Contents
-1. [Demo](#Demo)
-2. [Features](#Features)
-3. [Application configuration setup](#Application_configuration_setup)
+1. [Demo](#demo)
+2. [Features](#features)
+3. [Application configuration setup](#application_configuration_setup)
 4. [Oauth2 server `auth-box-server` configuration](#Oauth2 server auth-box-server configuration)
 5. [Build and run](#Build and run)
 
 ## Demo
+<a name="demo" />
 Full deployment of AuthBox (Oauth2 server and management panel) are running on 
 [https://oauth2.cloud](https://oauth2.cloud).
 
@@ -24,6 +25,7 @@ Please create an account to see complete functionality. Registration process wil
 * Oauth2 user (username: `test`; password: `test`) to demo user authentication or/and authorization.
 
 ## Features
+<a name="features" />
 AuthBox is [RFC 6749](https://tools.ietf.org/html/rfc6749) compliant Oauth2 server implementation.
 It features the following available grant types: `password`, `client_credentials`, `authorization_code`, and `refresh_token`.
 As part of `authorization_code` it provides ability to use Two Factor Authentication (2FA) using 
@@ -37,6 +39,7 @@ for metrics collection and visualization.
 `auth-box-server` and `auth-box-web` are docker/k8s ready and come with [Dockerfile(s)](docker/) and [docker-compose](docker/) scripts.
 
 ## Application configuration setup
+<a name="application_configuration_setup" />
 Oauth2 server `auth-box-server` and management portal `auth-box-web` use [spring-boot](https://spring.io/projects/spring-boot)
 internally and therefore can be configured using following methods:
 
