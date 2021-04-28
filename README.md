@@ -17,7 +17,7 @@ Management portal provides a UI and restful API for querying and management of O
 <a name="demo" />
 
 ## Demo
-Full deployment of AuthBox (Oauth2 server and management panel) are running on 
+Full deployment of AuthBox (Oauth2 server and management panel) is running on 
 [https://oauth2.cloud](https://oauth2.cloud).
 
 Please create an account to see complete functionality. Registration process will create the following:
