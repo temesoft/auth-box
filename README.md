@@ -38,8 +38,9 @@ for metrics collection and visualization.
 
 `auth-box-server` and `auth-box-web` are docker/k8s ready and come with [Dockerfile(s)](docker/) and [docker-compose](docker/) scripts.
 
-## Application configuration setup
 <a name="application_configuration_setup" />
+
+## Application configuration setup
 Oauth2 server `auth-box-server` and management portal `auth-box-web` use [spring-boot](https://spring.io/projects/spring-boot)
 internally and therefore can be configured using following methods:
 
