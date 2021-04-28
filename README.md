@@ -4,6 +4,13 @@ AuthBox is a free, open-source Oauth2 server implemented using Java.
 AuthBox consists of 2 applications: Oauth2 server `auth-box-server` and management portal `auth-box-web`.
 Management portal provides a UI and restful API for querying and management of Oauth2 server.
 
+# Table of Contents
+1. [Demo](#Demo)
+2. [Features](#Features)
+3. [Application configuration setup](#Application configuration setup)
+4. [Oauth2 server `auth-box-server` configuration](#Oauth2 server auth-box-server configuration)
+5. [Build and run](#Build and run)
+
 ## Demo
 Full deployment of AuthBox (Oauth2 server and management panel) are running on 
 [https://oauth2.cloud](https://oauth2.cloud).
