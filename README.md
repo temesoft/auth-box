@@ -75,6 +75,10 @@ java -jar auth-box-server.jar
 ## Oauth2 server `auth-box-server` configuration
 | Configuration property | Description | Default value |
 | :--- | :--- | :--- |
+| info.app.name | Application name | @project.name@ |
+| info.app.description | Application description | Auth box server |
+| info.app.version | Application version | @project.version@ |
+| info.app.domain | Application domain | oauth2.cloud |
 | server.port | Server listening port | 9999 |
 | spring.datasource.url | Database JDBC url | jdbc:mysql://${MYSQL_HOST:localhost}:3306/authbox?serverTimezone=UTC&useLegacyDatetimeCode=false |
 | spring.datasource.username | Database username | root |
@@ -82,21 +86,43 @@ java -jar auth-box-server.jar
 | spring.flyway.enabled | Flyway database migration flag | true |
 | spring.cache.type | DAO cache type (possible values are: caffeine/redis/none) | none |
 | spring.cache.cache-names | Cache names to enable in csv list (possible values are OauthClient,OauthScope,OauthToken,OauthUser,Organization,User) | N/A |
-| spring.redis.host | Redis cache host (disabled when not specified) | N/A |
+| spring.redis.host | Redis cache server host (disabled when not specified) | N/A |
+| spring.redis.port | Redis cache server port | 6379 |
+| management.metrics.export.graphite.host | Graphite server hostname | localhost |
+| management.metrics.export.graphite.port | Graphite server port | 2004 |
+| management.metrics.export.graphite.graphiteTagsEnabled | Graphite tags enabled | false |
+| management.metrics.export.graphite.step | Graphite push frequency | 1m |
+| management.metrics.export.graphite.rateUnits | Rate metrics units | SECONDS |
+| management.metrics.export.graphite.durationUnits | Duration metrics  units | MILLISECONDS |
+| management.metrics.export.graphite.tagsAsPrefix | Treat metrics tags as prefix | ${info.app.name},${hostname:localhost} |
 
 <a name="management_panel_auth-box-web_configuration" />
 
 ## Management panel `auth-box-web` configuration
 | Configuration property | Description | Default value |
 | :--- | :--- | :--- |
-| server.port | Server listening port | 9999 |
+| info.app.name | Application name | @project.name@ |
+| info.app.description | Application description | Auth box web |
+| info.app.version | Application version | @project.version@ |
+| info.app.domain | Application domain | oauth2.cloud |
+| info.app.registration-enabled | Registration of new Organizations/Users enabled | true |
+| server.port | Server listening port | 8888 |
 | spring.datasource.url | Database JDBC url | jdbc:mysql://${MYSQL_HOST:localhost}:3306/authbox?serverTimezone=UTC&useLegacyDatetimeCode=false |
 | spring.datasource.username | Database username | root |
 | spring.datasource.password | Database password | r00t |
 | spring.flyway.enabled | Flyway database migration flag | true |
 | spring.cache.type | DAO cache type (possible values are: caffeine/redis/none) | none |
 | spring.cache.cache-names | Cache names to enable in csv list (possible values are OauthClient,OauthScope,OauthToken,OauthUser,Organization,User) | N/A |
-| spring.redis.host | Redis cache host (disabled when not specified) | N/A |
+| spring.session.store-type | Web session storage type (possible values are none/redis) | none |
+| spring.redis.host | Redis cache server host (disabled when not specified) | N/A |
+| spring.redis.port | Redis cache server port | 6379 |
+| management.metrics.export.graphite.host | Graphite server hostname | localhost |
+| management.metrics.export.graphite.port | Graphite server port | 2004 |
+| management.metrics.export.graphite.graphiteTagsEnabled | Graphite tags enabled | false |
+| management.metrics.export.graphite.step | Graphite push frequency | 1m |
+| management.metrics.export.graphite.rateUnits | Rate metrics units | SECONDS |
+| management.metrics.export.graphite.durationUnits | Duration metrics  units | MILLISECONDS |
+| management.metrics.export.graphite.tagsAsPrefix | Treat metrics tags as prefix | ${info.app.name},${hostname:localhost} |
 
 <a name="build_and_run" />
 
