@@ -8,11 +8,15 @@ Management portal provides a UI and restful API for querying and management of O
 1. [Demo](#demo)
 2. [Features](#features)
 3. [Application configuration setup](#application_configuration_setup)
-4. [Oauth2 server `auth-box-server` configuration](#Oauth2 server auth-box-server configuration)
-5. [Build and run](#Build and run)
+4. [Oauth2 server `auth-box-server` configuration](#oauth2_server_auth-box-server_configuration)
+5. [Management panel `auth-box-web` configuration](#management_panel_auth-box-web_configuration)
+6. [Build and run](#build_and_run)
+7. [Support & contribution](#support)
+7. [License](#license)
+
+<a name="demo" />
 
 ## Demo
-<a name="demo" />
 Full deployment of AuthBox (Oauth2 server and management panel) are running on 
 [https://oauth2.cloud](https://oauth2.cloud).
 
@@ -24,8 +28,9 @@ Please create an account to see complete functionality. Registration process wil
 * One scope which is assigned to both clients.
 * Oauth2 user (username: `test`; password: `test`) to demo user authentication or/and authorization.
 
-## Features
 <a name="features" />
+
+## Features
 AuthBox is [RFC 6749](https://tools.ietf.org/html/rfc6749) compliant Oauth2 server implementation.
 It features the following available grant types: `password`, `client_credentials`, `authorization_code`, and `refresh_token`.
 As part of `authorization_code` it provides ability to use Two Factor Authentication (2FA) using 
@@ -65,6 +70,8 @@ export SERVER_PORT=12345
 java -jar auth-box-server.jar
 ```    
 
+<a name="oauth2_server_auth-box-server_configuration" />
+
 ## Oauth2 server `auth-box-server` configuration
 | Configuration property | Description | Default value |
 | :--- | :--- | :--- |
@@ -77,6 +84,21 @@ java -jar auth-box-server.jar
 | spring.cache.cache-names | Cache names to enable in csv list (possible values are OauthClient,OauthScope,OauthToken,OauthUser,Organization,User) | N/A |
 | spring.redis.host | Redis cache host (disabled when not specified) | N/A |
 
+<a name="management_panel_auth-box-web_configuration" />
+
+## Management panel `auth-box-web` configuration
+| Configuration property | Description | Default value |
+| :--- | :--- | :--- |
+| server.port | Server listening port | 9999 |
+| spring.datasource.url | Database JDBC url | jdbc:mysql://${MYSQL_HOST:localhost}:3306/authbox?serverTimezone=UTC&useLegacyDatetimeCode=false |
+| spring.datasource.username | Database username | root |
+| spring.datasource.password | Database password | r00t |
+| spring.flyway.enabled | Flyway database migration flag | true |
+| spring.cache.type | DAO cache type (possible values are: caffeine/redis/none) | none |
+| spring.cache.cache-names | Cache names to enable in csv list (possible values are OauthClient,OauthScope,OauthToken,OauthUser,Organization,User) | N/A |
+| spring.redis.host | Redis cache host (disabled when not specified) | N/A |
+
+<a name="build_and_run" />
 
 ## Build and run
 
@@ -103,10 +125,18 @@ java -jar auth-box-server.jar
     
     # Graphite/Grafana docker-compose containers (standalone)
     docker-compose -f docker/metrics-docker-compose.yml up
-    
 
-### RSA 2048 key pair creation
+<a name="support" />
 
-    openssl genrsa -out private.pem 2048
-    openssl rsa -in private.pem -outform PEM -pubout -out public.pem
+## Support & contribution
+TODO:... 
 
+<a name="license" />
+
+## License    
+[GNU General Public License v3](https://www.gnu.org/licenses/quick-guide-gplv3.html)
+
+* the freedom to use the software for any purpose,
+* the freedom to change the software to suit your needs,
+* the freedom to share the software with your friends and neighbors, and
+* the freedom to share the changes you make.
