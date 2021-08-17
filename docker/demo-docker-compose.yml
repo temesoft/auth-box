@@ -1,0 +1,55 @@
+version: '2'
+services:
+  auth-box-server:
+    image: auth-box-server:latest
+    container_name: auth-box-server
+    environment:
+      - spring_datasource_url=jdbc:mysql://auth-box-mysql:3306/authbox?serverTimezone=UTC&useLegacyDatetimeCode=false
+      - spring_flyway_placeholders_defaultDomainPrefix=localhost
+      - info_app_domain=
+      - info_app_port=443
+      - spring_cache_type=none
+      - spring_redis_host=auth-box-redis
+      - spring_redis_port=6379
+    ports:
+      - '9999:9999'
+    depends_on:
+      - "auth-box-mysql"
+  auth-box-web:
+    image: auth-box-web:latest
+    container_name: auth-box-web
+    environment:
+      - spring_datasource_url=jdbc:mysql://auth-box-mysql:3306/authbox?serverTimezone=UTC&useLegacyDatetimeCode=false
+      - info_app_domain=:9999
+      - info_app_port=443
+      - info_app_protocol=http
+      - oauth2_server_introspection-uri=https://authbox.oauth2.cloud/oauth/introspection
+      - oauth2_server_client-id=8c65aa63-bf75-4a68-8b9a-52304623cad1
+      - oauth2_server_client-secret=8f827d865a1ef37f275e27b42cb25d684cccade72086f2da3cc9e34e2f317a9e
+      - spring_cache_type=none
+      - spring_redis_host=auth-box-redis
+      - spring_redis_port=6379
+    ports:
+      - '8888:8888'
+    depends_on:
+      - "auth-box-mysql"
+      - "auth-box-server"
+  auth-box-mysql:
+    image: mysql:latest
+    container_name: auth-box-mysql
+    restart: always
+    environment:
+        - MYSQL_ROOT_PASSWORD=r00t
+        - MYSQL_DATABASE=authbox
+    ports:
+        - '33306:3306'
+    volumes:
+      - ./data/mysql-data:/var/lib/mysql
+  auth-box-redis:
+    image: redis:latest
+    container_name: auth-box-redis
+    restart: always
+    ports:
+      - '36379:6379'
+    volumes:
+      - ./data/redis-data:/data

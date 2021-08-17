@@ -1,0 +1,54 @@
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 _border-bottom ng-cloak">
+    <h2><i class="fas fa-user-friends fa-fw text-muted"></i> Add new account</h2>
+    <div class="btn-toolbar mb-2 mb-md-0">
+    </div>
+</div>
+
+<div class="col-md-12 order-md-1  ng-cloak">
+    <form class="needs-validation" novalidate>
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <label for="account.username">Username</label>
+                <input data-ng-model="account.username" type="text" class="form-control required" id="account.username"/>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12 mb-3">
+                <label for="account.name">Name</label>
+                <br/>
+                <input data-ng-model="account.name" type="text" class="form-control col-md-4 required" id="account.name"/>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12 mb-3">
+                <label for="account.password">Password
+                    <code class="text-muted">
+                        (<em>Leave empty to set random password, you can reset it later</em>)
+                    </code>
+                </label>
+                <input data-ng-model="account.password" type="password" class="form-control col-md-4" id="account.password"/>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-5 mb-3 non-multiple-select2">
+                <label for="account.role">Access role</label>
+                <br/>
+                <select data-ng-model="account.role" class="select2 _col-md-4 _custom-select _required _d-block w-100 " id="account.role">
+                    <option value="ROLE_ADMIN">Admin (full access)</option>
+                    <option value="ROLE_USER" selected="selected">User (read only access)</option>
+                </select>
+            </div>
+        </div>
+
+        <hr class="mb-4">
+
+        <div class="row">
+            <div class="col-md-12">
+                <button class="btn btn-outline-secondary" data-ng-click="location.url('/accounts');"
+                ><i class="fas fa-times"></i> Cancel</button>
+                <button class="btn btn-outline-primary" data-ng-click="createAccount()" id="createAccountBtn"
+                ><i class="far fa-save"></i> Create account</button>
+            </div>
+        </div>
+    </form>
+</div>

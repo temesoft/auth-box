@@ -5,30 +5,34 @@ AuthBox consists of 2 applications: Oauth2 server `auth-box-server` and manageme
 Management portal provides a UI and restful API for querying and management of Oauth2 server.
 
 # Table of Contents
-1. [Demo](#demo)
-2. [Features](#features)
+1. [Demo](#demo_section)
+2. [Features](#features_section)
 3. [Application configuration setup](#application_configuration_setup)
 4. [Oauth2 server `auth-box-server` configuration](#oauth2_server_auth-box-server_configuration)
 5. [Management panel `auth-box-web` configuration](#management_panel_auth-box-web_configuration)
 6. [Build and run](#build_and_run)
 7. [Support & contribution](#support)
-7. [License](#license)
+7. [License](#license_section)
 
-<a name="demo" />
+<a name="demo_section" />
 
 ## Demo
-Full deployment of AuthBox (Oauth2 server and management panel) is running on 
-[https://oauth2.cloud](https://oauth2.cloud).
+Full deployment of AuthBox (Oauth2 server and web management panel) is running on
+<h3><a href="https://oauth2.cloud" target="newOauth2CloudWindow">https://oauth2.cloud</a></h3> 
 
-Please create an account to see complete functionality. Registration process will create the following:
+* Hardware: [Raspberry Pi 3 ARMv7](https://www.raspberrypi.org/products/raspberry-pi-3-model-a-plus/) :smiley:
+* Software: OpenJDK 11, Spring-Boot 2.5.x, MySql 5.7
+
+Please create an account to see complete functionality. 
+Registration process will create the following:
 
 * Oauth2 management panel Admin account.
-* Client for service-to-service auth (`client_credentials`) which uses standard Oauth2 token.
-* Client for user auth (`password`, `authorization_code`, `refresh_token`) which uses JWT (custom RSA private key signed) Oauth2 token.
-* One scope which is assigned to both clients.
+* Oauth2 client for service-to-service auth (`client_credentials`) which uses standard Oauth2 token.
+* Oauth2 client for user auth (`password`, `authorization_code`, `refresh_token`) which uses JWT (custom RSA 2048 bit private key signed) token.
+* One Oauth2 scope which is assigned to both clients.
 * Oauth2 user (username: `test`; password: `test`) to demo user authentication or/and authorization.
 
-<a name="features" />
+<a name="features_section" />
 
 ## Features
 AuthBox is [RFC 6749](https://tools.ietf.org/html/rfc6749) compliant Oauth2 server implementation.
@@ -38,8 +42,7 @@ As part of `authorization_code` it provides ability to use Two Factor Authentica
 
 By default, Oauth2 server `auth-box-server` and management portal `auth-box-web` utilize 
 [MySql](https://www.mysql.com/) for data storage, and optionally [Redis](https://redis.io/) for 
-DAO caching and web session store, and optionally [Grafana](https://grafana.com/) / [Graphite](https://graphiteapp.org/) 
-for metrics collection and visualization.
+DAO caching and web session store.
 
 `auth-box-server` and `auth-box-web` are docker/k8s ready and come with [Dockerfile(s)](docker/) and [docker-compose](docker/) scripts.
 
@@ -65,8 +68,9 @@ Injecting individual custom properties, for example `server.port=12345`
 java -jar auth-box-server.jar --server.port=12345
 # or
 java -Dserver.port=12345 -jar auth-box-server.jar
-# or using environment variables (note: config property names should be in all caps and "_" instead of ".")
-export SERVER_PORT=12345 
+# or using environment variables 
+# (note: config property names should have "_" instead of ".", so "server.port" would be "SERVER_PORT")
+export SERVER_PORT=12345
 java -jar auth-box-server.jar
 ```    
 
@@ -88,13 +92,6 @@ java -jar auth-box-server.jar
 | spring.cache.cache-names | Cache names to enable in csv list (possible values are OauthClient,OauthScope,OauthToken,OauthUser,Organization,User) | N/A |
 | spring.redis.host | Redis cache server host (disabled when not specified) | N/A |
 | spring.redis.port | Redis cache server port | 6379 |
-| management.metrics.export.graphite.host | Graphite server hostname | localhost |
-| management.metrics.export.graphite.port | Graphite server port | 2004 |
-| management.metrics.export.graphite.graphiteTagsEnabled | Graphite tags enabled | false |
-| management.metrics.export.graphite.step | Graphite push frequency | 1m |
-| management.metrics.export.graphite.rateUnits | Rate metrics units | SECONDS |
-| management.metrics.export.graphite.durationUnits | Duration metrics  units | MILLISECONDS |
-| management.metrics.export.graphite.tagsAsPrefix | Treat metrics tags as prefix | ${info.app.name},${hostname:localhost} |
 
 <a name="management_panel_auth-box-web_configuration" />
 
@@ -116,13 +113,9 @@ java -jar auth-box-server.jar
 | spring.session.store-type | Web session storage type (possible values are none/redis) | none |
 | spring.redis.host | Redis cache server host (disabled when not specified) | N/A |
 | spring.redis.port | Redis cache server port | 6379 |
-| management.metrics.export.graphite.host | Graphite server hostname | localhost |
-| management.metrics.export.graphite.port | Graphite server port | 2004 |
-| management.metrics.export.graphite.graphiteTagsEnabled | Graphite tags enabled | false |
-| management.metrics.export.graphite.step | Graphite push frequency | 1m |
-| management.metrics.export.graphite.rateUnits | Rate metrics units | SECONDS |
-| management.metrics.export.graphite.durationUnits | Duration metrics  units | MILLISECONDS |
-| management.metrics.export.graphite.tagsAsPrefix | Treat metrics tags as prefix | ${info.app.name},${hostname:localhost} |
+| ipstack.url | IP details api url | https://api.ipstack.com/{ip}?access_key=YOUR_API_KEY |
+| ipstack.enabled | IP details functionality enabled | false |
+ 
 
 <a name="build_and_run" />
 
@@ -131,33 +124,42 @@ java -jar auth-box-server.jar
     # Run maven clean package
     mvn clean package
     
-    # Build auth-box-server docker container
-    docker build -f docker/auth-box-server.dockerfile -t auth-box-server .
+#### Build auth-box-server docker container
+```shell script
+docker build -f docker/auth-box-server.dockerfile -t auth-box-server .
+```
     
-    # Build auth-box-web docker container
-    docker build -f docker/auth-box-web.dockerfile -t auth-box-web .
-    
-    # Remove old container data
-    docker-compose -f docker/demo-docker-compose.yml rm -f
-    
-    # Start demo: mysql, redis, auth-box-web, auth-box-server 
-    docker-compose -f docker/demo-docker-compose.yml up
-    
-    # MySql container (standalone)
-    docker run -p 3306:3306 --rm --name mysql -e MYSQL_ROOT_PASSWORD=r00t -e MYSQL_DATABASE=authbox -it mysql:latest
-    
-    # Redis container (standalone)
-    docker run --name some-redis -p 6379:6379 --rm -it redis
-    
-    # Graphite/Grafana docker-compose containers (standalone)
-    docker-compose -f docker/metrics-docker-compose.yml up
-
+#### Build auth-box-web docker container
+```shell script
+docker build -f docker/auth-box-web.dockerfile -t auth-box-web .
+```    
+#### Start all demo (mysql, redis, auth-box-web, auth-box-server) on localhost:8888 (web UI portal) and localhost:9999 (oauth2 server)
+ ```shell script
+docker-compose -f docker/demo-docker-compose.yml up
+# Once the docker services startes use the following:
+#   Management Panel (auth-box-web): http://localhost:8888 
+#   Management Panel API (auth-box-web api): http://localhost:8888/swagger-ui/index.html
+#   Oauth2 Server API (auth-box-server api): http://localhost:8888/swagger-ui/index.html
+# Default management panel login: (user:admin, password: admin)
+```
+#### MySql container (i386)
+ ```shell script
+docker run -p 3306:3306 --rm --name mysql -e MYSQL_ROOT_PASSWORD=r00t -e MYSQL_DATABASE=authbox -it mysql:latest
+```
+#### MySql container (arm)
+```shell script
+docker run -p 3306:3306 --rm --name mysql -e MYSQL_ROOT_PASSWORD=r00t -e MYSQL_DATABASE=authbox -it biarms/mysql
+```    
+#### Redis container (i386)
+```shell script
+docker run --name some-redis -p 6379:6379 --rm -it redis
+```
 <a name="support" />
 
 ## Support & contribution
-TODO:... 
+To contribute to this project - please create a PR ;-)
 
-<a name="license" />
+<a name="license_section" />
 
 ## License    
 [GNU General Public License v3](https://www.gnu.org/licenses/quick-guide-gplv3.html)

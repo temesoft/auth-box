@@ -1,0 +1,49 @@
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 _border-bottom ng-cloak">
+    <h2><i class="fas fa-building fa-fw text-muted"></i> Organization</h2>
+</div>
+
+<div class="col-md-12 order-md-1  ng-cloak">
+    <form class="needs-validation" novalidate>
+        <div class="row">
+            <div class="col-md-5 mb-3">
+                <label for="organization.id">Organization Id</label>
+                <input data-ng-model="organization.id" type="text" class="form-control" id="organization.id" readonly="readonly"/>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-9 mb-3">
+                <label for="domainPrefix" title="Only letter and numbers allowed">Oauth2 server url</label>
+                <div class="input-group">
+                    <h6>{{appProperties.protocol}}://{{organization.domainPrefix}}.{{appProperties.domain}}</h6>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <label for="domainPrefix" title="Only letter and numbers allowed">Domain prefix</label>
+                <div class="input-group">
+                    <input data-ng-model="organization.domainPrefix" type="text" class="form-control required"
+                           style="width:{{organization.domainPrefix.length}}em !important;"
+                           id="domainPrefix" data-ng-change="validateDomainPrefix()">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-5 mb-3">
+                <label for="organizationName">Organization name</label>
+                <input data-ng-model="organization.name" type="text" class="form-control required" id="organizationName"
+                       placeholder="" value="" required="required">
+            </div>
+        </div>
+        <hr class="mb-4">
+
+        <div class="row">
+            <div class="col-md-12 _mb-3 _text-center">
+                <button class="btn btn-outline-primary" data-ng-click="updateOrganization()" id="updateOrganizationBtn"
+                        ><i class="far fa-save"></i> Update organization</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+

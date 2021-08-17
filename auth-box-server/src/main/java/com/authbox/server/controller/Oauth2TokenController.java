@@ -1,0 +1,134 @@
+package com.authbox.server.controller;
+
+import com.authbox.base.exception.Oauth2Exception;
+import com.authbox.base.model.GrantType;
+import com.authbox.base.model.OauthClient;
+import com.authbox.base.model.OauthTokenResponse;
+import com.authbox.base.model.Organization;
+import com.authbox.server.service.TokenDetailsService;
+import com.authbox.server.service.TokenEndpointProcessor;
+import io.micrometer.core.annotation.Timed;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+import static com.authbox.base.config.Constants.HEADER_AUTHORIZATION;
+import static com.authbox.base.config.Constants.HEADER_AUTHORIZATION_PREFIX_BEARER;
+import static com.authbox.base.config.Constants.MSG_INVALID_GRANT_TYPE;
+import static com.authbox.base.config.Constants.MSG_UNAUTHORIZED_REQUEST;
+import static com.authbox.base.config.Constants.OAUTH2_ATTR_ACCESS_TOKEN;
+import static com.authbox.base.config.Constants.OAUTH2_ATTR_GRANT_TYPE;
+import static com.authbox.base.config.Constants.OAUTH_PREFIX;
+import static com.authbox.base.model.AccessLog.AccessLogBuilder.accessLogBuilder;
+import static com.authbox.server.util.RequestUtils.getRequestId;
+import static com.authbox.server.util.RequestUtils.getTimeSinceRequest;
+import static org.springframework.util.ObjectUtils.isEmpty;
+
+@RestController
+@RequestMapping(OAUTH_PREFIX)
+public class Oauth2TokenController extends BaseController {
+
+    @Autowired
+    private List<TokenEndpointProcessor> tokenEndpointProcessors;
+
+    @Autowired
+    private TokenDetailsService tokenDetailsService;
+
+    @PostMapping("/token")
+    @Timed("generateToken")
+    public OauthTokenResponse generateToken(final HttpServletRequest req,
+                                            final HttpServletResponse res,
+                                            @RequestParam(OAUTH2_ATTR_GRANT_TYPE) final String grantTypeStr) {
+        accessLogService.create(
+                accessLogBuilder()
+                        .withRequestId(getRequestId())
+                        .withDuration(getTimeSinceRequest()),
+                "Starting Oauth2 token generation (grant_type: '%s')",
+                grantTypeStr
+        );
+        final Organization organization = getOrganization(req);
+
+        if (!GrantType.contains(grantTypeStr)) {
+            accessLogService.create(
+                    accessLogBuilder()
+                            .withRequestId(getRequestId())
+                            .withDuration(getTimeSinceRequest())
+                            .withOrganizationId(organization.id)
+                            .withError(MSG_INVALID_GRANT_TYPE),
+                    "Oauth2 grant type provided is not valid. grant type='%s'", grantTypeStr
+            );
+            throw new Oauth2Exception(MSG_INVALID_GRANT_TYPE);
+        }
+
+        final GrantType grantType = GrantType.valueOf(grantTypeStr);
+        final Optional<TokenEndpointProcessor> tokenEndpointProcessor = tokenEndpointProcessors
+                .stream()
+                .filter(processor -> grantType.equals(processor.getProcessingGrantType()))
+                .findFirst();
+
+        if (tokenEndpointProcessor.isEmpty()) {
+            throw new Oauth2Exception("processor not found");
+        }
+
+        return tokenEndpointProcessor.get().process(organization, req, res);
+    }
+
+    @PostMapping("/introspection")
+    @GetMapping("/introspection")
+    @Timed("introspectToken")
+    public Map<String, Object> introspectToken(final HttpServletRequest req,
+                                               @RequestParam(value = OAUTH2_ATTR_ACCESS_TOKEN, required = false) final String token) {
+        accessLogService.create(
+                accessLogBuilder()
+                        .withRequestId(getRequestId())
+                        .withDuration(getTimeSinceRequest()),
+                "Starting Oauth2 token introspection"
+        );
+        final Organization organization = getOrganization(req);
+        Optional<String> accessToken = Optional.ofNullable(token);
+        if (accessToken.isEmpty()) {
+            accessToken = Optional.ofNullable(req.getParameter("token"));
+        }
+        if (accessToken.isEmpty()) {
+            final String authHeader = req.getHeader(HEADER_AUTHORIZATION);
+            if (!isEmpty(authHeader)) {
+                accessToken = Optional.of(authHeader.replace(HEADER_AUTHORIZATION_PREFIX_BEARER, ""));
+            }
+        }
+        if (accessToken.isEmpty()) {
+            accessLogService.create(
+                    accessLogBuilder()
+                            .withRequestId(getRequestId())
+                            .withOrganizationId(organization.id)
+                            .withDuration(getTimeSinceRequest())
+                            .withError(MSG_UNAUTHORIZED_REQUEST),
+                    "Oauth2 access token is not provided"
+            );
+            throw new Oauth2Exception(MSG_UNAUTHORIZED_REQUEST);
+        }
+
+        if (!appProperties.isAllowTokenDetailsWithoutClientCredentials()) {
+            // validates actual OauthClient
+            accessLogService.create(
+                    accessLogBuilder()
+                            .withRequestId(getRequestId())
+                            .withDuration(getTimeSinceRequest())
+                            .withOrganizationId(organization.id),
+                    "Parsing and validating Oauth2 client"
+            );
+            final OauthClient oauthClient = parsingValidationService.getOauthClient(req, organization);
+            return tokenDetailsService.getAccessTokenDetails(organization, accessToken.get(), oauthClient);
+        } else {
+            return tokenDetailsService.getAccessTokenDetails(organization, accessToken.get(), null);
+        }
+    }
+}

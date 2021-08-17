@@ -1,0 +1,173 @@
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 _border-bottom ng-cloak">
+    <h2><i class="fas fa-paperclip fa-fw text-muted"></i> Oauth2 Scopes
+        <button class="btn btn-sm btn-outline-primary" data-ng-click="openModalAddScope()"
+            ><i class="far fa-plus-square"></i> Add new scope</button>
+    </h2>
+    <div class="btn-toolbar mb-2 mb-md-0" data-ng-if="oauth2Scopes">
+        <nav aria-label="Page navigation" class="m-1" data-ng-if="oauth2Scopes.totalElements > 0 && oauth2Scopes.totalElements > pageSize">
+            <ul class="pagination">
+                <li class="page-item disabled" data-ng-if="oauth2Scopes.number == 0">
+                    <a class="page-link">Previous</a>
+                </li>
+                <li class="page-item cursor-pointer" data-ng-if="oauth2Scopes.number > 0">
+                    <a class="page-link" data-ng-click="loadOauth2Scopes(oauth2Scopes.size, oauth2Scopes.number-1)">Previous</a>
+                </li>
+
+                <li class="page-item" data-ng-repeat="n in paginationRange(1, oauth2Scopes.totalPages, oauth2Scopes.number + 1)">
+                    <span data-ng-if="oauth2Scopes.number + 1 == n" class="page-link bg-secondary white">
+                        <strong class="">{{n}}</strong>
+                    </span>
+                    <a data-ng-if="oauth2Scopes.number + 1 != n" class="page-link cursor-pointer" data-ng-click="loadOauth2Scopes(oauth2Scopes.size, n-1)">{{n}}</a>
+                </li>
+
+                <li class="page-item disabled" data-ng-if="oauth2Scopes.number + 1 == oauth2Scopes.totalPages">
+                    <a class="page-link">Next</a>
+                </li>
+                <li class="page-item cursor-pointer" data-ng-if="oauth2Scopes.number + 1 != oauth2Scopes.totalPages">
+                    <a class="page-link" data-ng-click="loadOauth2Scopes(oauth2Scopes.size, oauth2Scopes.number + 1)">Next</a>
+                </li>
+            </ul>
+        </nav>
+        <div>
+            <div class="input-group m-1">
+                <button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+                >Page size {{pageSize}}</button>
+                <div class="dropdown-menu">
+                    <a class="dropdown-item" data-ng-click="loadOauth2Scopes(10, 0)">10</a>
+                    <a class="dropdown-item" data-ng-click="loadOauth2Scopes(25, 0)">25</a>
+                    <a class="dropdown-item" data-ng-click="loadOauth2Scopes(100, 0)">100</a>
+                    <a class="dropdown-item" data-ng-click="loadOauth2Scopes(500, 0)">500</a>
+                </div>
+            </div>
+        </div>
+        <div class=" m-1">
+            <button class="btn btn-sm btn-outline-primary" data-ng-if="checkIfOneSelected()" data-ng-click="openModalEditScope()"
+                ><i class="far fa-edit"></i> Edit</button>
+            <button class="btn btn-sm btn-outline-danger" data-ng-if="checkIfAnySelected()" data-ng-click="deleteSelectedScopes()"
+                ><i class="far fa-trash-alt"></i> Delete</button>
+        </div>
+    </div>
+</div>
+
+<div class="col-md-12 order-md-1 ng-cloak">
+    <div class="table-responsive" data-ng-if="oauth2Scopes">
+        <table class="table table-striped table-sm">
+            <thead>
+            <tr>
+                <th class="p-2">
+                    <input type="checkbox" name="selectAll" id="selectAll" data-ng-click="selectAll()" />
+                </th>
+                <th>Scope</th>
+                <th>Description</th>
+                <th>Created</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr data-ng-repeat="scope in oauth2Scopes.content" id="tr-{{scope.id}}">
+                <td class="p-2">
+                    <input type="checkbox"
+                           class="required _m-2"
+                           name="scopeSelectorCheckbox"
+                           data-ng-model="clientSelectorCheckbox"
+                           data-client-id="{{scope.id}}"
+                           data-scope="{{scope}}"
+                    />
+                </td>
+                <td>
+                    <a class="btn btn-outline-primary btn-xs" data-ng-click="openModalEditScope(scope)">{{scope.scope}}</a>
+                </td>
+                <td style="width:50%">
+                    <em class="text-muted">{{scope.description}}</em>
+                </td>
+                <td>
+                    <small>
+                    {{scope.createTime | amDateFormat:'YYYY-MM-DD HH:mm:ss' }}
+                     <i class="text-muted">
+                        (<span data-am-time-ago="scope.createTime"></span>)
+                    </i>
+                    </small>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="modal fade" tabindex="-1" role="dialog" id="modalAddScope">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add new scope</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form class="needs-validation" novalidate>
+                    <div class="row">
+                        <div class="col-md-5 mb-3">
+                            <label for="newScope.scope">Scope</label>
+                            <input data-ng-model="newScope.scope" type="text" class="form-control required" id="newScope.scope"
+                                   placeholder="" value="" required="required">
+                            <div class="invalid-feedback">
+                                Valid scope is required.
+                            </div>
+                        </div>
+                        <div class="col-md-7 mb-3">
+                            <label for="newScope.description">Description</label>
+                            <textarea data-ng-model="newScope.description" type="text" rows="4" class="form-control required" id="newScope.description"
+                                   placeholder="" required="required"></textarea>
+                            <div class="invalid-feedback">
+                                Valid description is required.
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-outline-primary" data-ng-click="createOauth2Scopes()" id="createOauth2ScopesBtn">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" tabindex="-1" role="dialog" id="modalEditScope">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit scope</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form class="needs-validation" novalidate>
+                    <div class="row">
+                        <div class="col-md-5 mb-3">
+                            <label for="oauth2Scope.scope">Scope</label>
+                            <input data-ng-model="oauth2Scope.scope" type="text" class="form-control required" id="oauth2Scope.scope"
+                                   placeholder="" value="" required="required">
+                            <div class="invalid-feedback">
+                                Valid scope is required.
+                            </div>
+                        </div>
+                        <div class="col-md-7 mb-3">
+                            <label for="oauth2Scope.description">Description</label>
+                            <textarea data-ng-model="oauth2Scope.description" type="text" rows="4" class="form-control required" id="oauth2Scope.description"
+                                      placeholder="" required="required"></textarea>
+                            <div class="invalid-feedback">
+                                Valid description is required.
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-outline-primary" data-ng-click="updateOauth2Scope()" id="updateOauth2ScopeBtn">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,98 @@
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 _border-bottom ng-cloak">
+    <h2><i class="fas fa-stream fa-fw text-muted"></i> Request Log</h2>
+</div>
+
+<div class="col-md-12 order-md-1 ng-cloak">
+    <div class="col-md-8 input-group m-1">
+        <input type="text" class="form-control" placeholder="Request ID" aria-label="Request ID" aria-describedby="basic-addon2" data-ng-model="requestId">
+        <div class="input-group-append">
+            <button class="btn btn-outline-primary" type="button" data-ng-click="location.url('/access-log/' + requestId)">Search by Request ID</button>
+        </div>
+    </div>
+    <div class="m-4" data-ng-if="!accessLogList">
+        <span class="text-muted">
+            Request id header value can be found in all successful or erroneous responses returned by Oauth2 server.
+            <br/>
+            Header name: <code>X-Request-ID</code>
+        </span>
+    </div>
+    <div class="m-1" data-ng-if="accessLogList && accessLogList.totalElements == 0">
+        <span class="text-danger">Unable to find any access log records by provided request id</span>
+    </div>
+    <div class="table-responsive mt-4" data-ng-if="accessLogList && accessLogList.totalElements > 0">
+        <table class="table table-striped table-sm">
+            <tr>
+                <th>Timestamp</th>
+                <td>
+                    {{timestamp | amDateFormat:'YYYY-MM-DD HH:mm:ss' }}
+                    &nbsp;
+                    <i class="text-muted">
+                        (<small data-am-time-ago="timestamp"></small>)
+                    </i>
+                </td>
+            </tr>
+            <tr>
+                <th style="width:10em">IP&nbsp;Address</th>
+                <td>
+                    {{ip}}
+                    <span data-ng-if="ipDetails && ipDetails.city && ipDetails.region_name && ipDetails.country_name">
+                        &nbsp; &nbsp; &nbsp;
+                        {{ipDetails.city}},
+                        {{ipDetails.region_name}},
+                        {{ipDetails.country_name}}
+                        &nbsp;
+                        {{ipDetails.location.country_flag_emoji}}
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <th>User-Agent</th>
+                <td>{{userAgent}}</td>
+            </tr>
+            <tr>
+                <th>Status</th>
+                <td>
+                    <span data-ng-if="hasErrors" class="badge badge-danger">Failure: {{errorMessage}}</span>
+                    <span data-ng-if="!hasErrors" class="badge badge-success">Success</span>
+                </td>
+            </tr>
+            <tr>
+                <th>Status code</th>
+                <td>
+                    <span data-ng-if="hasErrors" class="badge badge-danger">{{statusCode}}</span>
+                    <span data-ng-if="!hasErrors" class="badge badge-success">{{statusCode}}</span>
+                </td>
+            </tr>
+        </table>
+        <br/>
+        <table class="table table-striped table-sm">
+            <thead>
+            <tr>
+                <th>Message</th>
+                <th>Duration</th>
+                <th>Token</th>
+                <th>Client</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr data-ng-repeat="accessLog in accessLogList.content">
+                <td>
+                    <span data-ng-if="accessLog.error" class="text-danger bold">{{accessLog.message}}</span>
+                    <span data-ng-if="!accessLog.error">{{accessLog.message}}</span>
+                </td>
+                <td>
+                    {{accessLog.duration.replace('PT', '').toLowerCase()}}
+                </td>
+                <td>
+                    <a class="btn btn-link btn-xs" title="{{accessLog.oauthTokenId}}"
+                       data-ng-click="location.url('/oauth2-tokens/id/' + accessLog.oauthTokenId)">{{accessLog.oauthTokenId | secret}}</a>
+                </td>
+                <td>
+                    <a class="btn btn-link btn-xs" title="{{accessLog.clientId}}"
+                       data-ng-click="location.url('/edit-oauth2-client/' + accessLog.clientId)">{{accessLog.clientId | secret}}</a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

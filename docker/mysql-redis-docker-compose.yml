@@ -1,0 +1,21 @@
+version: '2'
+services:
+  auth-box-mysql:
+    image: mysql:latest
+    container_name: auth-box-mysql
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=r00t
+      - MYSQL_DATABASE=authbox
+    ports:
+      - '3306:3306'
+    volumes:
+      - ./data/mysql:/var/lib/mysql
+  auth-box-redis:
+    image: redis:latest
+    container_name: auth-box-redis
+    restart: always
+    ports:
+      - '6379:6379'
+    volumes:
+      - ./data/redis:/data

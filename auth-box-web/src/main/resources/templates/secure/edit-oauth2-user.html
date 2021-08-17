@@ -1,0 +1,157 @@
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 _border-bottom ng-cloak">
+    <h2><i class="fas fa-user-lock fa-fw text-muted"></i> Edit Oauth2 user</h2>
+    <div class="btn-toolbar mb-2 mb-md-0">
+    </div>
+</div>
+
+<div class="col-md-12 order-md-1 ng-cloak">
+    <form class="needs-validation" novalidate>
+        <div class="row">
+            <div class="col-md-8 mb-3">
+                <label for="oauth2User.id">User Id</label>
+                <input data-ng-model="oauth2User.id" type="text" class="form-control" id="oauth2User.id" readonly="readonly"/>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-8 mb-3">
+                <a class="btn btn-outline-info m-1 p-1"
+                   data-ng-click="location.url('/oauth2-tokens/user/' + oauth2User.id)"
+                ><i class="fas fa-key"></i> Display user tokens</a>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12 mb-3">
+                <label for="oauth2User.username">Username</label>
+                <input data-ng-model="oauth2User.username" type="text" class="form-control required" id="oauth2User.username"/>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <label for="oauth2User.username">Status</label>
+                <br/>
+                <input type="checkbox" name="enableDisableUserCheckbox" data-user-id="{{oauth2User.id}}"
+                       data-ng-model="oauth2User.enabled" data-toggle="toggle" data-size="sm"
+                       data-on="Enabled" data-off="Disabled">
+            </div>
+            <div class="col-md-4 mb-3">
+                <label>User password management</label>
+                <br/>
+                <a class="btn btn-outline-primary btn-sm m-1 p-1" data-ng-click="passwordResetModal(oauth2User)"
+                ><i class="fas fa-unlock-alt"></i> password reset</a>
+            </div>
+            <div class="col-md-4 mb-3">
+                <label for="oauth2User.username">Two Factor Authentication</label>
+                <br/>
+                <input type="checkbox" name="enableDisableUsersCheckbox"
+                       id="oauth2User.using2Fa"
+                       data-ng-model="oauth2User.using2Fa" data-toggle="toggle" data-size="sm"
+                       data-on="Enabled" data-off="Disabled">
+                <br/>
+                <a class="btn btn-outline-primary btn-sm mt-1 p-1"
+                   data-ng-if="oauth2User.using2Fa"
+                   data-ng-click="twoFactorAuthModal()"><i class="fa-border fab fa-google"></i> Show Google Authenticator QR Code</a>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12 mb-3">
+                <label for="oauth2User.metadata">
+                    Metadata
+                    <span>(<em>{{oauth2User.metadata.length}} bytes</em>)</span>
+                </label>
+                <input data-ng-model="oauth2User.metadata" type="text" class="form-control required" id="oauth2User.metadata"
+                       placeholder="" value="" required="required">
+                <div class="invalid-feedback">
+                    Valid Oauth2 user metadata is required.
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12 mb-3">
+                Created: {{oauth2User.createTime | amDateFormat:'YYYY-MM-DD HH:mm:ss' }}
+                <i class="text-muted">
+                    (<small data-am-time-ago="oauth2User.createTime"></small>)
+                </i>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12 mb-3">
+                Updated: {{oauth2User.lastUpdated | amDateFormat:'YYYY-MM-DD HH:mm:ss' }}
+                <i class="text-muted">
+                    (<small data-am-time-ago="oauth2User.lastUpdated"></small>)
+                </i>
+            </div>
+        </div>
+
+        <hr class="mb-4">
+
+        <div class="row">
+            <div class="col-md-12">
+                <button class="btn btn-outline-secondary" data-ng-click="location.url('/oauth2-users');"
+                    ><i class="fas fa-times"></i> Cancel</button>
+                <button class="btn btn-outline-primary" data-ng-click="updateOauth2User()" id="updateOauth2UserBtn"
+                    ><i class="far fa-save"></i> Update user</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="modal fade" tabindex="-1" role="dialog" id="passwordResetModal">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLongTitle">Password Reset</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <code>Please leave passwords blank to set random password</code>
+                        <hr/>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 mb-3">
+                        <label for="password1">New password</label>
+                        <input data-ng-model="password.newPassword" type="password" class="form-control required" id="password1"
+                               placeholder="New password" required>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12 mb-3">
+                        <label for="password2">New password (verify)</label>
+                        <input data-ng-model="password.newPassword2" type="password" class="form-control required" id="password2"
+                               placeholder="New password (verify)" required>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-outline-primary" data-ng-click="passwordReset()">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" tabindex="-1" role="dialog" id="twoFactorAuthModal">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="twoFactorAuthModalLongTitle">Google Authenticator QR Code</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body text-center">
+                <div data-ng-if="oauth2User.using2Fa">
+                    <img data-ng-src="/api/oauth2-user/{{oauth2User.id}}/2fa-qr-code"/>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>

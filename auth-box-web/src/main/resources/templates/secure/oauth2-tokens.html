@@ -1,0 +1,333 @@
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 _border-bottom ng-cloak">
+    <div data-ng-if="routeParams.userId">
+        <h2>
+            <i class="fas fa-key fa-fw text-muted"></i> Oauth2 token(s) by user id
+        </h2>
+        user id: <strong class="text-muted">{{routeParams.userId}}</strong>
+    </div>
+    <div data-ng-if="routeParams.clientId">
+        <h2>
+            <i class="fas fa-key fa-fw text-muted"></i> Oauth2 token(s) by client id
+        </h2>
+        client id: <strong class="text-muted">{{routeParams.clientId}}</strong>
+    </div>
+    <div data-ng-if="routeParams.hash">
+        <h2>
+            <i class="fas fa-key fa-fw text-muted"></i> Oauth2 token by hash
+        </h2>
+        hash: <strong class="text-muted">{{routeParams.hash}}</strong>
+    </div>
+    <div data-ng-if="routeParams.token">
+        <h2>
+            <i class="fas fa-key fa-fw text-muted"></i> Oauth2 token by token
+        </h2>
+        token: <strong class="text-muted">{{routeParams.token}}</strong>
+    </div>
+    <div data-ng-if="routeParams.id">
+        <h2>
+            <i class="fas fa-key fa-fw text-muted"></i> Oauth2 token by id
+        </h2>
+        token id: <strong class="text-muted">{{routeParams.id}}</strong>
+    </div>
+    <h2 data-ng-if="routeParams.userId == undefined && routeParams.clientId == undefined && routeParams.hash == undefined && routeParams.token == undefined && routeParams.id == undefined">
+        <i class="fas fa-key fa-fw text-muted"></i> Oauth2 Tokens
+    </h2>
+    <div class="btn-toolbar mb-2 mb-md-0" data-ng-if="oauth2Tokens">
+        <nav aria-label="Page navigation" class="m-1" data-ng-if="oauth2Tokens.totalElements > 0 && oauth2Tokens.totalElements > pageSize">
+            <ul class="pagination">
+                <li class="page-item disabled" data-ng-if="oauth2Tokens.number == 0">
+                    <a class="page-link">Previous</a>
+                </li>
+                <li class="page-item cursor-pointer" data-ng-if="oauth2Tokens.number > 0">
+                    <a class="page-link" data-ng-if="routeParams.clientId" data-ng-click="loadOauth2TokensFor('client', routeParams.clientId, oauth2Tokens.size, oauth2Tokens.number-1)">Previous</a>
+                    <a class="page-link" data-ng-if="routeParams.userId" data-ng-click="loadOauth2TokensFor('user', routeParams.userId, oauth2Tokens.size, oauth2Tokens.number-1)">Previous</a>
+                    <a class="page-link" data-ng-if="!routeParams.clientId && !routeParams.userId" data-ng-click="loadOauth2Tokens(oauth2Tokens.size, oauth2Tokens.number-1)">Previous</a>
+                </li>
+
+                <li class="page-item" data-ng-repeat="n in paginationRange(1, oauth2Tokens.totalPages, oauth2Tokens.number + 1)">
+                    <span data-ng-if="oauth2Tokens.number + 1 == n" class="page-link bg-secondary white">
+                        <strong class="">{{n}}</strong>
+                    </span>
+                    <a data-ng-if="oauth2Tokens.number + 1 != n && routeParams.clientId" class="page-link cursor-pointer" data-ng-click="loadOauth2TokensFor('client', routeParams.clientId, oauth2Tokens.size, n-1)">{{n}}</a>
+                    <a data-ng-if="oauth2Tokens.number + 1 != n && routeParams.userId" class="page-link cursor-pointer" data-ng-click="loadOauth2TokensFor('user', routeParams.userId, oauth2Tokens.size, n-1)">{{n}}</a>
+                    <a data-ng-if="oauth2Tokens.number + 1 != n && !routeParams.clientId && !routeParams.userId" class="page-link cursor-pointer" data-ng-click="loadOauth2Tokens(oauth2Tokens.size, n-1)">{{n}}</a>
+                </li>
+
+                <li class="page-item disabled" data-ng-if="oauth2Tokens.number + 1 == oauth2Tokens.totalPages">
+                    <a class="page-link">Next</a>
+                </li>
+                <li class="page-item cursor-pointer" data-ng-if="oauth2Tokens.number + 1 != oauth2Tokens.totalPages">
+                    <a class="page-link" data-ng-if="routeParams.clientId" data-ng-click="loadOauth2TokensFor('client', routeParams.clientId, oauth2Tokens.size, oauth2Tokens.number + 1)">Next</a>
+                    <a class="page-link" data-ng-if="routeParams.userId" data-ng-click="loadOauth2TokensFor('user', routeParams.userId, oauth2Tokens.size, oauth2Tokens.number + 1)">Next</a>
+                    <a class="page-link" data-ng-if="!routeParams.clientId && !routeParams.userId" data-ng-click="loadOauth2Tokens(oauth2Tokens.size, oauth2Tokens.number + 1)">Next</a>
+                </li>
+            </ul>
+        </nav>
+        <div>
+            <div class="input-group m-1">
+                <button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+                >Page size {{pageSize}}</button>
+                <div class="dropdown-menu">
+                    <a class="dropdown-item" data-ng-click="loadOauth2Tokens(10, 0)">10</a>
+                    <a class="dropdown-item" data-ng-click="loadOauth2Tokens(25, 0)">25</a>
+                    <a class="dropdown-item" data-ng-click="loadOauth2Tokens(100, 0)">100</a>
+                    <a class="dropdown-item" data-ng-click="loadOauth2Tokens(500, 0)">500</a>
+                </div>
+            </div>
+        </div>
+        <div class=" m-1">
+            <button class="btn btn-sm btn-outline-danger"
+                data-ng-if="checkIfAnySelected() || oauth2Token"
+                data-ng-click="deleteSelectedTokens()"
+                ><i class="far fa-trash-alt"></i> Delete</button>
+        </div>
+    </div>
+</div>
+
+
+<div class="col-md-12 order-md-1 ng-cloak" data-ng-if="!oauth2Token">
+    <form class="needs-validation" novalidate>
+        <div class="row">
+            <div class="col-md-8 mb-3">
+                <div class="input-group">
+                    <input data-ng-model="searchQuery" type="text" class="form-control"
+                           value="{{routeParams.id}}{{routeParams.clientId}}{{routeParams.hash}}{{routeParams.userId}}{{routeParams.token}}">
+                    <div class="input-group-append">
+                        <button class="btn btn-outline-primary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+                            >Search by</button>
+                        <div class="dropdown-menu">
+                            <a class="dropdown-item" data-ng-click="search('client', searchQuery)">Search by client
+                                id</a>
+                            <a class="dropdown-item" data-ng-click="search('user', searchQuery)">Search by user
+                                id</a>
+                            <a class="dropdown-item" data-ng-click="search('hash', searchQuery)">Search by token
+                                hash</a>
+                            <a class="dropdown-item" data-ng-click="search('token', searchQuery)">Search by token
+                                value</a>
+                            <a class="dropdown-item" data-ng-click="search('id', searchQuery)">Search by token
+                                id</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+
+<div class="col-md-12 order-md-1 ng-cloak" data-ng-if="oauth2Token">
+    <form class="needs-validation">
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="oauth2Token.id">Token id</label>
+                <input data-ng-model="oauth2Token.id" type="text" class="form-control" id="oauth2Token.id"
+                       readonly="readonly"/>
+            </div>
+            <div class="col-md-2 mb-3">
+                <label>Status</label>
+                <br/>
+                <h4>
+                    <strong class="badge _badge-pill badge-warning cursor-info" title="Token becomes inactive after exchange"
+                            data-ng-if="isAfterNow(oauth2Token.expiration) && (oauth2Token.tokenType == 'AUTHORIZATION_CODE' && oauth2Token.linkedTokenId)"
+                            >INACTIVE</strong>
+                    <strong class="badge _badge-pill badge-success cursor-info" title="Token is active"
+                            data-ng-if="isAfterNow(oauth2Token.expiration) && !(oauth2Token.tokenType == 'AUTHORIZATION_CODE' && oauth2Token.linkedTokenId)"
+                            >ACTIVE</strong>
+                    <strong class="badge _badge-pill badge-warning cursor-info" title="Token is expired" data-ng-if="!isAfterNow(oauth2Token.expiration)"
+                            >EXPIRED</strong>
+                    <strong class="badge badge-info cursor-info" title="Exchanged for access_token"
+                            data-ng-if="oauth2Token.tokenType == 'AUTHORIZATION_CODE' && oauth2Token.linkedTokenId">LINKED</strong>
+                    <strong class="badge badge-info cursor-info" title="Used to create access_token"
+                            data-ng-if="oauth2Token.tokenType == 'REFRESH_TOKEN' && oauth2Token.linkedTokenId">LINKED</strong>
+                </h4>
+            </div>
+            <div class="col-md-2 mb-3">
+                <label>Token type</label>
+                <br/>
+                <h4><strong class="badge badge-dark">{{oauth2Token.tokenType}}</strong></h4>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12 mb-3">
+                <label for="oauth2Token.hash">Token hash</label>
+                <input data-ng-model="oauth2Token.hash" type="text" class="form-control" id="oauth2Token.hash"
+                       readonly="readonly"/>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label>Client id</label>
+                <br/>
+                <a class="btn _btn-link btn-outline-info btn-sm"
+                   data-ng-click="location.url('/edit-oauth2-client/' + oauth2Token.clientId)">{{oauth2Token.clientId}}</a>
+            </div>
+            <div class="col-md-6 mb-3" data-ng-if="oauth2Token.linkedTokenId">
+                <label>Linked token</label>
+                <br/>
+                <a class="btn _btn-link btn-outline-info btn-sm"
+                   data-ng-click="location.url('/oauth2-tokens/id/' + oauth2Token.linkedTokenId)">{{oauth2Token.linkedTokenId}}</a>
+            </div>
+        </div>
+        <div class="row" data-ng-if="oauth2Token.oauthUserId">
+            <div class="col-md-6 mb-3">
+                <label>User id</label>
+                <br/>
+                <a class="btn _btn-link btn-outline-info btn-sm"
+                   data-ng-click="location.url('/edit-oauth2-user/' + oauth2Token.oauthUserId)">{{oauth2Token.oauthUserId}}</a>
+            </div>
+        </div>
+        <div class="row" data-ng-if="oauth2Token.requestId">
+            <div class="col-md-6 mb-3">
+                <label>Token creation access log</label>
+                <br/>
+                <a class="btn _btn-link btn-outline-info btn-sm"
+                   data-ng-click="location.url('/access-log/' + oauth2Token.requestId)">{{oauth2Token.requestId}}</a>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <label for="oauth2Token.createTime">Token created</label>
+                <br/>
+                <h5 id="oauth2Token.createTime">
+                    {{oauth2Token.createTime | amDateFormat:'YYYY-MM-DD HH:mm:ss' }}
+                    <br/>
+                    <small class="text-muted">
+                        <i data-am-time-ago="oauth2Token.createTime"></i>
+                    </small>
+                </h5>
+            </div>
+            <div class="col-md-4 mb-3">
+                <label for="oauth2Token.expiration">Token expiration</label>
+                <br/>
+                <h5 id="oauth2Token.expiration">
+                    {{oauth2Token.expiration | amDateFormat:'YYYY-MM-DD HH:mm:ss' }}
+                    <br/>
+                    <small class="text-muted">
+                        <i data-am-time-ago="oauth2Token.expiration"></i>
+                    </small>
+                </h5>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3 mb-3">
+                <label>IP address</label>
+                <h5>{{oauth2Token.ip}}</h5>
+            </div>
+            <!--        </div>-->
+            <!--        <div class="row">-->
+            <div class="col-md-9 mb-3">
+                <label>User-Agent</label>
+                <h5>{{oauth2Token.userAgent}}</h5>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12 mb-3">
+                <label>Scopes ({{oauth2Token.scopes.length}})</label>
+                <h6>
+                    <span class="badge badge-info m-1" data-ng-repeat="scope in oauth2Token.scopes.sort()">
+                        {{scope}}
+                    </span>
+                </h6>
+            </div>
+        </div>
+    </form>
+</div>
+
+
+<div class="col-md-12 order-md-1 ng-cloak" data-ng-if="oauth2Tokens">
+    <div class="table-responsive">
+        <table class="table table-striped table-sm">
+            <thead>
+            <tr>
+                <th class="p-2">
+                    <input type="checkbox" name="selectAll" id="selectAll" data-ng-click="selectAll()" />
+                </th>
+                <th>ID</th>
+                <th>Hash</th>
+                <th>Client id</th>
+                <th>Token type</th>
+                <th>Scopes</th>
+                <th>User id</th>
+                <th>Status</th>
+                <th>Timestamp</th>
+                <th>Expiration</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr data-ng-repeat="oauth2Token in oauth2Tokens.content">
+                <td class="p-2">
+                    <input type="checkbox"
+                           name="tokenSelectorCheckbox"
+                           data-ng-model="tokenSelectorCheckbox"
+                           data-token-id="{{oauth2Token.id}}"
+                    />
+                </td>
+                <td>
+                    <a class="btn btn-link btn-xs"
+                       title="{{oauth2Token.id}}"
+                       data-ng-click="location.url('/oauth2-tokens/id/' + oauth2Token.id)">{{oauth2Token.id | secret}}</a>
+                </td>
+                <td>
+                    <a class="btn btn-link btn-xs"
+                       title="{{oauth2Token.hash}}"
+                       data-ng-click="location.url('/oauth2-tokens/hash/' + oauth2Token.hash)">{{oauth2Token.hash |
+                        secret}}</a>
+                </td>
+                <td>
+                    <a class="btn btn-link btn-xs"
+                       title="{{oauth2Token.clientId}}"
+                       data-ng-click="location.url('/edit-oauth2-client/' + oauth2Token.clientId)">{{oauth2Token.clientId
+                        | secret}}</a>
+                </td>
+                <td>
+                    <small>{{oauth2Token.tokenType}}</small>
+                </td>
+                <td>
+                    <a class="btn btn-outline-info btn-xs"
+                       data-ng-click="location.url('/oauth2-tokens/hash/' + oauth2Token.hash)">{{oauth2Token.scopes.length}}</a>
+                </td>
+                <td>
+                    <span data-ng-if="oauth2Token.oauthUserId">
+                        <a class="btn btn-link btn-xs"
+                           title="{{oauth2Token.oauthUserId}}"
+                           data-ng-click="location.url('/edit-oauth2-user/' + oauth2Token.oauthUserId)">{{oauth2Token.oauthUserId | secret}}</a>
+                    </span>
+                    <span data-ng-if="!oauth2Token.oauthUserId">
+                        -
+                    </span>
+                </td>
+                <td>
+                    <h5>
+                    <strong class="badge _badge-pill badge-warning cursor-info" title="Token becomes inactive after exchange" data-ng-if="isAfterNow(oauth2Token.expiration) && (oauth2Token.tokenType == 'AUTHORIZATION_CODE' && oauth2Token.linkedTokenId)">I</strong>
+                        <strong class="badge _badge-pill badge-success cursor-info" title="Token is active" data-ng-if="isAfterNow(oauth2Token.expiration) && !(oauth2Token.tokenType == 'AUTHORIZATION_CODE' && oauth2Token.linkedTokenId)">A</strong>
+                    <strong class="badge _badge-pill badge-warning cursor-info" title="Token is expired" data-ng-if="!isAfterNow(oauth2Token.expiration)">E</strong>
+
+                    <strong class="badge _badge-pill badge-info cursor-info" title="Exchanged for access_token"
+                            data-ng-if="oauth2Token.tokenType == 'AUTHORIZATION_CODE' && oauth2Token.linkedTokenId">X</strong>
+                    <strong class="badge _badge-pill badge-info cursor-info" title="Used to create access_token"
+                            data-ng-if="oauth2Token.tokenType == 'REFRESH_TOKEN' && oauth2Token.linkedTokenId">X</strong>
+                    </h5>
+                </td>
+                <td>
+                    <small>
+                    {{oauth2Token.createTime | amDateFormat:'YYYY-MM-DD HH:mm:ss' }}
+                    <br/>
+                    <i class="text-muted">
+                        (<span data-am-time-ago="oauth2Token.createTime"></span>)
+                    </i>
+                    </small>
+                </td>
+                <td>
+                    <small>
+                    {{oauth2Token.expiration | amDateFormat:'YYYY-MM-DD HH:mm:ss' }}
+                    <br/>
+                    <i class="text-muted">
+                        (<span data-am-time-ago="oauth2Token.expiration"></span>)
+                    </i>
+                    </small>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

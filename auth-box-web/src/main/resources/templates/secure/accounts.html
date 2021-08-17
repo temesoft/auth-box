@@ -1,0 +1,274 @@
+<div class="d-flex justify-content-between mb-md-12 flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 _border-bottom ng-cloak">
+    <div data-ng-if="accounts" class="col-md-6">
+        <h2><i class="fas fa-user-friends fa-fw text-muted"></i> Accounts
+            <a class="btn btn-sm btn-outline-primary" href="#!/add-account"><i class="far fa-plus-square"></i> Add new account</a>
+        </h2>
+    </div>
+<!--    TODO: Uncomment this -->
+    <div data-ng-if="account">
+        <h2>
+            <i class="fas fa-user-friends fa-fw text-muted"></i> Account details
+        </h2>
+        account id: <strong class="text-muted">{{routeParams.id}}</strong>
+    </div>
+
+    <div class="btn-toolbar mb-2 col-md-6" data-ng-if="accounts">
+        <div class="col-md-12">
+            <div>
+                <div class="float-right m-1">
+                    <button class="btn btn-sm btn-outline-danger"
+                            data-ng-if="checkIfAnySelected()"
+                            data-ng-click="deleteSelectedAccount()"
+                    ><i class="far fa-trash-alt"></i> Delete</button>
+                </div>
+            </div>
+            <div>
+                <div class="input-group m-1 float-right">
+                    <button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+                    >Page size {{pageSize}}</button>
+                    <div class="dropdown-menu float-right">
+                        <a class="dropdown-item" data-ng-click="loadAccounts(10, 0)">10</a>
+                        <a class="dropdown-item" data-ng-click="loadAccounts(25, 0)">25</a>
+                        <a class="dropdown-item" data-ng-click="loadAccounts(100, 0)">100</a>
+                        <a class="dropdown-item" data-ng-click="loadAccounts(500, 0)">500</a>
+                    </div>
+                </div>
+            </div>
+            <nav aria-label="Page navigation" class="m-1" data-ng-if="accounts.totalElements > 0 && accounts.totalElements > pageSize">
+                <ul class="pagination float-right">
+                    <li class="page-item disabled" data-ng-if="accounts.number == 0">
+                        <a class="page-link">Previous</a>
+                    </li>
+                    <li class="page-item cursor-pointer" data-ng-if="accounts.number > 0">
+                        <a class="page-link" data-ng-click="loadAccounts(accounts.size, accounts.number-1)">Previous</a>
+                    </li>
+
+                    <li class="page-item" data-ng-repeat="n in paginationRange(1, accounts.totalPages, accounts.number + 1)">
+                        <span data-ng-if="accounts.number + 1 == n" class="page-link bg-secondary white">
+                            <strong class="">{{n}}</strong>
+                        </span>
+                        <a data-ng-if="accounts.number + 1 != n" class="page-link cursor-pointer" data-ng-click="loadAccounts(accounts.size, n-1)">{{n}}</a>
+                    </li>
+
+                    <li class="page-item disabled" data-ng-if="accounts.number + 1 == accounts.totalPages">
+                        <a class="page-link">Next</a>
+                    </li>
+                    <li class="page-item cursor-pointer" data-ng-if="accounts.number + 1 != accounts.totalPages">
+                        <a class="page-link" data-ng-click="loadAccounts(accounts.size, accounts.number + 1)">Next</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+
+</div>
+
+<div class="col-md-12 order-md-1 ng-cloak" data-ng-if="accounts">
+    <div class="table-responsive">
+        <table class="table table-striped table-sm">
+            <thead>
+            <tr>
+                <th class="pl-3">
+                    <input type="checkbox" name="selectAll" id="selectAll" data-ng-click="selectAll()" />
+                </th>
+                <th>ID</th>
+                <th>Username</th>
+                <th>Name</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Created</th>
+                <th>Last updated</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr data-ng-repeat="account in accounts.content">
+                <td class="pl-3">
+                    <input type="checkbox" aria-label="Checkbox for following text input"
+                           data-ng-if="loggedInAccount.id != account.id"
+                           name="accountSelectorCheckbox"
+                           data-ng-model="accountSelectorCheckbox"
+                           data-account-id="{{account.id}}"
+                    />
+                </td>
+                <td>
+                    <a class="btn btn-link btn-xs" data-ng-click="location.url('/accounts/' + account.id)"
+                        >{{account.id | secret}}</a>
+                </td>
+                <td>
+                    <a class="btn btn-link btn-xs" data-ng-click="location.url('/accounts/' + account.id)"
+                        >{{account.username}}</a>
+                </td>
+                <td>
+                    <a class="btn btn-link btn-xs" data-ng-click="location.url('/accounts/' + account.id)"
+                    >{{account.name}}</a>
+                </td>
+                <td>
+                    <h6>
+                        <span class="badge badge-warning m-1" data-ng-if="account.roles.indexOf('ROLE_ADMIN') >= 0" title="Full access">Admin</span>
+                        <span class="badge badge-info m-1" data-ng-if="account.roles.indexOf('ROLE_USER') >= 0" title="Read only access">User</span>
+                    </h6>
+                </td>
+                <td>
+                    <span data-ng-if="loggedInAccount.id != account.id">
+                        <input type="checkbox" name="enableDisableUsersCheckbox"
+                               id="enableDisableUsersCheckbox"
+                               data-ng-model="account.enabled" data-toggle="toggle" data-size="xs"
+                               data-ng-change="enableDisableAccount(account)"
+                               data-on="Enabled" data-off="Disabled">
+                    </span>
+                    <span data-ng-if="loggedInAccount.id == account.id">
+                        <span data-ng-if="account.enabled">Enabled</span>
+                        <span data-ng-if="!account.enabled">Disabled</span>
+                    </span>
+                </td>
+                <td>
+                    {{account.createTime | amDateFormat:'YYYY-MM-DD HH:mm:ss' }}
+                    <i class="text-muted">
+                        <br/>(<small data-am-time-ago="account.createTime"></small>)
+                    </i>
+                </td>
+                <td>
+                    {{account.lastUpdated | amDateFormat:'YYYY-MM-DD HH:mm:ss' }}
+                    <i class="text-muted">
+                        <br/>(<small data-am-time-ago="account.lastUpdated"></small>)
+                    </i>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+
+
+<div class="col-md-12 order-md-1 ng-cloak" data-ng-if="account">
+    <form class="needs-validation" autocomplete="off">
+        <div class="row">
+            <div class="col-md-8 mb-3">
+                <label for="account.id">Account Id</label>
+                <input data-ng-model="account.id" type="text" class="form-control" id="account.id" readonly="readonly"/>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-7 mb-3">
+                <label for="username">Username</label>
+                <input data-ng-model="account.username" type="text" class="form-control required" id="username" required="required">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-7 mb-3">
+                <label for="name">Name</label>
+                <input data-ng-model="account.name" type="text" class="form-control required" id="name"
+                       placeholder="" value="" required="required">
+            </div>
+        </div>
+        <div class="row" data-ng-if="loggedInAccount.id != account.id">
+            <div class="col-md-4 mb-3">
+                <label for="account.enabled">Status</label>
+                <br/>
+                <input type="checkbox" name="enableDisableUserCheckbox" data-account-id="{{account.id}}" id="account.enabled"
+                       data-ng-model="account.enabled" data-toggle="toggle" data-size="sm"
+                       data-on="Enabled" data-off="Disabled">
+            </div>
+            <div class="col-md-4 mb-3 non-multiple-select2">
+                <label>Access role</label>
+                <br/>
+                <h4>
+                    <span class="badge badge-info" data-ng-if="account.roles[0].indexOf('ROLE_USER') >= 0" title="Read only access">User (read only access)</span>
+                    <span class="badge badge-warning" data-ng-if="account.roles[0].indexOf('ROLE_ADMIN') >= 0" title="Full access">Admin</span>
+                </h4>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12 mb-3">
+                <label for="account.password">Password
+                    <code class="text-muted">
+                        (<em>Leave empty to set random password, you can reset it later</em>)
+                    </code>
+                </label>
+                <input data-ng-model="account.password" autocomplete="off" type="password" class="form-control col-md-4"
+                       id="account.password"/>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <label for="account.createTime">Account created</label>
+                <br/>
+                <h5 id="account.createTime">
+                    {{account.createTime | amDateFormat:'YYYY-MM-DD HH:mm:ss' }}
+                    <br/>
+                    <small class="text-muted">
+                        <i data-am-time-ago="account.createTime"></i>
+                    </small>
+                </h5>
+            </div>
+            <div class="col-md-4 mb-3">
+                <label for="account.lastUpdated">Last updated</label>
+                <br/>
+                <h5 id="account.lastUpdated">
+                    {{account.lastUpdated | amDateFormat:'YYYY-MM-DD HH:mm:ss' }}
+                    <br/>
+                    <small class="text-muted">
+                        <i data-am-time-ago="account.lastUpdated"></i>
+                    </small>
+                </h5>
+            </div>
+        </div>
+
+        <hr class="mb-4">
+
+        <div class="row">
+            <div class="col-md-12">
+                <button class="btn btn-outline-secondary" data-ng-click="location.url('/accounts');"
+                ><i class="fas fa-times"></i> Cancel</button>
+                <button class="btn btn-outline-primary" loading-text="loading..." id="updateAccountBtn" data-ng-click="updateAccount()"
+                ><i class="far fa-save"></i> Update account</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+
+
+
+<div class="modal fade" tabindex="-1" role="dialog" id="passwordResetModal">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLongTitle">Reset password</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <code>Please leave passwords blank to set random password</code>
+                        <hr/>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 mb-3">
+                        <label for="password1">New password</label>
+                        <input data-ng-model="password.newPassword" type="password" class="form-control required" id="password1"
+                               placeholder="New password" required>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12 mb-3">
+                        <label for="password2">New password (verify)</label>
+                        <input data-ng-model="password.newPassword2" type="password" class="form-control required" id="password2"
+                               placeholder="New password (verify)" required>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-outline-primary" data-ng-click="passwordReset()">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>

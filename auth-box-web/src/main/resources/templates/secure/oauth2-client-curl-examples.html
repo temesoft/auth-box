@@ -1,0 +1,159 @@
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 _border-bottom ng-cloak">
+    <h2><i class="fas fa-info-circle text-muted"></i> Oauth2 client curl examples</h2>
+</div>
+
+<div class="col-md-12 order-md-1 ng-cloak text-left">
+
+    <div class="row pt-4" data-ng-if="oauth2Client.grantTypes.indexOf('authorization_code') >= 0">
+        <div class="col-md-12">
+            <h4>Authorization code grant type Oauth2 flow</h4>
+            <div class="_col-md-12 curl-example-block required">
+                <em class="comment"># Authorization code grant type Oauth2 flow</em>
+                <br/>
+                <em class="comment"># Part 1 (Browser)</em>
+                <br/>
+                <span title="access token endpoint" class="highlight"
+                >{{appProperties.protocol}}://{{organization.domainPrefix}}.{{appProperties.domain}}/oauth/authorize</span>?client_id=<span
+                    title="client id" class="highlight">{{oauth2Client.id}}</span>&redirect_uri=<span
+                    title="Authorization code success redirect url" class="highlight"
+            >{{oauth2Client.redirectUrls[0]}}</span>&response_type=<span title="Authorization response type" class="highlight"
+            >code</span><span data-ng-if="oauth2Client.scopes.length > 0">&scope=<span data-ng-repeat="s in oauth2Client.scopes"><span title="scope" class="highlight"
+            >{{s.scope}}</span><span data-ng-if="!$last">%20</span></span></span>
+
+                <br/>
+                <br/>
+                <em class="comment"># Part 2 (Authorization code to access token exchange)</em>
+                <br/>
+                curl -X POST \
+                <br/>
+                &nbsp; &nbsp; -u "<span title="client id" class="highlight"
+            >{{oauth2Client.id}}</span>:<span title="client secret" class="highlight"
+            >{{oauth2Client.secret}}</span>" \
+                <br/>
+                &nbsp; &nbsp; -d "grant_type=<span title="grant type" class="highlight">authorization_code</span>" \
+                <br/>
+                &nbsp; &nbsp; -d "code=<strong title="Authorization code" class="white">$CODE</strong>" \
+                <br/>
+                &nbsp; &nbsp; "<span title="access token endpoint" class="highlight">{{appProperties.protocol}}://{{organization.domainPrefix}}.{{appProperties.domain}}/oauth/token</span>"
+            </div>
+        </div>
+    </div>
+
+    <div class="row pt-4" data-ng-if="oauth2Client.grantTypes.indexOf('client_credentials') >= 0">
+        <div class="col-md-12">
+            <h4>Client credentials grant type Oauth2 access token request</h4>
+            <div class="_col-md-12 curl-example-block required">
+                <em class="comment"># Client credentials grant type Oauth2 access token request</em>
+                <br/>
+                curl -X POST \
+                <br/>
+                &nbsp; &nbsp; -u "<span title="client id" class="highlight"
+                    >{{oauth2Client.id}}</span>:<span title="client secret" class="highlight"
+                    >{{oauth2Client.secret}}</span>" \
+                <br/>
+                &nbsp; &nbsp; -d "grant_type=<span title="grant type" class="highlight">client_credentials</span>" \
+                <span data-ng-if="oauth2Client.scopes.length > 0">
+                    <br/>
+                &nbsp; &nbsp; -d "scope=<span
+                    data-ng-repeat="s in oauth2Client.scopes"><span title="scope" class="highlight"
+                    >{{s.scope}}</span><span data-ng-if="!$last">%20</span></span>" \
+                </span>
+                <br/>
+                &nbsp; &nbsp; <span title="access token endpoint" class="highlight">{{appProperties.protocol}}://{{organization.domainPrefix}}.{{appProperties.domain}}/oauth/token</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="row pt-4" data-ng-if="oauth2Client">
+        <div class="col-md-12">
+            <h4>Validate and get details for Oauth2 access token</h4>
+            <div class="_col-md-12 curl-example-block required">
+                <em class="comment"># Validate Oauth2 access token</em>
+                <br/>
+                curl -X POST \
+                <span data-ng-if="!appProperties.allowTokenDetailsWithoutClientCredentials">
+                    <br/>&nbsp; &nbsp; -d "client_id=<span title="client id" class="highlight">{{oauth2Client.id}}</span>" \
+                    <br/>&nbsp; &nbsp; -d "client_secret=<span title="client secret" class="highlight">{{oauth2Client.secret}}</span>" \
+                </span>
+                <br/>&nbsp; &nbsp; -H "Authorization: Bearer <strong class="white">$ACCESS_TOKEN</strong>" \
+                <br/>&nbsp; &nbsp; <span title="introspection endpoint" class="highlight">{{appProperties.protocol}}://{{organization.domainPrefix}}.{{appProperties.domain}}/oauth/introspection</span>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="row pt-4" data-ng-if="!oauth2Client">
+        <div class="col-md-12 table-responsive">
+            <table class="table table-striped table-sm">
+                <tr>
+                    <th>Client id</th>
+                    <th>Client description</th>
+                    <th>Allowed grant types</th>
+                </tr>
+                <tr data-ng-repeat="oauth2Client in oauth2Clients.content">
+                    <td>
+                        <a class="btn btn-link" data-ng-click="location.url('/oauth2-client-curl-examples/' + oauth2Client.id)">{{oauth2Client.id | secret}}</a>
+                    </td>
+                    <td>
+                        <a class="btn btn-link" data-ng-click="location.url('/oauth2-client-curl-examples/' + oauth2Client.id)">{{oauth2Client.description}}</a>
+                    </td>
+                    <td>
+                        <h6>
+                            <span data-ng-repeat="grantType in oauth2Client.grantTypes">
+                                <span class="badge badge-info">{{grantType}}</span>
+                            </span>
+                        </h6>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <div class="row pt-4" data-ng-if="oauth2Client.grantTypes.indexOf('password') >= 0">
+        <div class="col-md-12">
+            <h4>Password grant type Oauth2 access token request</h4>
+            <div class="_col-md-12 curl-example-block required">
+                <em class="comment"># Password grant type Oauth2 access token request</em>
+                <br/>
+                curl -X POST \
+                <br/>
+                &nbsp; &nbsp; -u "<span title="client id" class="highlight"
+            >{{oauth2Client.id}}</span>:<span title="client secret" class="highlight"
+            >{{oauth2Client.secret}}</span>" \
+                <br/>
+                &nbsp; &nbsp; -d "grant_type=<span title="grant type" class="highlight">password</span>" \
+                <br/>
+                &nbsp; &nbsp; -d "scope=<span
+                    data-ng-repeat="s in oauth2Client.scopes"><span title="scope" class="highlight"
+            >{{s.scope}}</span><span data-ng-if="!$last">%20</span></span>" \
+                <br/>
+                &nbsp; &nbsp; -d "username=<span title="user's username" class="highlight">......</span>" \
+                <br/>
+                &nbsp; &nbsp; -d "password=<span title="user's password" class="highlight">......</span>" \
+                <br/>
+                &nbsp; &nbsp; "<span title="access token endpoint" class="highlight">{{appProperties.protocol}}://{{organization.domainPrefix}}.{{appProperties.domain}}/oauth/token</span>"
+            </div>
+        </div>
+    </div>
+
+    <div class="row pt-4" data-ng-if="oauth2Client.grantTypes.indexOf('refresh_token') >= 0">
+        <div class="col-md-12">
+            <h4>Refresh token grant type Oauth2 request</h4>
+            <div class="_col-md-12 curl-example-block required">
+                <em class="comment"># Refresh token grant type Oauth2 request</em>
+                <br/>
+                curl -X POST \
+                <br/>
+                &nbsp; &nbsp; -u "<span title="client id" class="highlight"
+            >{{oauth2Client.id}}</span>:<span title="client secret" class="highlight"
+            >{{oauth2Client.secret}}</span>" \
+                <br/>
+                &nbsp; &nbsp; -d "grant_type=<span title="grant type" class="highlight">refresh_token</span>" \
+                <br/>
+                &nbsp; &nbsp; -d "refresh_token=<span title="refresh token" class="highlight">......</span>" \
+                <br/>
+                &nbsp; &nbsp; "<span title="access token endpoint" class="highlight">{{appProperties.protocol}}://{{organization.domainPrefix}}.{{appProperties.domain}}/oauth/token</span>"
+            </div>
+        </div>
+    </div>
+</div>

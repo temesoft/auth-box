@@ -1,0 +1,118 @@
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 _border-bottom ng-cloak">
+    <h2><i class="fas fa-user-cog fa-fw text-muted"></i> Account settings</h2>
+    <div class="btn-toolbar mb-2 mb-md-0">
+    </div>
+</div>
+
+<div class="col-md-8 order-md-1  ng-cloak">
+    <form class="needs-validation" novalidate>
+        <div class="row">
+            <div class="col-md-8 mb-3">
+                <label for="account.id">Account Id</label>
+                <input data-ng-model="account.id" type="text" class="form-control" id="account.id" readonly="readonly"/>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-7 mb-3">
+                <label for="username">Username</label>
+                <input data-ng-model="account.username" type="text" class="form-control" id="username"
+                       placeholder="" value="" readonly="readonly" required data-ng-change="updateOrganizationName()">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-7 mb-3">
+                <label for="name">Name</label>
+                <input data-ng-model="account.name" type="text" class="form-control required" id="name"
+                       placeholder="" value="" required data-ng-change="updateOrganizationName()">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6 mb-3 non-multiple-select2">
+                <label>Access role</label>
+                <br/>
+                <h4>
+                    <span class="badge badge-info" data-ng-if="account.roles[0].indexOf('ROLE_USER') >= 0" title="Read only access">User (read only access)</span>
+                    <span class="badge badge-warning" data-ng-if="account.roles[0].indexOf('ROLE_ADMIN') >= 0" title="Full access">Admin</span>
+                </h4>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-5 mb-3">
+                <label for="account.createTime">Account created</label>
+                <br/>
+                <h5 id="account.createTime">
+                    {{account.createTime | amDateFormat:'YYYY-MM-DD HH:mm:ss' }}
+                    <br/>
+                    <small class="text-muted">
+                        <i data-am-time-ago="account.createTime"></i>
+                    </small>
+                </h5>
+            </div>
+            <div class="col-md-5 mb-3">
+                <label for="account.lastUpdated">Last updated</label>
+                <br/>
+                <h5 id="account.lastUpdated">
+                    {{account.lastUpdated | amDateFormat:'YYYY-MM-DD HH:mm:ss' }}
+                    <br/>
+                    <small class="text-muted">
+                        <i data-am-time-ago="account.lastUpdated"></i>
+                    </small>
+                </h5>
+            </div>
+        </div>
+
+        <hr class="mb-4">
+
+        <div class="row">
+            <div class="col-md-12">
+                <button class="btn btn-outline-primary" data-ng-click="updateAccount()" id="updateAccountBtn"
+                    ><i class="far fa-save"></i> Update</button>
+                <button class="btn btn-outline-secondary" data-ng-click="changePasswordModal()"
+                    ><i class="fas fa-lock"></i> Change password</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+
+<div class="modal fade" tabindex="-1" role="dialog" id="modalChangePassword">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLongTitle">Update password</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-12 mb-3">
+                        <label for="passwordOld">Old password</label>
+                        <input data-ng-model="password.oldPassword" type="password" class="form-control required" id="passwordOld"
+                               placeholder="Old password" required>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12 mb-3">
+                        <label for="password1">New password</label>
+                        <input data-ng-model="password.newPassword" type="password" class="form-control required" id="password1"
+                               placeholder="New password" required>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12 mb-3">
+                        <label for="password2">New password (verify)</label>
+                        <input data-ng-model="password.newPassword2" type="password" class="form-control required" id="password2"
+                               placeholder="New password (verify)" required>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-outline-primary" data-ng-click="updatePassword()" id="updatePasswordBtn">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>

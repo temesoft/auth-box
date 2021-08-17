@@ -1,0 +1,113 @@
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 _border-bottom ng-cloak">
+    <h2><i class="fas fa-map-signs fa-fw text-muted"></i> Add new Oauth2 client</h2>
+    <div class="btn-toolbar mb-2 mb-md-0">
+    </div>
+</div>
+
+<div class="col-md-12 order-md-1  ng-cloak">
+    <form class="needs-validation" novalidate>
+        <div class="row">
+            <div class="col-md-12 mb-3">
+                <label for="oauth2Client.description">Description</label>
+                <input data-ng-model="oauth2Client.description" type="text" class="form-control required" id="oauth2Client.description"
+                       placeholder="" value="" required="required">
+                <div class="invalid-feedback">
+                    Valid Oauth2 client description is required.
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12 mb-3">
+                <label for="oauth2Client.grantTypes">Allowed grant types:</label>
+                <select data-ng-model="oauth2Client.grantTypes" multiple="multiple" class="col-md-4 custom-select required d-block w-100 select2"
+                        id="oauth2Client.grantTypes" required="required">
+                    <option value="client_credentials">client_credentials</option>
+                    <option value="password">password</option>
+                    <option value="authorization_code">authorization_code</option>
+                    <option value="refresh_token">refresh_token</option>
+                </select>
+                <div class="invalid-feedback">
+                    Please select a valid grant type.
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12 mb-3">
+                <label for="oauth2Client.scopeIds">Scope list:</label>
+                <select data-ng-model="oauth2Client.scopeIds" multiple="multiple" class="col-md-4 custom-select required d-block w-100 select2"
+                        id="oauth2Client.scopeIds" required="required">
+                    <option data-ng-repeat="oauth2Scope in oauth2Scopes" value="{{oauth2Scope.id}}">{{oauth2Scope.scope}}</option>
+                </select>
+                <div class="invalid-feedback">
+                    Please select a valid grant type.
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12 mb-3">
+                <label for="oauth2Client.expiration">Access token expiration
+                    <em class="text-muted">(Example: 1h or 30m or 2h30m15s)</em>
+                </label>
+                <input data-ng-model="oauth2Client.expiration" type="text" class="form-control required col-md-2" id="oauth2Client.expiration"
+                       placeholder="" value="" required="required">
+                <div class="invalid-feedback">
+                    Valid Oauth2 client access token expiration is required.
+                </div>
+            </div>
+        </div>
+        <div class="row" data-ng-if="oauth2Client.grantTypes.indexOf('refresh_token') >= 0">
+            <div class="col-md-12 mb-3">
+                <label for="oauth2Client.refreshExpiration">Refresh token expiration
+                    <em class="text-muted">(Example: 1h or 30m or 2h30m15s). The value must be higher than access token expiration</em>
+                </label>
+                <input data-ng-model="oauth2Client.refreshExpiration" type="text" class="form-control required col-md-2" id="oauth2Client.refreshExpiration"
+                       placeholder="" value="" required="required">
+                <div class="invalid-feedback">
+                    Valid Oauth2 client refresh token expiration is required.
+                </div>
+            </div>
+        </div>
+
+        <div class="row" data-ng-if="oauth2Client.grantTypes.indexOf('authorization_code') >= 0">
+            <div class="col-md-8 mb-3">
+                <label for="oauth2Client.redirectUrls">Authorization code redirect urls
+                </label>
+                <span data-ng-repeat="redirectUrl in oauth2Client.redirectUrls">
+                    <table class="w-100">
+                    <tr>
+                        <td><button class="btn btn-sm btn-outline-danger" data-ng-click="removeRedirectUrl(redirectUrl)">Remove</button></td>
+                        <td class="text-left w-100">
+                            <i class="fas fa-link"></i> <strong>{{redirectUrl}}</strong>
+                        </td>
+                    </tr>
+                </table>
+                </span>
+                <table class="w-100">
+                    <tr>
+                        <td>
+                            <input data-ng-model="oauth2Client.redirectUrl" type="text" class="form-control required col-md-12" id="oauth2Client.redirectUrls"
+                                   placeholder="" value="" required="required">
+                        </td>
+                        <td><button class="btn btn-sm btn-outline-success" data-ng-click="addRedirectUrl()">Add</button></td>
+                    </tr>
+                </table>
+
+
+                <div class="invalid-feedback">
+                    Valid Oauth2 client refresh token expiration is required.
+                </div>
+            </div>
+        </div>
+
+        <hr class="mb-4">
+
+        <div class="row">
+            <div class="col-md-12">
+                <button class="btn btn-outline-secondary" data-ng-click="location.url('/oauth2-clients');"
+                    ><i class="fas fa-times"></i> Cancel</button>
+                <button class="btn btn-outline-primary" data-ng-click="createOauth2Client()" id="createOauth2ClientBtn"
+                    ><i class="far fa-save"></i> Create client</button>
+            </div>
+        </div>
+    </form>
+</div>

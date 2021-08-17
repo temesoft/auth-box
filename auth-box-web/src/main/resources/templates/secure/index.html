@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.w3.org/1999/xhtml" data-ng-app="authBoxWeb">
+<head>
+    <title>Auth-box Web</title>
+    <link href="data:image/x-icon;base64,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" rel="icon" type="image/x-icon" />
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <link rel="stylesheet" href="/webjars/bootstrap/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="/webjars/font-awesome/css/all.min.css"/>
+    <link rel="stylesheet" href="/webjars/angularjs/angular-csp.css"/>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/angular-toastr/2.1.1/angular-toastr.min.css" integrity="sha512-qx6VN+/Hr2aH12rxk9dxHQx48fzZgJbcdCm8Ig0dXh48AHoFUs2ldKfBA5gqhfPqvFtCaeaawUoF51qb00oAfg==" crossorigin="anonymous"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap4-toggle/3.6.1/bootstrap4-toggle.min.css" integrity="sha512-EzrsULyNzUc4xnMaqTrB4EpGvudqpetxG/WNjCpG6ZyyAGxeB6OBF9o246+mwx3l/9Cn838iLIcrxpPHTiygAA==" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" integrity="sha512-nMNlpuaDPrqlEls3IX/Q56H36qvBASwb3ipuo3MxeWbsQB1881ox0cRv7UPTgBlriqoynt35KjEwgGUeUXIPnw==" crossorigin="anonymous" />
+    <link href="/css/dashboard.css" rel="stylesheet">
+</head>
+<body data-ng-controller="mainController">
+
+<nav class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0">
+    <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="#">Oauth2.cloud</a>
+    <span class="w-100 p-3 text-muted text-right ng-cloak">Welcome, {{loggedInAccount.name}}</span>
+    <ul class="navbar-nav px-3">
+        <li class="nav-item text-nowrap">
+            <a class="nav-link text-bold" href="/logout">Sign out</a>
+        </li>
+    </ul>
+</nav>
+
+<div class="container-fluid">
+    <div class="row">
+        <nav class="col-md-2 d-none d-md-block bg-light sidebar position-fixed">
+            <div class="sidebar-sticky" style="position: fixed">
+                <ul class="nav flex-column">
+                    <li class="nav-item ng-cloak">
+                        <a class="nav-link text-bold" href="#!/organization" data-ng-class="{'active':getRoute() === 'organization.html'}">
+                            <span data-feather="home"></span>
+                            <i class="fas fa-building fa-fw"></i> Organization <span class="sr-only">(current)</span>
+                        </a>
+                    </li>
+                    <li class="nav-item ng-cloak" data-ng-if="loggedInAccount.admin">
+                        <a class="nav-link text-bold" href="#!/accounts" data-ng-class="{'active':getRoute() === 'accounts.html'}">
+                            <span data-feather="archive"></span>
+                            <i class="fas fa-user-friends fa-fw"></i> Accounts
+                        </a>
+                    </li>
+                    <li class="nav-item ng-cloak">
+                        <a class="nav-link text-bold" href="#!/account" data-ng-class="{'active':getRoute() === 'account.html'}">
+                            <span data-feather="settings"></span>
+                            <i class="fas fa-user-cog fa-fw"></i> Account Settings
+                        </a>
+                    </li>
+                    <li class="nav-item ng-cloak">
+                        <hr/>
+                        <a class="nav-link text-bold" href="#!/oauth2-clients" data-ng-class="{'active':getRoute() === 'oauth2-clients.html'}">
+                            <span data-feather="archive"></span>
+                            <i class="fas fa-map-signs fa-fw"></i> Oauth2 Clients
+                        </a>
+                    </li>
+                    <li class="nav-item ng-cloak">
+                        <a class="nav-link text-bold" href="#!/oauth2-scopes" data-ng-class="{'active':getRoute() === 'oauth2-scopes.html'}">
+                            <span data-feather="archive"></span>
+                            <i class="fas fa-paperclip fa-fw"></i> Oauth2 Scopes
+                        </a>
+                    </li>
+                    <li class="nav-item ng-cloak">
+                        <a class="nav-link text-bold" href="#!/oauth2-users" data-ng-class="{'active':getRoute() === 'oauth2-users.html'}">
+                            <span data-feather="users"></span>
+                            <i class="fas fa-user-lock fa-fw"></i> Oauth2 Users
+                        </a>
+                    </li>
+                    <li class="nav-item ng-cloak">
+                        <a class="nav-link text-bold" href="#!/oauth2-tokens" data-ng-class="{'active':getRoute() === 'oauth2-tokens.html'}">
+                            <span data-feather="users"></span>
+                            <i class="fas fa-key fa-fw"></i> Oauth2 Tokens
+                        </a>
+                    </li>
+                    <li class="nav-item ng-cloak">
+                        <a class="nav-link text-bold" href="#!/oauth2-client-curl-examples" data-ng-class="{'active':getRoute() === 'oauth2-client-curl-examples.html'}">
+                            <span data-feather="users"></span>
+                            <i class="fas fa-info-circle"></i> Oauth2 curl examples
+                        </a>
+                    </li>
+                    <li class="nav-item ng-cloak">
+                        <a class="nav-link text-bold" href="#!/access-log" data-ng-class="{'active':getRoute() === 'access-log.html'}">
+                            <span data-feather="access-log"></span>
+                            <i class="fas fa-stream"></i> Request Log
+                        </a>
+                    </li>
+<!--                    <li class="nav-item ng-cloak">-->
+<!--                        <hr/>-->
+<!--                        <a class="nav-link text-bold" target="newWindow">-->
+<!--                            <span data-feather="layers"></span>-->
+<!--                            Oauth2 server API-->
+<!--                            <br/>-->
+<!--                            <small>-->
+<!--                            <a class="nav-link text-bold" data-ng-if="appProperties.domain.length != 0" href="{{appProperties.protocol}}://{{loggedInOrganization.domainPrefix}}.{{appProperties.domain}}:{{appProperties.port}}/swagger-ui/index.html"-->
+<!--                                > - &nbsp; {{appProperties.protocol}}://{{loggedInOrganization.domainPrefix}}.{{appProperties.domain}}:{{appProperties.port}}</a>-->
+<!--                            <a class="nav-link text-bold" data-ng-if="appProperties.domain.length == 0" href="{{appProperties.protocol}}://{{loggedInOrganization.domainPrefix}}:{{appProperties.port}}/swagger-ui/index.html"-->
+<!--                                > - &nbsp; {{appProperties.protocol}}://{{loggedInOrganization.domainPrefix}}:{{appProperties.port}}</a>-->
+<!--                            </small>-->
+<!--                        </a>-->
+<!--                    </li>-->
+<!--                    <li class="nav-item ng-cloak">-->
+<!--                        <hr/>-->
+<!--                        <a class="nav-link text-bold" href="https://www.oauth2.cloud/swagger-ui/index.html" target="newWindow">-->
+<!--                            <span data-feather="layers"></span>-->
+<!--                            Oauth2 management API-->
+<!--                            <br/>-->
+<!--                            <small>-->
+<!--                            <a class="nav-link text-bold" data-ng-if="appProperties.domain.length != 0" href="{{appProperties.protocol}}://{{loggedInOrganization.domainPrefix}}.{{appProperties.domain}}:{{appProperties.port}}/swagger-ui/index.html"-->
+<!--                                > - &nbsp; {{appProperties.protocol}}://{{appProperties.domain}}:{{appProperties.port}}</a>-->
+<!--                            <a class="nav-link text-bold" data-ng-if="appProperties.domain.length == 0" href="{{appProperties.protocol}}://{{loggedInOrganization.domainPrefix}}:{{appProperties.port}}/swagger-ui/index.html"-->
+<!--                                > - &nbsp; {{appProperties.protocol}}://{{loggedInOrganization.domainPrefix}}:{{appProperties.port}}</a>-->
+<!--                            </small>-->
+<!--                        </a>-->
+<!--                    </li>-->
+                </ul>
+            </div>
+        </nav>
+
+        <main role="main" class="col-md-9 ml-sm-auto col-lg-10 pt-3 px-4 ng-cloak" data-ng-view="data-ng-view">
+            loading...
+        </main>
+    </div>
+</div>
+
+<div class="modal fade" tabindex="-1" role="dialog" id="secretDisplayModal">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-body text-center bold">
+                <!-- will be filled runtime -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" tabindex="-1" role="dialog" id="areYouSureModal">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+<!--                <h5 class="modal-title" id="exampleModalLongTitle">Confirmation</h5>-->
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <h4 id="warningMessage">You are about to do something</h4>
+                <br/>
+                <h5 class="text-center">Are you sure?</h5>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-danger" id="applyChangesBtn" data-ng-click="areYouSureApply()">Apply changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap core JavaScript
+================================================== -->
+<!-- Placed at the end of the document so the pages load faster -->
+<script src="/webjars/jquery/jquery.min.js"></script>
+<script src="/webjars/angularjs/angular.min.js"></script>
+<script src="/webjars/popper.js/umd/popper.min.js"></script>
+<script src="/webjars/bootstrap/js/bootstrap.min.js"></script>
+<script src="/webjars/angular-ui-bootstrap/ui-bootstrap-tpls.min.js"></script>
+<script src="/webjars/angularjs/angular-route.min.js"></script>
+<script src="/webjars/momentjs/min/moment.min.js"></script>
+<script src="/webjars/angular-moment/angular-moment.min.js"></script>
+<script src="/webjars/bootstrap4-toggle/js/bootstrap4-toggle.min.js"></script>
+<script src="/webjars/jquery-cookie/jquery.cookie.js"></script>
+<script src="/webjars/angular-toastr/angular-toastr.min.js"></script>
+<script src="/webjars/angular-toastr/angular-toastr.tpls.min.js"></script>
+<script src="/webjars/select2/js/select2.min.js"></script>
+
+<script type='text/javascript' src='/js/utils.js'></script>
+<script type='text/javascript' src='/js/application.js'></script>
+<script type='text/javascript' src='/js/organization-controller.js'></script>
+<script type='text/javascript' src='/js/account-controller.js'></script>
+<script type='text/javascript' src='/js/oauth2-clients-controller.js'></script>
+<script type='text/javascript' src='/js/oauth2-scopes-controller.js'></script>
+<script type='text/javascript' src='/js/add-oauth2-client-controller.js'></script>
+<script type='text/javascript' src='/js/edit-oauth2-client-controller.js'></script>
+<script type='text/javascript' src='/js/oauth2-client-curl-examples-controller.js'></script>
+<script type='text/javascript' src='/js/oauth2-users-controller.js'></script>
+<script type='text/javascript' src='/js/oauth2-tokens-controller.js'></script>
+<script type='text/javascript' src='/js/accounts-controller.js'></script>
+<script type='text/javascript' src='/js/add-account-controller.js'></script>
+<script type='text/javascript' src='/js/access-log-controller.js'></script>
+
+<script th:inline="javascript">
+    const appProperties = [[${appProperties}]];
+</script>
+</body>
+</html>

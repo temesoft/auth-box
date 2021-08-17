@@ -1,0 +1,233 @@
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 _border-bottom ng-cloak">
+    <h2><i class="fas fa-map-signs fa-fw text-muted"></i> Edit Oauth2 client</h2>
+    <div class="btn-toolbar mb-2 mb-md-0">
+    </div>
+</div>
+
+<div class="col-md-12 order-md-1  ng-cloak">
+    <form class="needs-validation" novalidate>
+        <div class="row">
+            <div class="col-md-12">
+                <button class="btn btn-outline-info" data-ng-click="location.url('/oauth2-tokens/client/' + oauth2Client.id)"
+                    ><i class="fas fa-key"></i> tokens</button>
+                <button class="btn btn-outline-info" data-ng-click="location.url('/oauth2-client-curl-examples/' + oauth2Client.id);"
+                    ><i class="fas fa-link"></i> curl examples</button>
+                <hr/>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-8 mb-3">
+
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="oauth2Client.id">Client Id</label>
+                <input data-ng-model="oauth2Client.id" type="text" class="form-control" id="oauth2Client.id" readonly="readonly"/>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12 mb-3">
+                <label for="oauth2Client.secret">Client Secret</label>
+                <input data-ng-model="oauth2Client.secret" type="text" class="form-control" id="oauth2Client.secret" readonly="readonly"/>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="oauth2Client.description">Description</label>
+                <input data-ng-model="oauth2Client.description" type="text" class="form-control required" id="oauth2Client.description"
+                       placeholder="" value="" required="required">
+                <div class="invalid-feedback">
+                    Valid Oauth2 client description is required.
+                </div>
+            </div>
+        </div>
+
+
+
+        <div class="row">
+            <div class="col-md-6 mb-3 non-multiple-select2">
+                <label for="oauth2Client.tokenFormat">Token format</label>
+                <br/>
+                <select data-ng-model="oauth2Client.tokenFormat" class="_custom-select _required _d-block _w-100 select2" id="oauth2Client.tokenFormat" required>
+                    <option value="">Choose...</option>
+                    <option value="STANDARD">Standard (Opaque)</option>
+                    <option value="JWT">JWT (JSON Web Tokens)</option>
+                </select>
+                <div class="p-3" data-ng-if="oauth2Client.tokenFormat == 'JWT'">
+                    <button class="btn btn-outline-info btn-sm" data-ng-click="generateKeys()" id="generateKeysBtn"
+                            ><i class="fas fa-key"></i> Generate new keys</button>
+                    <button class="btn btn-outline-primary btn-sm" data-ng-click="addNewPrivateKey()" id="addNewPrivateKeyBtn"
+                            ><i class="fas fa-key"></i> Add private key</button>
+                </div>
+
+            </div>
+        </div>
+        <!--        <div class="row" data-ng-if="oauth2Client.tokenFormat == 'JWT' && oauth2Client.privateKey">-->
+        <!--            <div class="col-md-12 mb-3">-->
+        <!--                <div class="keyPanel">-->
+        <!--                    <div style="padding: 3px;">-->
+        <!--                        <span> &nbsp;-->
+        <!--                            <a data-ng-click="togglePanel('privateKey', 'privateKeyCaret');" class="pointer">-->
+        <!--                                <i class="fas fa-caret-right" id="privateKeyCaret"></i> Private Key ({{oauth2Client.privateKey.length}} bytes)-->
+        <!--                            </a>-->
+        <!--                        </span>-->
+        <!--                    </div>-->
+        <!--                    <textarea readonly="readonly" data-ng-model="oauth2Client.privateKey"-->
+        <!--                              class="form-control publicKey d-none"-->
+        <!--                              rows="10" id="privateKey"></textarea>-->
+        <!--                </div>-->
+        <!--            </div>-->
+        <!--        </div>-->
+
+        <div class="row" data-ng-if="oauth2Client.tokenFormat == 'JWT' && oauth2Client.publicKey">
+            <div class="col-md-12 mb-3">
+                <div class="keyPanel">
+                    <div style="padding: 3px;">
+                        <span> &nbsp;
+                            <a data-ng-click="togglePanel('publicKey', 'publicKeyCaret');">
+                                <i class="fas fa-caret-right" id="publicKeyCaret"></i> Public Key
+                            </a>
+                        </span>
+                    </div>
+                    <textarea readonly="readonly" data-ng-model="oauth2Client.publicKey"
+                              class="form-control publicKey"
+                              rows="10" id="publicKey"></textarea>
+                </div>
+            </div>
+        </div>
+
+
+
+        <div class="row">
+            <div class="col-md-12 mb-3">
+                <label for="oauth2Client.grantTypes">Allowed grant types</label>
+                <br/>
+                <select data-ng-model="oauth2Client.grantTypes" multiple="multiple" class="col-md-4 custom-select required d-block w-100 select2"
+                        id="oauth2Client.grantTypes" required="required">
+                    <option value="client_credentials">client_credentials</option>
+                    <option value="password">password</option>
+                    <option value="authorization_code">authorization_code</option>
+                    <option value="refresh_token">refresh_token</option>
+                </select>
+                <div class="invalid-feedback">
+                    Please select a valid grant type.
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12 mb-3">
+                <label for="oauth2Client.scopeIds">Scope list</label>
+                <br/>
+                <select data-ng-model="oauth2Client.scopeIds" multiple="multiple" class="col-md-4 custom-select required d-block w-100 select2"
+                        id="oauth2Client.scopeIds" required="required">
+                    <option data-ng-repeat="oauth2Scope in oauth2Scopes" value="{{oauth2Scope.id}}">{{oauth2Scope.scope}}</option>
+                </select>
+                <div class="invalid-feedback">
+                    Please select a valid grant type.
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12 mb-3">
+                <label for="oauth2Client.expiration">Access token expiration
+                    <em class="text-muted">(Example: 1h or 30m or 2h30m15s)</em>
+                </label>
+                <input data-ng-model="oauth2Client.expiration" type="text" class="form-control required col-md-2" id="oauth2Client.expiration"
+                       placeholder="" value="" required="required">
+                <div class="invalid-feedback">
+                    Valid Oauth2 client access token expiration is required.
+                </div>
+            </div>
+        </div>
+        <div class="row" data-ng-if="oauth2Client.grantTypes.indexOf('refresh_token') >= 0">
+            <div class="col-md-12 mb-3">
+                <label for="oauth2Client.refreshExpiration">Refresh token expiration
+                    <em class="text-muted">(Example: 1h or 30m or 2h30m15s). The value must be higher than access token expiration</em>
+                </label>
+                <input data-ng-model="oauth2Client.refreshExpiration" type="text" class="form-control required col-md-2" id="oauth2Client.refreshExpiration"
+                       placeholder="" value="" required="required">
+                <div class="invalid-feedback">
+                    Valid Oauth2 client refresh token expiration is required.
+                </div>
+            </div>
+        </div>
+
+        <div class="row" data-ng-if="oauth2Client.grantTypes.indexOf('authorization_code') >= 0">
+            <div class="col-md-8 mb-3">
+                <label for="oauth2Client.redirectUrls">Authorization code redirect urls
+                </label>
+                <span data-ng-repeat="redirectUrl in oauth2Client.redirectUrls">
+                    <table class="w-100">
+                    <tr>
+                        <td><button class="btn btn-sm btn-outline-danger" data-ng-click="removeRedirectUrl(redirectUrl)"
+                            ><i class="far fa-trash-alt"></i></button></td>
+                        <td class="text-left w-100">
+                            <i class="fas fa-link"></i> <strong>{{redirectUrl}}</strong>
+                        </td>
+                    </tr>
+                </table>
+                </span>
+                <table class="w-100">
+                    <tr>
+                        <td>
+                            <input data-ng-model="oauth2Client.redirectUrl" type="text" class="form-control required col-md-12" id="oauth2Client.redirectUrls"
+                                   placeholder="" value="" required="required">
+                        </td>
+                        <td><button class="btn btn-sm btn-outline-success" data-ng-click="addRedirectUrl()"
+                            ><i class="far fa-plus-square"></i> Add</button></td>
+                    </tr>
+                </table>
+
+
+                <div class="invalid-feedback">
+                    Valid Oauth2 client refresh token expiration is required.
+                </div>
+            </div>
+        </div>
+
+        <hr class="mb-4">
+
+        <div class="row">
+            <div class="col-md-12">
+                <button class="btn btn-outline-danger" data-ng-click="deleteOauth2Client()"
+                    ><i class="far fa-trash-alt"></i> Delete</button>
+                <button class="btn btn-outline-secondary" data-ng-click="location.url('/oauth2-clients');"
+                    ><i class="fas fa-times"></i> Cancel</button>
+                <button class="btn btn-outline-primary" data-ng-click="updateOauth2Client()" id="updateOauth2ClientBtn"
+                    ><i class="far fa-save"></i> Update client</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+
+<div class="modal fade" tabindex="-1" role="dialog" id="modalEnterPrivateKey">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLongTitle">Paste your private key to be used for JWT token signing</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Private key should be RSA 2048 in <a href="https://en.wikipedia.org/wiki/Privacy-Enhanced_Mail" target="wikiWindow">PEM format</a>.
+                <textarea data-ng-model="oauth2Client.privateKey" class="form-control privateKey" rows="10" id="newPrivateKey"></textarea>
+            </div>
+            <div class="modal-footer">
+                <div class="row col-md-12">
+                    <div class="col-md-7 mb-3 text-left">
+                        <em>To create custom private key:</em>
+                        <br/>
+                        <code>openssl genrsa -out your-rsa-private-key.pem 2048</code>
+                    </div>
+                    <div class="col-md-5 mb-3 text-right">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" data-ng-click="addNewPrivateKeySubmit()" id="modalEnterPrivateKeyBtn">Apply changes</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
