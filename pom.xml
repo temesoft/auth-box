@@ -21,7 +21,7 @@
         <springfox.version>3.0.0</springfox.version>
         <spring-security-oauth2.version>2.5.1.RELEASE</spring-security-oauth2.version>
         <h2.version>[1.4.200,)</h2.version>
-        <micrometer.version>1.7.0</micrometer.version>
+        <micrometer.version>1.7.3</micrometer.version>
         <commons-io.version>[2.8.0,)</commons-io.version>
         <jjwt.version>[0.11.1,)</jjwt.version>
         <bouncycastle.version>[1.68,)</bouncycastle.version>
