@@ -1,3 +1,5 @@
+[![Java CI](https://github.com/temesoft/auth-box/actions/workflows/main.yml/badge.svg)](https://github.com/temesoft/auth-box/actions/workflows/main.yml)
+
 # AuthBox - Oauth2 server and management panel
 
 AuthBox is a free, open-source Oauth2 server implemented using Java. 
