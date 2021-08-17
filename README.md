@@ -157,7 +157,7 @@ docker run --name some-redis -p 6379:6379 --rm -it redis
 <a name="support" />
 
 ## Support & contribution
-To contribute to this project - please create a PR ;-)
+To contribute to this project - please create a PR :smiley:
 
 <a name="license_section" />
 
