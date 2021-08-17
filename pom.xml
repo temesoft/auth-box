@@ -27,7 +27,7 @@
         <bouncycastle.version>[1.68,)</bouncycastle.version>
         <commons-validator.version>[1.7,)</commons-validator.version>
         <flyway.version>7.6.0</flyway.version>
-        <guava.version>30.1-jre</guava.version>
+        <guava.version>30.1.1-jre</guava.version>
         <awaitility.version>[4.1.0,)</awaitility.version>
     </properties>
 
