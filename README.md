@@ -138,11 +138,11 @@ docker build -f docker/auth-box-web.dockerfile -t auth-box-web .
 #### Start all demo (mysql, redis, auth-box-web, auth-box-server) on localhost:8888 (web UI portal) and localhost:9999 (oauth2 server)
  ```shell script
 docker-compose -f docker/demo-docker-compose.yml up
-# Once the docker services startes use the following:
+#   Once the docker services startes use the following:
 #   Management Panel (auth-box-web): http://localhost:8888 
 #   Management Panel API (auth-box-web api): http://localhost:8888/swagger-ui/index.html
-#   Oauth2 Server API (auth-box-server api): http://localhost:8888/swagger-ui/index.html
-# Default management panel login: (user:admin, password: admin)
+#   Oauth2 Server API (auth-box-server api): http://localhost:9999/swagger-ui/index.html
+#   Default management panel login: (user:admin, password: admin)
 ```
 #### MySql container (i386)
  ```shell script
