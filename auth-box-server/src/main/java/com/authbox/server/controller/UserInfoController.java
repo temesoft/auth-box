@@ -4,6 +4,7 @@ import com.authbox.base.dao.OauthClientDao;
 import com.authbox.base.dao.OauthTokenDao;
 import com.authbox.base.dao.OauthUserDao;
 import com.authbox.base.exception.Oauth2Exception;
+import com.authbox.base.model.AccessLog;
 import com.authbox.base.model.OauthClient;
 import com.authbox.base.model.OauthToken;
 import com.authbox.base.model.OauthUser;
@@ -33,7 +34,6 @@ import static com.authbox.base.config.Constants.OAUTH2_ATTR_METADATA;
 import static com.authbox.base.config.Constants.OAUTH2_ATTR_ORGANIZATION_ID;
 import static com.authbox.base.config.Constants.OAUTH2_ATTR_USERNAME;
 import static com.authbox.base.config.Constants.OAUTH_PREFIX;
-import static com.authbox.base.model.AccessLog.AccessLogBuilder.accessLogBuilder;
 import static com.authbox.base.model.TokenType.ACCESS_TOKEN;
 import static com.authbox.base.util.HashUtils.sha256;
 import static com.authbox.server.util.RequestUtils.getRequestId;
@@ -65,7 +65,7 @@ public class UserInfoController extends BaseController {
     public Map<String, Object> getUserInfo(final HttpServletRequest req,
                                            @RequestParam(value = OAUTH2_ATTR_ACCESS_TOKEN, required = false) final String token) {
         accessLogService.create(
-                accessLogBuilder()
+                AccessLog.builder()
                         .withRequestId(getRequestId())
                         .withDuration(getTimeSinceRequest()),
                 "Processing user info request"
@@ -84,10 +84,10 @@ public class UserInfoController extends BaseController {
         }
         if (accessToken.isEmpty()) {
             accessLogService.create(
-                    accessLogBuilder()
+                    AccessLog.builder()
                             .withRequestId(getRequestId())
                             .withDuration(getTimeSinceRequest())
-                            .withOrganizationId(organization.id)
+                            .withOrganizationId(organization.getId())
                             .withError(MSG_UNAUTHORIZED_REQUEST),
                     "Access token is not provided"
             );
@@ -103,135 +103,135 @@ public class UserInfoController extends BaseController {
         if (accessOauthToken.isEmpty()) {
             LOGGER.debug("Access token='{}' / hash='{}' not found", accessToken.get(), sha256(accessToken.get()));
             accessLogService.create(
-                    accessLogBuilder()
+                    AccessLog.builder()
                             .withRequestId(getRequestId())
                             .withDuration(getTimeSinceRequest())
-                            .withOrganizationId(organization.id)
+                            .withOrganizationId(organization.getId())
                             .withError(MSG_INVALID_TOKEN),
                     "Access token='%s' / hash='%s' not found", accessToken.get(), sha256(accessToken.get())
             );
             throw new Oauth2Exception(MSG_INVALID_TOKEN);
         }
-        if (!accessOauthToken.get().tokenType.equals(ACCESS_TOKEN)) {
-            LOGGER.debug("Provided token is not ACCESS_TOKEN. type='{}' token='{}' / hash='{}'", accessOauthToken.get().tokenType, accessToken.get(), sha256(accessToken.get()));
+        if (!accessOauthToken.get().getTokenType().equals(ACCESS_TOKEN)) {
+            LOGGER.debug("Provided token is not ACCESS_TOKEN. type='{}' token='{}' / hash='{}'", accessOauthToken.get().getTokenType(), accessToken.get(), sha256(accessToken.get()));
             accessLogService.create(
-                    accessLogBuilder()
+                    AccessLog.builder()
                             .withRequestId(getRequestId())
                             .withDuration(getTimeSinceRequest())
-                            .withOrganizationId(organization.id)
-                            .withClientId(accessOauthToken.get().clientId)
+                            .withOrganizationId(organization.getId())
+                            .withClientId(accessOauthToken.get().getClientId())
                             .withError(MSG_INVALID_TOKEN),
-                    "Provided token is not ACCESS_TOKEN. type='%s' token='%s' / hash='%s'", accessOauthToken.get().tokenType.name(), accessToken.get(), sha256(accessToken.get())
+                    "Provided token is not ACCESS_TOKEN. type='%s' token='%s' / hash='%s'", accessOauthToken.get().getTokenType().name(), accessToken.get(), sha256(accessToken.get())
             );
             throw new Oauth2Exception(MSG_INVALID_TOKEN);
         }
-        if (!accessOauthToken.get().organizationId.equals(organization.id)) {
-            LOGGER.debug("Token does not belong to organization_id='{}'", organization.id);
+        if (!accessOauthToken.get().getOrganizationId().equals(organization.getId())) {
+            LOGGER.debug("Token does not belong to organization_id='{}'", organization.getId());
             accessLogService.create(
-                    accessLogBuilder()
+                    AccessLog.builder()
                             .withRequestId(getRequestId())
                             .withDuration(getTimeSinceRequest())
-                            .withOrganizationId(organization.id)
-                            .withClientId(accessOauthToken.get().clientId)
+                            .withOrganizationId(organization.getId())
+                            .withClientId(accessOauthToken.get().getClientId())
                             .withError(MSG_INVALID_TOKEN),
-                    "Token does not belong to organization id='%s'", organization.id
+                    "Token does not belong to organization id='%s'", organization.getId()
             );
             throw new Oauth2Exception(MSG_INVALID_TOKEN);
         }
 
-        if (isEmpty(accessOauthToken.get().oauthUserId)) {
+        if (isEmpty(accessOauthToken.get().getOauthUserId())) {
             LOGGER.debug("Access token='{}' / hash='{}' is not linked to a oauth user", accessToken.get(), sha256(accessToken.get()));
             accessLogService.create(
-                    accessLogBuilder()
+                    AccessLog.builder()
                             .withRequestId(getRequestId())
                             .withDuration(getTimeSinceRequest())
-                            .withOrganizationId(organization.id)
-                            .withClientId(accessOauthToken.get().clientId)
+                            .withOrganizationId(organization.getId())
+                            .withClientId(accessOauthToken.get().getClientId())
                             .withError(MSG_INVALID_TOKEN),
                     "Access token='%s' / hash='%s' is not linked to a oauth user", accessToken.get(), sha256(accessToken.get())
             );
             throw new Oauth2Exception(MSG_INVALID_TOKEN);
         }
 
-        final Optional<OauthUser> oauthUser = oauthUserDao.getById(accessOauthToken.get().oauthUserId);
+        final Optional<OauthUser> oauthUser = oauthUserDao.getById(accessOauthToken.get().getOauthUserId());
         if (oauthUser.isEmpty()) {
-            LOGGER.debug("OauthUser not found by id='{}'", accessOauthToken.get().oauthUserId);
+            LOGGER.debug("OauthUser not found by id='{}'", accessOauthToken.get().getOauthUserId());
             accessLogService.create(
-                    accessLogBuilder()
+                    AccessLog.builder()
                             .withRequestId(getRequestId())
                             .withDuration(getTimeSinceRequest())
-                            .withOrganizationId(organization.id)
-                            .withClientId(accessOauthToken.get().clientId)
+                            .withOrganizationId(organization.getId())
+                            .withClientId(accessOauthToken.get().getClientId())
                             .withError(MSG_UNAUTHORIZED_REQUEST),
-                    "Oauth2 user not found by id='%s'", accessOauthToken.get().oauthUserId
+                    "Oauth2 user not found by id='%s'", accessOauthToken.get().getOauthUserId()
             );
             throw new Oauth2Exception(MSG_UNAUTHORIZED_REQUEST);
         }
 
-        if (!oauthUser.get().enabled) {
-            LOGGER.debug("OauthUser user disabled. id='{}'", oauthUser.get().id);
+        if (!oauthUser.get().isEnabled()) {
+            LOGGER.debug("OauthUser user disabled. id='{}'", oauthUser.get().getId());
             accessLogService.create(
-                    accessLogBuilder()
+                    AccessLog.builder()
                             .withRequestId(getRequestId())
                             .withDuration(getTimeSinceRequest())
-                            .withOrganizationId(organization.id)
-                            .withClientId(accessOauthToken.get().clientId)
+                            .withOrganizationId(organization.getId())
+                            .withClientId(accessOauthToken.get().getClientId())
                             .withError(MSG_UNAUTHORIZED_REQUEST),
-                    "Oauth2 user user is disabled. id='%s'", oauthUser.get().id
+                    "Oauth2 user user is disabled. id='%s'", oauthUser.get().getId()
             );
             throw new Oauth2Exception(MSG_UNAUTHORIZED_REQUEST);
         }
 
-        final Optional<OauthClient> oauthClient = oauthClientDao.getById(accessOauthToken.get().clientId);
+        final Optional<OauthClient> oauthClient = oauthClientDao.getById(accessOauthToken.get().getClientId());
         if (oauthClient.isEmpty()) {
-            LOGGER.debug("OauthClient not found by id='{}'", accessOauthToken.get().clientId);
+            LOGGER.debug("OauthClient not found by id='{}'", accessOauthToken.get().getClientId());
             accessLogService.create(
-                    accessLogBuilder()
+                    AccessLog.builder()
                             .withRequestId(getRequestId())
                             .withDuration(getTimeSinceRequest())
-                            .withOrganizationId(organization.id)
-                            .withClientId(accessOauthToken.get().clientId)
+                            .withOrganizationId(organization.getId())
+                            .withClientId(accessOauthToken.get().getClientId())
                             .withError(MSG_UNAUTHORIZED_REQUEST),
-                    "Oauth2 client not found by id='%s'", accessOauthToken.get().clientId
+                    "Oauth2 client not found by id='%s'", accessOauthToken.get().getClientId()
             );
             throw new Oauth2Exception(MSG_UNAUTHORIZED_REQUEST);
         }
 
-        if (!oauthClient.get().enabled) {
-            LOGGER.debug("OauthClient is disabled. id='{}'", oauthClient.get().id);
+        if (!oauthClient.get().isEnabled()) {
+            LOGGER.debug("OauthClient is disabled. id='{}'", oauthClient.get().getId());
             accessLogService.create(
-                    accessLogBuilder()
+                    AccessLog.builder()
                             .withRequestId(getRequestId())
                             .withDuration(getTimeSinceRequest())
-                            .withOrganizationId(organization.id)
-                            .withClientId(oauthClient.get().id)
+                            .withOrganizationId(organization.getId())
+                            .withClientId(oauthClient.get().getId())
                             .withError(MSG_UNAUTHORIZED_REQUEST),
-                    "Oauth2 user user disabled. id='%s'", oauthUser.get().id
+                    "Oauth2 user user disabled. id='%s'", oauthUser.get().getId()
             );
             throw new Oauth2Exception(MSG_UNAUTHORIZED_REQUEST);
         }
 
         Object metadata = null;
         try {
-            metadata = objectMapper.readValue(oauthUser.get().metadata, Map.class);
+            metadata = objectMapper.readValue(oauthUser.get().getMetadata(), Map.class);
         } catch (JsonProcessingException e) {
-            LOGGER.debug("Unable to parse metadata for OauthUser user_id='{}'", oauthUser.get().id);
+            LOGGER.debug("Unable to parse metadata for OauthUser user_id='{}'", oauthUser.get().getId());
         }
 
         accessLogService.create(
-                accessLogBuilder()
+                AccessLog.builder()
                         .withRequestId(getRequestId())
                         .withDuration(getTimeSinceRequest())
-                        .withOrganizationId(organization.id)
-                        .withClientId(oauthClient.get().id),
+                        .withOrganizationId(organization.getId())
+                        .withClientId(oauthClient.get().getId()),
                 "User info request finished"
         );
 
         return ImmutableMap.of(
-                "id", oauthUser.get().id,
-                OAUTH2_ATTR_USERNAME, oauthUser.get().username,
-                OAUTH2_ATTR_ORGANIZATION_ID, oauthUser.get().organizationId,
-                OAUTH2_ATTR_METADATA, metadata != null ? metadata : oauthUser.get().metadata
+                "id", oauthUser.get().getId(),
+                OAUTH2_ATTR_USERNAME, oauthUser.get().getUsername(),
+                OAUTH2_ATTR_ORGANIZATION_ID, oauthUser.get().getOrganizationId(),
+                OAUTH2_ATTR_METADATA, metadata != null ? metadata : oauthUser.get().getMetadata()
         );
     }
 }

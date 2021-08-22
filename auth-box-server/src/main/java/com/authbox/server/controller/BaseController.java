@@ -3,6 +3,7 @@ package com.authbox.server.controller;
 import com.authbox.base.config.AppProperties;
 import com.authbox.base.dao.OrganizationDao;
 import com.authbox.base.exception.BadRequestException;
+import com.authbox.base.model.AccessLog;
 import com.authbox.base.model.Organization;
 import com.authbox.base.service.AccessLogService;
 import com.authbox.server.config.RequestWrapperFilterConfiguration;
@@ -14,16 +15,10 @@ import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.net.URI;
-import java.time.Duration;
 import java.util.Optional;
 
 import static com.authbox.base.config.Constants.MSG_INVALID_REQUEST;
-import static com.authbox.base.model.AccessLog.AccessLogBuilder.accessLogBuilder;
-import static com.authbox.server.config.RequestWrapperFilterConfiguration.REQUEST_ID_HEADER;
-import static com.authbox.server.config.RequestWrapperFilterConfiguration.REQUEST_ID_MDC_KEY;
-import static com.authbox.server.config.RequestWrapperFilterConfiguration.REQUEST_START_REQUEST_TIME_MDC_KEY;
 import static com.authbox.server.util.RequestUtils.getRequestId;
 import static com.authbox.server.util.RequestUtils.getTimeSinceRequest;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -58,10 +53,10 @@ public abstract class BaseController {
 
     protected Organization getByDomainPrefix(final String organizationDomainPrefix) {
         final Optional<Organization> organization = organizationDao.getByDomainPrefix(organizationDomainPrefix);
-        if (organization.isEmpty() || !organization.get().enabled) {
+        if (organization.isEmpty() || !organization.get().isEnabled()) {
             LOGGER.debug("Organization not found by domain_prefix='{}' or disabled", organizationDomainPrefix);
             accessLogService.create(
-                    accessLogBuilder()
+                    AccessLog.builder()
                             .withRequestId(getRequestId())
                             .withDuration(getTimeSinceRequest())
                             .withError(MSG_INVALID_REQUEST),
@@ -69,7 +64,7 @@ public abstract class BaseController {
             );
             throw new BadRequestException("Domain prefix unknown: " + organizationDomainPrefix);
         }
-        MDC.put(RequestWrapperFilterConfiguration.REQUEST_ORGANIZATION_MDC_KEY, organization.get().id);
+        MDC.put(RequestWrapperFilterConfiguration.REQUEST_ORGANIZATION_MDC_KEY, organization.get().getId());
         return organization.get();
     }
 }

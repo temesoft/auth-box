@@ -9,7 +9,7 @@ import java.util.Optional;
 
 public interface AccessLogDao {
 
-    int insert(AccessLog accessLog);
+    void insert(AccessLog accessLog);
 
     Optional<AccessLog> getById(String id);
 

@@ -76,7 +76,7 @@ public class BaseController {
         if (organization.isEmpty()) {
             throw new BadRequestException("Organization not found");
         }
-        MDC.put(REQUEST_ORGANIZATION_MDC_KEY, organization.get().id);
+        MDC.put(REQUEST_ORGANIZATION_MDC_KEY, organization.get().getId());
         return organization.get();
     }
 
@@ -87,7 +87,7 @@ public class BaseController {
     public User getCurrentUser() {
         final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication instanceof AbstractAuthenticationToken && authentication.getPrincipal() instanceof User) {
-            final String userId = ((User) authentication.getPrincipal()).id;
+            final String userId = ((User) authentication.getPrincipal()).getId();
             return userDao.getById(userId).orElseThrow(() -> new BadRequestException("User not found by id: " + userId));
         } else {
             throw new BadRequestException("User details available only through https://oauth2.cloud");
@@ -110,7 +110,7 @@ public class BaseController {
                 return ((DefaultOAuth2User) ((AbstractAuthenticationToken) principal).getPrincipal()).getAttributes();
             } else {
                 final User user = (User) ((AbstractAuthenticationToken) principal).getPrincipal();
-                return ImmutableMap.of(OAUTH2_ATTR_ORGANIZATION_ID, user.organizationId);
+                return ImmutableMap.of(OAUTH2_ATTR_ORGANIZATION_ID, user.getOrganizationId());
             }
 
         } else {

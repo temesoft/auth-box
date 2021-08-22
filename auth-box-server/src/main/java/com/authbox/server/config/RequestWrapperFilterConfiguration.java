@@ -1,5 +1,6 @@
 package com.authbox.server.config;
 
+import com.authbox.base.model.AccessLog;
 import com.authbox.base.service.AccessLogService;
 import com.authbox.base.util.NetUtils;
 import com.google.common.base.Stopwatch;
@@ -15,7 +16,6 @@ import javax.servlet.FilterChain;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import static com.authbox.base.model.AccessLog.AccessLogBuilder.accessLogBuilder;
 import static com.authbox.base.util.HashUtils.makeRequestId;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
@@ -63,7 +63,7 @@ public class RequestWrapperFilterConfiguration {
                     requestId = makeRequestId();
                 }
                 accessLogService.create(
-                        accessLogBuilder()
+                        AccessLog.builder()
                                 .withIp(NetUtils.getIp(request))
                                 .withUserAgent(NetUtils.getUserAgent(request))
                                 .withRequestId(requestId),
@@ -78,7 +78,7 @@ public class RequestWrapperFilterConfiguration {
                 chain.doFilter(request, response);
             } catch (Exception e) {
                 accessLogService.create(
-                        accessLogBuilder()
+                        AccessLog.builder()
                                 .withRequestId(MDC.get(REQUEST_ID_MDC_KEY))
                                 .withDuration(stopwatch.elapsed())
                                 .withStatusCode(response.getStatus())
@@ -88,7 +88,7 @@ public class RequestWrapperFilterConfiguration {
                 LOGGER.error("Error during request processing", e);
             } finally {
                 accessLogService.create(
-                        accessLogBuilder()
+                        AccessLog.builder()
                                 .withRequestId(MDC.get(REQUEST_ID_MDC_KEY))
                                 .withStatusCode(response.getStatus())
                                 .withDuration(stopwatch.stop().elapsed()),

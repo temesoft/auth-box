@@ -52,8 +52,8 @@ public class AccountController extends BaseController {
     @PreAuthorize("hasRole('USER') || hasRole('ADMIN')")
     public User updateCurrentAccount(@RequestBody final User updatedUser) {
         final User user = getCurrentUser();
-        userDao.update(user.id, user.username, updatedUser.name, user.password, updatedUser.enabled, Instant.now(defaultClock));
-        return userDao.getById(user.id).orElseThrow(() -> new BadRequestException("User not found by id: " + user.id));
+        userDao.update(user.getId(), user.getUsername(), updatedUser.getName(), user.getPassword(), updatedUser.isEnabled(), Instant.now(defaultClock));
+        return userDao.getById(user.getId()).orElseThrow(() -> new BadRequestException("User not found by id: " + user.getId()));
     }
 
     @PostMapping("/password")
@@ -65,7 +65,7 @@ public class AccountController extends BaseController {
             throw new BadRequestException("Old password can not be empty");
         }
         // verify current password
-        if (!passwordEncoder.matches(passwordChangeRequest.oldPassword, user.password)) {
+        if (!passwordEncoder.matches(passwordChangeRequest.oldPassword, user.getPassword())) {
             throw new BadRequestException("Old password does not match");
         }
         // verify new password min length
@@ -76,8 +76,8 @@ public class AccountController extends BaseController {
         if (!passwordChangeRequest.newPassword.equals(passwordChangeRequest.newPassword2)) {
             throw new BadRequestException("New password and new password 2 do not match");
         }
-        userDao.update(user.id, user.username, user.name, passwordEncoder.encode(passwordChangeRequest.newPassword), user.enabled, Instant.now(defaultClock));
-        return userDao.getById(user.id).orElseThrow(() -> new BadRequestException("User not found by id: " + user.id));
+        userDao.update(user.getId(), user.getUsername(), user.getName(), passwordEncoder.encode(passwordChangeRequest.newPassword), user.isEnabled(), Instant.now(defaultClock));
+        return userDao.getById(user.getId()).orElseThrow(() -> new BadRequestException("User not found by id: " + user.getId()));
     }
 
     @GetMapping("/list")
@@ -85,7 +85,7 @@ public class AccountController extends BaseController {
     public Page<User> listAccounts(@RequestParam(value = "pageSize", defaultValue = "10") final int pageSize,
                                    @RequestParam(value = "currentPage", defaultValue = "0") final int currentPage) {
         final User adminUser = getCurrentUserVerifyAdmin();
-        return userDao.listByOrganizationId(adminUser.organizationId, PageRequest.of(currentPage, pageSize));
+        return userDao.listByOrganizationId(adminUser.getOrganizationId(), PageRequest.of(currentPage, pageSize));
     }
 
     @GetMapping("/{id}")
@@ -96,7 +96,7 @@ public class AccountController extends BaseController {
         if (foundUser.isEmpty()) {
             throw new BadRequestException("Account not found by id: " + id);
         }
-        if (!adminUser.organizationId.equals(foundUser.get().organizationId)) {
+        if (!adminUser.getOrganizationId().equals(foundUser.get().getOrganizationId())) {
             throw new AccessDeniedException();
         }
         return foundUser.get();
@@ -129,7 +129,7 @@ public class AccountController extends BaseController {
                         request.name.trim(),
                         ImmutableList.of(request.role.name()),
                         true,
-                        adminUser.organizationId,
+                        adminUser.getOrganizationId(),
                         now
                 )
         );
@@ -141,35 +141,35 @@ public class AccountController extends BaseController {
     public ResponseEntity<String> updateAccount(@PathVariable("id") final String id,
                                                 @RequestBody final User updatedUser) {
         final User adminUser = getCurrentUserVerifyAdmin();
-        final Optional<User> user = userDao.getById(updatedUser.id);
+        final Optional<User> user = userDao.getById(updatedUser.getId());
         if (user.isEmpty()) {
             throw new BadRequestException("User not found by id: " + id);
         }
-        if (!adminUser.organizationId.equals(user.get().organizationId)) {
+        if (!adminUser.getOrganizationId().equals(user.get().getOrganizationId())) {
             throw new AccessDeniedException();
         }
 
 
-        if (isEmpty(updatedUser.username)) {
+        if (isEmpty(updatedUser.getUsername())) {
             throw new BadRequestException("Account username can not be empty");
         }
-        if (isEmpty(updatedUser.name)) {
+        if (isEmpty(updatedUser.getName())) {
             throw new BadRequestException("Account name can not be empty");
         }
-        if (isEmpty(updatedUser.roles)) {
+        if (isEmpty(updatedUser.getRoles())) {
             throw new BadRequestException("Account access roles can not be empty");
         }
-        if (!user.get().username.equals(updatedUser.username.trim())) {
-            if (userDao.getByUsername(updatedUser.username.trim()).isPresent()) {
+        if (!user.get().getUsername().equals(updatedUser.getUsername().trim())) {
+            if (userDao.getByUsername(updatedUser.getUsername().trim()).isPresent()) {
                 throw new BadRequestException("This username is taken, please select another user");
             }
         }
         userDao.update(
-                updatedUser.id,
-                updatedUser.username.trim(),
-                updatedUser.name.trim(),
-                (isEmpty(updatedUser.password) ? passwordEncoder.encode(randomUUID().toString()) : passwordEncoder.encode(updatedUser.password.trim())),
-                updatedUser.enabled,
+                updatedUser.getId(),
+                updatedUser.getUsername().trim(),
+                updatedUser.getName().trim(),
+                (isEmpty(updatedUser.getPassword()) ? passwordEncoder.encode(randomUUID().toString()) : passwordEncoder.encode(updatedUser.getPassword().trim())),
+                updatedUser.isEnabled(),
                 Instant.now(defaultClock)
         );
 
@@ -187,10 +187,10 @@ public class AccountController extends BaseController {
                 if (foundUser.isEmpty()) {
                     throw new BadRequestException("User not found by id: " + accountId);
                 }
-                if (!adminUser.organizationId.equals(foundUser.get().organizationId)) {
+                if (!adminUser.getOrganizationId().equals(foundUser.get().getOrganizationId())) {
                     throw new AccessDeniedException();
                 }
-                if (adminUser.id.equals(foundUser.get().id)) {
+                if (adminUser.getId().equals(foundUser.get().getId())) {
                     throw new BadRequestException("User is unable to remove self");
                 }
                 userDao.delete(foundUser.get());

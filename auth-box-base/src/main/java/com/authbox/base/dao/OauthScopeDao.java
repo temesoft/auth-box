@@ -9,7 +9,7 @@ import java.util.Optional;
 
 public interface OauthScopeDao {
 
-    int insert(OauthScope oauthScope);
+    void insert(OauthScope oauthScope);
 
     Optional<OauthScope> getById(String id);
 
@@ -17,12 +17,10 @@ public interface OauthScopeDao {
 
     Page<OauthScope> listByOrganizationId(String organizationId, Pageable pageable);
 
-    List<OauthScope> listByClientId(String clientId);
-
     boolean existsByOrganizationIdAndScope(String organizationId, String scope);
 
-    int deleteById(String id);
+    void deleteById(String id);
 
-    int updateById(String id, String scope, String description);
+    void update(String id, String scope, String description);
 
 }

@@ -46,7 +46,7 @@ public class OrganizationController extends BaseController {
     @GetMapping("/available-domain-prefix/{domainPrefix}")
     public Map<String, Object> checkAvailableDomainPrefix(@PathVariable("domainPrefix") final String domainPrefix) {
         final Organization organization = getOrganization();
-        validateDomainPrefix(organizationDao, domainPrefix, organization.id);
+        validateDomainPrefix(organizationDao, domainPrefix, organization.getId());
         return ImmutableMap.of("exists", organizationDao.getByDomainPrefix(domainPrefix.trim()).isPresent());
     }
 
@@ -54,22 +54,22 @@ public class OrganizationController extends BaseController {
     @PostMapping
     public Organization update(@RequestBody final Organization updatedOrganization) {
         final Organization organization = getOrganization();
-        if (!organization.id.equals(updatedOrganization.id)) {
+        if (!organization.getId().equals(updatedOrganization.getId())) {
             throw new BadRequestException("Invalid company id");
         }
-        validateDomainPrefix(organizationDao, updatedOrganization.domainPrefix, organization.id);
-        if (isEmpty(updatedOrganization.name)) {
+        validateDomainPrefix(organizationDao, updatedOrganization.getDomainPrefix(), organization.getId());
+        if (isEmpty(updatedOrganization.getName())) {
             throw new BadRequestException("Organization name can not be empty");
         }
         organizationDao.update(
-                updatedOrganization.id,
-                updatedOrganization.name,
-                updatedOrganization.domainPrefix,
-                updatedOrganization.address,
-                updatedOrganization.enabled,
+                updatedOrganization.getId(),
+                updatedOrganization.getName(),
+                updatedOrganization.getDomainPrefix(),
+                updatedOrganization.getAddress(),
+                updatedOrganization.isEnabled(),
                 Instant.now(defaultClock)
         );
-        return getOrganization(organization.id);
+        return getOrganization(organization.getId());
     }
 
     static void validateDomainPrefix(final OrganizationDao organizationDao, final String domainPrefix, final String providedOrganizationId) {
@@ -80,7 +80,7 @@ public class OrganizationController extends BaseController {
             throw new BadRequestException("Selected domain prefix is not allowed");
         }
         final Optional<Organization> existingByDomainPrefix = organizationDao.getByDomainPrefix(domainPrefix);
-        if (existingByDomainPrefix.isPresent() && !existingByDomainPrefix.get().id.equals(providedOrganizationId)) {
+        if (existingByDomainPrefix.isPresent() && !existingByDomainPrefix.get().getId().equals(providedOrganizationId)) {
             throw new BadRequestException("Domain prefix is already taken by another organization");
         }
     }

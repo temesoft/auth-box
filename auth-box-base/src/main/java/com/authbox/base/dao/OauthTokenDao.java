@@ -9,7 +9,7 @@ import java.util.Optional;
 
 public interface OauthTokenDao {
 
-    int insert(OauthToken oauthToken);
+    void insert(OauthToken oauthToken);
 
     Optional<OauthToken> getById(String id);
 
@@ -21,8 +21,8 @@ public interface OauthTokenDao {
 
     Optional<OauthToken> getByHash(String hash);
 
-    int deleteById(String id, String hash);
+    void deleteById(String id, String hash);
 
-    int updateLinkedTokenId(String id, String linkedTokenId);
+    void updateLinkedTokenId(String id, String linkedTokenId);
 
 }

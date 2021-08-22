@@ -49,7 +49,7 @@ public class Oauth2UsersController extends BaseController {
     public Page<OauthUser> getOauth2Users(@RequestParam(value = "pageSize", defaultValue = "10") final int pageSize,
                                           @RequestParam(value = "currentPage", defaultValue = "0") final int currentPage) {
         final Organization organization = getOrganization();
-        return oauthUserDao.listByOrganizationId(organization.id, PageRequest.of(currentPage, pageSize));
+        return oauthUserDao.listByOrganizationId(organization.getId(), PageRequest.of(currentPage, pageSize));
     }
 
     @GetMapping("/{id}")
@@ -61,7 +61,7 @@ public class Oauth2UsersController extends BaseController {
             throw new EntityNotFoundException("User not found by id: " + id);
         }
 
-        if (!organization.id.equals(oauthUser.get().organizationId)) {
+        if (!organization.getId().equals(oauthUser.get().getOrganizationId())) {
             throw new AccessDeniedException();
         }
 
@@ -77,7 +77,7 @@ public class Oauth2UsersController extends BaseController {
             throw new EntityNotFoundException("User not found by id: " + userId);
         }
 
-        if (!organization.id.equals(oauthUser.get().organizationId)) {
+        if (!organization.getId().equals(oauthUser.get().getOrganizationId())) {
             throw new AccessDeniedException();
         }
 
@@ -88,13 +88,13 @@ public class Oauth2UsersController extends BaseController {
 
         oauthUserDao.update(
                 userId,
-                oauthUser.get().username,
+                oauthUser.get().getUsername(),
                 isEmpty(passwordChangeRequest.newPassword) // if empty set to random
                         ? passwordEncoder.encode(UUID.randomUUID().toString())
                         : passwordEncoder.encode(passwordChangeRequest.newPassword),
-                oauthUser.get().enabled,
-                oauthUser.get().metadata,
-                oauthUser.get().using2Fa,
+                oauthUser.get().isEnabled(),
+                oauthUser.get().getMetadata(),
+                oauthUser.get().isUsing2Fa(),
                 Instant.now(defaultClock)
         );
 
@@ -111,16 +111,16 @@ public class Oauth2UsersController extends BaseController {
             throw new EntityNotFoundException("User not found by id: " + userId);
         }
 
-        if (!organization.id.equals(oauthUser.get().organizationId)) {
+        if (!organization.getId().equals(oauthUser.get().getOrganizationId())) {
             throw new AccessDeniedException();
         }
 
         final String qrCodeUrl = "https://chart.googleapis.com/chart?chs=200x200&chld=M%%7C0&cht=qr&chl=otpauth://totp/"
-                + organization.name
+                + organization.getName()
                 + " ("
-                + oauthUser.get().username
+                + oauthUser.get().getUsername()
                 + ")?secret="
-                + oauthUser.get().secret
+                + oauthUser.get().getSecret()
                 + "&issuer=auth-box";
 
         return restTemplate.getForObject(qrCodeUrl, byte[].class);
@@ -136,44 +136,44 @@ public class Oauth2UsersController extends BaseController {
             throw new EntityNotFoundException("User not found by id: " + userId);
         }
 
-        if (!organization.id.equals(oauthUser.get().organizationId) || !oauthUser.get().id.equals(updatedOauthUser.id)) {
+        if (!organization.getId().equals(oauthUser.get().getOrganizationId()) || !oauthUser.get().getId().equals(updatedOauthUser.getId())) {
             throw new AccessDeniedException();
         }
 
         // check if username changed
-        if (!oauthUser.get().username.equals(updatedOauthUser.username.trim())) {
+        if (!oauthUser.get().getUsername().equals(updatedOauthUser.getUsername().trim())) {
             // check if username already there
-            if (oauthUserDao.getByUsernameAndOrganizationId(updatedOauthUser.username.trim(), organization.id).isPresent()) {
-                throw new BadRequestException("Username already exists: " + updatedOauthUser.username.trim());
+            if (oauthUserDao.getByUsernameAndOrganizationId(updatedOauthUser.getUsername().trim(), organization.getId()).isPresent()) {
+                throw new BadRequestException("Username already exists: " + updatedOauthUser.getUsername().trim());
             }
         }
 
         final Instant now = Instant.now(defaultClock);
 
-        if (updatedOauthUser.enabled != oauthUser.get().enabled) {
+        if (updatedOauthUser.isEnabled() != oauthUser.get().isEnabled()) {
             oauthUserDao.update(
-                    oauthUser.get().id,
-                    oauthUser.get().username,
-                    oauthUser.get().password,
-                    updatedOauthUser.enabled,
-                    oauthUser.get().metadata,
-                    oauthUser.get().using2Fa,
+                    oauthUser.get().getId(),
+                    oauthUser.get().getUsername(),
+                    oauthUser.get().getPassword(),
+                    updatedOauthUser.isEnabled(),
+                    oauthUser.get().getMetadata(),
+                    oauthUser.get().isUsing2Fa(),
                     now
             );
         } else {
             oauthUserDao.update(
-                    oauthUser.get().id,
-                    updatedOauthUser.username,
-                    oauthUser.get().password,
-                    updatedOauthUser.enabled,
-                    updatedOauthUser.metadata,
-                    updatedOauthUser.using2Fa,
+                    oauthUser.get().getId(),
+                    updatedOauthUser.getUsername(),
+                    oauthUser.get().getPassword(),
+                    updatedOauthUser.isEnabled(),
+                    updatedOauthUser.getMetadata(),
+                    updatedOauthUser.isUsing2Fa(),
                     now
             );
         }
 
-        return oauthUserDao.getById(oauthUser.get().id).orElseThrow((Supplier<EntityNotFoundException>) () -> {
-            throw new EntityNotFoundException("User not found by id: " + oauthUser.get().id);
+        return oauthUserDao.getById(oauthUser.get().getId()).orElseThrow((Supplier<EntityNotFoundException>) () -> {
+            throw new EntityNotFoundException("User not found by id: " + oauthUser.get().getId());
         });
     }
 
@@ -181,19 +181,19 @@ public class Oauth2UsersController extends BaseController {
     public OauthUser createOauth2User(@RequestBody final OauthUser newOauthUser) {
         final Organization organization = getOrganization();
 
-        if (isEmpty(newOauthUser.username)) {
+        if (isEmpty(newOauthUser.getUsername())) {
             throw new BadRequestException("Username can not be empty");
         }
         final String password;
-        if (isEmpty(newOauthUser.password)) {
+        if (isEmpty(newOauthUser.getPassword())) {
             password = passwordEncoder.encode(UUID.randomUUID().toString());
         } else {
-            password = passwordEncoder.encode(newOauthUser.password.trim());
+            password = passwordEncoder.encode(newOauthUser.getPassword().trim());
         }
 
         // check if username already there
-        if (oauthUserDao.getByUsernameAndOrganizationId(newOauthUser.username.trim(), organization.id).isPresent()) {
-            throw new BadRequestException("Username already exists: " + newOauthUser.username.trim());
+        if (oauthUserDao.getByUsernameAndOrganizationId(newOauthUser.getUsername().trim(), organization.getId()).isPresent()) {
+            throw new BadRequestException("Username already exists: " + newOauthUser.getUsername().trim());
         }
 
         final String id = UUID.randomUUID().toString();
@@ -202,12 +202,12 @@ public class Oauth2UsersController extends BaseController {
         final OauthUser result = new OauthUser(
                 id,
                 now,
-                newOauthUser.username.trim(),
+                newOauthUser.getUsername().trim(),
                 password,
                 true,
-                organization.id,
-                isEmpty(newOauthUser.metadata) ? "" : newOauthUser.metadata.trim(),
-                newOauthUser.using2Fa,
+                organization.getId(),
+                isEmpty(newOauthUser.getMetadata()) ? "" : newOauthUser.getMetadata().trim(),
+                newOauthUser.isUsing2Fa(),
                 HashUtils.makeRandomBase32(),
                 now
         );
@@ -231,10 +231,10 @@ public class Oauth2UsersController extends BaseController {
                 throw new EntityNotFoundException("User not found by id: " + userId);
             }
 
-            if (!organization.id.equals(oauthUser.get().organizationId)) {
+            if (!organization.getId().equals(oauthUser.get().getOrganizationId())) {
                 throw new AccessDeniedException();
             }
-            oauthUserDao.deleteById(oauthUser.get().id);
+            oauthUserDao.deleteById(oauthUser.get().getId());
         });
     }
 }

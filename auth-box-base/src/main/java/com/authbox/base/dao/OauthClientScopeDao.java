@@ -7,18 +7,18 @@ import java.util.Optional;
 
 public interface OauthClientScopeDao {
 
-    int insert(OauthClientScope oauthClientScope);
+    void insert(OauthClientScope oauthClientScope);
 
     Optional<OauthClientScope> getById(String id);
 
     List<OauthClientScope> listByClientId(String clientId);
 
-    int countByScopeIds(List<String> scopeIds);
+    long countByScopeIds(List<String> scopeIds);
 
-    int deleteById(String id);
+    void deleteById(String id);
 
-    int deleteByClientIdAndScopeId(String clientId, String scopeId);
+    void deleteByClientIdAndScopeId(String clientId, String scopeId);
 
-    int deleteByScopeId(String scopeId);
+    void deleteByScopeId(String scopeId);
 
 }

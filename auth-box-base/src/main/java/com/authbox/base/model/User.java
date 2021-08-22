@@ -1,15 +1,24 @@
 package com.authbox.base.model;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
+import com.authbox.base.util.ListOfStringsConverter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Function;
-import com.google.common.base.MoreObjects;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import javax.persistence.Column;
+import javax.persistence.Convert;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
 import java.io.Serializable;
 import java.time.Instant;
 import java.util.Collection;
@@ -19,56 +28,33 @@ import java.util.stream.Collectors;
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
 @JsonInclude(NON_NULL)
+@Entity
+@Table(name = "user")
+@AllArgsConstructor
+@NoArgsConstructor
+@Setter
+@Getter
+@ToString
 public class User implements UserDetails, Serializable {
 
     private static final long serialVersionUID = 12159753648257L;
 
-    public final String id;
-    public final Instant createTime;
-    public final String username;
+    @Id
+    private String id;
+    @Convert(converter = Jsr310JpaConverters.InstantConverter.class)
+    private Instant createTime;
+    private String username;
     @JsonIgnore
-    public final String password;
-    public final String name;
-    public final List<String> roles;
-    public final boolean enabled;
-    public final String organizationId;
-    public final Instant lastUpdated;
-
-    @JsonCreator
-    public User(@JsonProperty("id") final String id,
-                @JsonProperty("createTime") final Instant createTime,
-                @JsonProperty("username") final String username,
-                @JsonProperty("password") final String password,
-                @JsonProperty("name") final String name,
-                @JsonProperty("roles") final List<String> roles,
-                @JsonProperty("enabled") final boolean enabled,
-                @JsonProperty("organizationId") final String organizationId,
-                @JsonProperty("lastUpdated") final Instant lastUpdated) {
-        this.id = id;
-        this.createTime = createTime;
-        this.username = username;
-        this.password = password;
-        this.name = name;
-        this.roles = roles;
-        this.enabled = enabled;
-        this.organizationId = organizationId;
-        this.lastUpdated = lastUpdated;
-    }
-
-    @Override
-    public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .add("id", id)
-                .add("createTime", createTime)
-                .add("username", username)
-                .add("password", password)
-                .add("name", name)
-                .add("roles", roles)
-                .add("enabled", enabled)
-                .add("organizationId", organizationId)
-                .add("lastUpdated", lastUpdated)
-                .toString();
-    }
+    @ToString.Exclude
+    private String password;
+    private String name;
+    @Convert(converter = ListOfStringsConverter.class)
+    @Column(name = "roles_csv")
+    private List<String> roles;
+    private boolean enabled;
+    private String organizationId;
+    @Convert(converter = Jsr310JpaConverters.InstantConverter.class)
+    private Instant lastUpdated;
 
     @Override
     @JsonIgnore

@@ -10,7 +10,7 @@ import java.util.Optional;
 
 public interface OauthUserDao {
 
-    int insert(OauthUser oauthUser);
+    void insert(OauthUser oauthUser);
 
     Optional<OauthUser> getById(String id);
 
@@ -18,8 +18,8 @@ public interface OauthUserDao {
 
     Page<OauthUser> listByOrganizationId(String organizationId, Pageable pageable);
 
-    int deleteById(String id);
+    void deleteById(String id);
 
-    int update(String id, String username, String password, boolean enabled, String metadata, boolean using2Fa, Instant lastUpdated);
+    void update(String id, String username, String password, boolean enabled, String metadata, boolean using2Fa, Instant lastUpdated);
 
 }

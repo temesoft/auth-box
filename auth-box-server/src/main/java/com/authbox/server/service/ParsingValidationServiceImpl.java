@@ -2,6 +2,7 @@ package com.authbox.server.service;
 
 import com.authbox.base.dao.OauthClientDao;
 import com.authbox.base.exception.BadRequestException;
+import com.authbox.base.model.AccessLog;
 import com.authbox.base.model.OauthClient;
 import com.authbox.base.model.Organization;
 import com.authbox.base.service.AccessLogService;
@@ -21,7 +22,6 @@ import static com.authbox.base.config.Constants.HEADER_AUTHORIZATION_PREFIX_BASI
 import static com.authbox.base.config.Constants.MSG_INVALID_REQUEST;
 import static com.authbox.base.config.Constants.OAUTH2_ATTR_CLIENT_ID;
 import static com.authbox.base.config.Constants.OAUTH2_ATTR_CLIENT_SECRET;
-import static com.authbox.base.model.AccessLog.AccessLogBuilder.accessLogBuilder;
 import static com.authbox.server.config.RequestWrapperFilterConfiguration.REQUEST_ID_MDC_KEY;
 import static com.authbox.server.util.RequestUtils.getRequestId;
 import static com.authbox.server.util.RequestUtils.getTimeSinceRequest;
@@ -49,10 +49,10 @@ public class ParsingValidationServiceImpl implements ParsingValidationService {
         if (requestClientDetails.isEmpty()) {
             LOGGER.debug("Request missing client credentials");
             accessLogService.create(
-                    accessLogBuilder()
+                    AccessLog.builder()
                             .withRequestId(getRequestId())
                             .withDuration(getTimeSinceRequest())
-                            .withOrganizationId(organization.id)
+                            .withOrganizationId(organization.getId())
                             .withError(MSG_INVALID_REQUEST),
                     "Request missing client credentials"
             );
@@ -62,50 +62,50 @@ public class ParsingValidationServiceImpl implements ParsingValidationService {
         if (oauthClient.isEmpty()) {
             LOGGER.debug("OauthClient not found by id='{}'", requestClientDetails.get().getFirst());
             accessLogService.create(
-                    accessLogBuilder()
+                    AccessLog.builder()
                             .withRequestId(getRequestId())
                             .withDuration(getTimeSinceRequest())
-                            .withOrganizationId(organization.id)
+                            .withOrganizationId(organization.getId())
                             .withError(MSG_INVALID_REQUEST),
                     "Oauth2 client not found by id='%s'",
                     requestClientDetails.get().getFirst()
             );
             throw new BadRequestException(MSG_INVALID_REQUEST);
         }
-        if (!oauthClient.get().enabled) {
+        if (!oauthClient.get().isEnabled()) {
             LOGGER.debug("OauthClient is disabled");
             accessLogService.create(
-                    accessLogBuilder()
+                    AccessLog.builder()
                             .withRequestId(MDC.get(REQUEST_ID_MDC_KEY))
-                            .withOrganizationId(organization.id)
-                            .withClientId(oauthClient.get().id)
+                            .withOrganizationId(organization.getId())
+                            .withClientId(oauthClient.get().getId())
                             .withError(MSG_INVALID_REQUEST),
                     "Oauth2 client is disabled"
             );
             throw new BadRequestException(MSG_INVALID_REQUEST);
         }
-        if (!oauthClient.get().organizationId.equals(organization.id)) {
-            LOGGER.debug("Oauth2 client organization details do not match domain prefix specified in request: '{}'", organization.domainPrefix);
+        if (!oauthClient.get().getOrganizationId().equals(organization.getId())) {
+            LOGGER.debug("Oauth2 client organization details do not match domain prefix specified in request: '{}'", organization.getDomainPrefix());
             accessLogService.create(
-                    accessLogBuilder()
+                    AccessLog.builder()
                             .withRequestId(getRequestId())
                             .withDuration(getTimeSinceRequest())
-                            .withClientId(oauthClient.get().id)
+                            .withClientId(oauthClient.get().getId())
                             .withError(MSG_INVALID_REQUEST),
                     "Oauth2 client organization details do not match domain prefix specified in request: '%s'",
-                    organization.domainPrefix
+                    organization.getDomainPrefix()
             );
             throw new BadRequestException(MSG_INVALID_REQUEST);
         }
-        if (!oauthClient.get().secret.equals(requestClientDetails.get().getSecond())) {
+        if (!oauthClient.get().getSecret().equals(requestClientDetails.get().getSecond())) {
             LOGGER.debug("OauthClient secret does not match");
             accessLogService.create(
-                    accessLogBuilder()
+                    AccessLog.builder()
                             .withRequestId(getRequestId())
                             .withDuration(getTimeSinceRequest())
-                            .withOrganizationId(organization.id)
+                            .withOrganizationId(organization.getId())
                             .withError(MSG_INVALID_REQUEST)
-                            .withClientId(oauthClient.get().id),
+                            .withClientId(oauthClient.get().getId()),
                     "Oauth2 client secret does not match provided value"
             );
             throw new BadRequestException(MSG_INVALID_REQUEST);

@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.transaction.Transactional;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.security.KeyFactory;
@@ -44,7 +45,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import static com.authbox.base.model.GrantType.authorization_code;
 import static com.authbox.base.model.GrantType.refresh_token;
@@ -72,7 +72,7 @@ public class Oauth2ClientsController extends BaseController {
     public Page<OauthClient> getOauth2Clients(@RequestParam(value = "pageSize", defaultValue = "10") final int pageSize,
                                               @RequestParam(value = "currentPage", defaultValue = "0") final int currentPage) {
         final Organization organization = getOrganization();
-        return oauthClientDao.listByOrganizationId(organization.id, PageRequest.of(currentPage, pageSize));
+        return oauthClientDao.listByOrganizationId(organization.getId(), PageRequest.of(currentPage, pageSize));
     }
 
     @GetMapping("/{id}")
@@ -85,19 +85,16 @@ public class Oauth2ClientsController extends BaseController {
             throw new EntityNotFoundException("Client not found by id: " + id);
         }
 
-        if (!organization.id.equals(oauthClient.get().organizationId)) {
+        if (!organization.getId().equals(oauthClient.get().getOrganizationId())) {
             throw new AccessDeniedException();
         }
 
-        final List<OauthScope> scopes = oauthScopeDao.listByClientId(id);
-
-        return oauthClient.get()
-                .withScopes(scopes)
-                .withScopeIds(scopes.stream().map(s -> s.id).collect(toUnmodifiableList()));
+        return oauthClient.get();
     }
 
     @PostMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
+    @Transactional
     public OauthClient updateOauth2ClientById(@PathVariable("id") final String clientId,
                                               @RequestBody final OauthClient updatedOauthClient) throws NoSuchAlgorithmException, InvalidKeySpecException, IOException {
         final Organization organization = getOrganization();
@@ -107,22 +104,22 @@ public class Oauth2ClientsController extends BaseController {
             throw new EntityNotFoundException("Client not found by id: " + clientId);
         }
 
-        if (!organization.id.equals(oauthClient.get().organizationId)) {
+        if (!organization.getId().equals(oauthClient.get().getOrganizationId())) {
             throw new AccessDeniedException();
         }
 
         final Instant now = Instant.now(defaultClock);
-        if (isNotBlank(updatedOauthClient.privateKey)
-                && !updatedOauthClient.privateKey.equals(oauthClient.get().privateKey)) {
+        if (isNotBlank(updatedOauthClient.getPrivateKey())
+                && !updatedOauthClient.getPrivateKey().equals(oauthClient.get().getPrivateKey())) {
             final PrivateKey privateKey;
             try {
-                privateKey = generatePrivateKey(updatedOauthClient.privateKey);
+                privateKey = generatePrivateKey(updatedOauthClient.getPrivateKey());
             } catch (IllegalArgumentException e) {
                 throw new BadRequestException(e.getMessage());
             }
 
-            final RSAPrivateCrtKey privk = (RSAPrivateCrtKey) privateKey;
-            final RSAPublicKeySpec publicKeySpec = new java.security.spec.RSAPublicKeySpec(privk.getModulus(), privk.getPublicExponent());
+            final RSAPrivateCrtKey privateCrtKey = (RSAPrivateCrtKey) privateKey;
+            final RSAPublicKeySpec publicKeySpec = new java.security.spec.RSAPublicKeySpec(privateCrtKey.getModulus(), privateCrtKey.getPublicExponent());
             final KeyFactory keyFactory = KeyFactory.getInstance("RSA");
             final PublicKey publicKey = keyFactory.generatePublic(publicKeySpec);
             final StringWriter writer = new StringWriter();
@@ -132,46 +129,58 @@ public class Oauth2ClientsController extends BaseController {
             pemWriter.close();
             final String publicKeyPem = writer.toString();
 
-            oauthClientDao.updateById(
-                    clientId,
-                    updatedOauthClient.description,
-                    updatedOauthClient.grantTypes.stream().map(Enum::name).collect(Collectors.joining(Constants.COMMA)),
-                    updatedOauthClient.enabled,
-                    String.join(Constants.COMMA, updatedOauthClient.redirectUrls),
-                    updatedOauthClient.expiration,
-                    updatedOauthClient.refreshExpiration,
-                    updatedOauthClient.tokenFormat,
-                    updatedOauthClient.privateKey,
-                    publicKeyPem,
-                    now
+            oauthClientDao.update(
+                    new OauthClient(
+                            clientId,
+                            oauthClient.get().getCreateTime(),
+                            updatedOauthClient.getDescription(),
+                            oauthClient.get().getSecret(),
+                            updatedOauthClient.getGrantTypes(),
+                            oauthClient.get().getOrganizationId(),
+                            updatedOauthClient.isEnabled(),
+                            updatedOauthClient.getRedirectUrls(),
+                            updatedOauthClient.getExpiration(),
+                            updatedOauthClient.getRefreshExpiration(),
+                            updatedOauthClient.getTokenFormat(),
+                            updatedOauthClient.getPrivateKey(),
+                            publicKeyPem,
+                            now,
+                            oauthClient.get().getScopes(),
+                            null
+                    )
             );
         } else {
-            oauthClientDao.updateById(
-                    clientId,
-                    updatedOauthClient.description,
-                    updatedOauthClient.grantTypes.stream().map(Enum::name).collect(Collectors.joining(Constants.COMMA)),
-                    updatedOauthClient.enabled,
-                    String.join(Constants.COMMA, updatedOauthClient.redirectUrls),
-                    updatedOauthClient.expiration,
-                    updatedOauthClient.refreshExpiration,
-                    updatedOauthClient.tokenFormat,
-                    oauthClient.get().privateKey,
-                    oauthClient.get().publicKey,
-                    now
+
+            oauthClientDao.update(
+                    new OauthClient(
+                            clientId,
+                            oauthClient.get().getCreateTime(),
+                            updatedOauthClient.getDescription(),
+                            oauthClient.get().getSecret(),
+                            updatedOauthClient.getGrantTypes(),
+                            oauthClient.get().getOrganizationId(),
+                            updatedOauthClient.isEnabled(),
+                            updatedOauthClient.getRedirectUrls(),
+                            updatedOauthClient.getExpiration(),
+                            updatedOauthClient.getRefreshExpiration(),
+                            updatedOauthClient.getTokenFormat(),
+                            oauthClient.get().getPrivateKey(),
+                            oauthClient.get().getPublicKey(),
+                            now,
+                            oauthClient.get().getScopes(),
+                            null
+                    )
             );
         }
 
-        final List<OauthScope> originalOauthScopeList = oauthScopeDao.listByClientId(clientId);
-        final List<String> originalOauthScopeIdList = originalOauthScopeList
+        final List<String> originalOauthScopeIdList = oauthClient.get().getScopes()
                 .stream()
-                .map(oauthScope -> oauthScope.id)
+                .map(OauthScope::getId)
                 .collect(toUnmodifiableList());
 
         if (updatedOauthClient.getScopeIds() != null) {
             // See if there are new scopes that needs to be created
             updatedOauthClient.getScopeIds()
-                    .stream()
-                    .parallel()
                     .forEach(scopeId -> {
                         if (!originalOauthScopeIdList.contains(scopeId)) {
                             oauthClientScopeDao.insert(new OauthClientScope(
@@ -184,18 +193,16 @@ public class Oauth2ClientsController extends BaseController {
                     });
 
             // See if there are old scopes which need to be removed
-            originalOauthScopeList
-                    .stream()
-                    .parallel()
+            oauthClient.get().getScopes()
                     .forEach(originalScope -> {
-                        if (!updatedOauthClient.getScopeIds().contains(originalScope.id)) {
-                            oauthClientScopeDao.deleteByClientIdAndScopeId(clientId, originalScope.id);
+                        if (!updatedOauthClient.getScopeIds().contains(originalScope.getId())) {
+                            oauthClientScopeDao.deleteByClientIdAndScopeId(clientId, originalScope.getId());
                         }
                     });
         }
 
-        return oauthClientDao.getById(updatedOauthClient.id).orElseThrow((Supplier<EntityNotFoundException>) () -> {
-            throw new EntityNotFoundException("Client not found by id: " + updatedOauthClient.id);
+        return oauthClientDao.getById(updatedOauthClient.getId()).orElseThrow((Supplier<EntityNotFoundException>) () -> {
+            throw new EntityNotFoundException("Client not found by id: " + updatedOauthClient.getId());
         });
     }
 
@@ -204,25 +211,25 @@ public class Oauth2ClientsController extends BaseController {
     public OauthClient createOauth2Client(@RequestBody final OauthClient updatedOauthClient) {
         final Organization organization = getOrganization();
 
-        if (isEmpty(updatedOauthClient.description)) {
+        if (isEmpty(updatedOauthClient.getDescription())) {
             throw new BadRequestException("Client description can not be empty");
         }
 
-        if (isEmpty(updatedOauthClient.grantTypes)) {
+        if (isEmpty(updatedOauthClient.getGrantTypes())) {
             throw new BadRequestException("Grant types list can not be empty");
         }
 
-        if (updatedOauthClient.grantTypes.contains(authorization_code)
-                && isEmpty(updatedOauthClient.redirectUrls)) {
+        if (updatedOauthClient.getGrantTypes().contains(authorization_code)
+                && isEmpty(updatedOauthClient.getRedirectUrls())) {
             throw new BadRequestException("Redirect url list can not be empty when '" + authorization_code.name() + "' is selected");
         }
 
-        if (isEmpty(updatedOauthClient.expiration)) {
+        if (isEmpty(updatedOauthClient.getExpiration())) {
             throw new BadRequestException("Token expiration can not be empty");
         }
 
-        if (updatedOauthClient.grantTypes.contains(refresh_token)
-                && isEmpty(updatedOauthClient.refreshExpiration == null)) {
+        if (updatedOauthClient.getGrantTypes().contains(refresh_token)
+                && isEmpty(updatedOauthClient.getRefreshExpiration() == null)) {
             throw new BadRequestException("Refresh token expiration can not be empty");
         }
 
@@ -232,18 +239,20 @@ public class Oauth2ClientsController extends BaseController {
         final OauthClient result = new OauthClient(
                 UUID.randomUUID().toString(),
                 now,
-                updatedOauthClient.description,
+                updatedOauthClient.getDescription(),
                 sha256(UUID.randomUUID().toString()),
-                updatedOauthClient.grantTypes,
-                organization.id,
+                updatedOauthClient.getGrantTypes(),
+                organization.getId(),
                 true,
-                updatedOauthClient.redirectUrls,
-                updatedOauthClient.expiration,
-                updatedOauthClient.refreshExpiration,
+                updatedOauthClient.getRedirectUrls(),
+                updatedOauthClient.getExpiration(),
+                updatedOauthClient.getRefreshExpiration(),
                 TokenFormat.STANDARD,
                 rsaKeyPair.privateKeyPem,
                 rsaKeyPair.publicKeyPem,
-                now
+                now,
+                null,
+                null
         );
 
         oauthClientDao.insert(result);
@@ -255,7 +264,7 @@ public class Oauth2ClientsController extends BaseController {
                     .forEach(scopeId -> oauthClientScopeDao.insert(new OauthClientScope(
                             UUID.randomUUID().toString(),
                             now,
-                            result.id,
+                            result.getId(),
                             scopeId
                     )));
         }
@@ -278,12 +287,12 @@ public class Oauth2ClientsController extends BaseController {
                 throw new EntityNotFoundException("Client not found by id: " + clientId);
             }
 
-            if (!organization.id.equals(oauthClient.get().organizationId)) {
+            if (!organization.getId().equals(oauthClient.get().getOrganizationId())) {
                 throw new AccessDeniedException();
             }
-            oauthClientDao.deleteById(oauthClient.get().id);
-            final List<OauthClientScope> oauthClientScopes = oauthClientScopeDao.listByClientId(oauthClient.get().id);
-            oauthClientScopes.stream().parallel().forEach(oauthClientScope -> oauthClientScopeDao.deleteById(oauthClientScope.id));
+            oauthClientDao.deleteById(oauthClient.get().getId());
+            final List<OauthClientScope> oauthClientScopes = oauthClientScopeDao.listByClientId(oauthClient.get().getId());
+            oauthClientScopes.stream().parallel().forEach(oauthClientScope -> oauthClientScopeDao.deleteById(oauthClientScope.getId()));
         });
     }
 
@@ -296,23 +305,31 @@ public class Oauth2ClientsController extends BaseController {
             throw new EntityNotFoundException("Client not found by id: " + clientId);
         }
 
-        if (!organization.id.equals(oauthClient.get().organizationId)) {
+        if (!organization.getId().equals(oauthClient.get().getOrganizationId())) {
             throw new AccessDeniedException();
         }
 
         final RsaKeyPair rsaKeyPair = CertificateKeysUtils.generateRsaKeyPair();
-        oauthClientDao.updateById(
-                clientId,
-                oauthClient.get().description,
-                oauthClient.get().grantTypes.stream().map(Enum::name).collect(Collectors.joining(Constants.COMMA)),
-                oauthClient.get().enabled,
-                String.join(Constants.COMMA, oauthClient.get().redirectUrls),
-                oauthClient.get().expiration,
-                oauthClient.get().refreshExpiration,
-                oauthClient.get().tokenFormat,
-                rsaKeyPair.privateKeyPem,
-                rsaKeyPair.publicKeyPem,
-                Instant.now(defaultClock)
+
+        oauthClientDao.update(
+                new OauthClient(
+                        clientId,
+                        oauthClient.get().getCreateTime(),
+                        oauthClient.get().getDescription(),
+                        oauthClient.get().getSecret(),
+                        oauthClient.get().getGrantTypes(),
+                        oauthClient.get().getOrganizationId(),
+                        oauthClient.get().isEnabled(),
+                        oauthClient.get().getRedirectUrls(),
+                        oauthClient.get().getExpiration(),
+                        oauthClient.get().getRefreshExpiration(),
+                        oauthClient.get().getTokenFormat(),
+                        rsaKeyPair.privateKeyPem,
+                        rsaKeyPair.publicKeyPem,
+                        Instant.now(defaultClock),
+                        oauthClient.get().getScopes(),
+                        null
+                )
         );
 
         return oauthClientDao.getById(clientId).orElseThrow(() -> new EntityNotFoundException("Client not found by id: " + clientId));
@@ -344,22 +361,29 @@ public class Oauth2ClientsController extends BaseController {
             throw new EntityNotFoundException("Client not found by id: " + clientId);
         }
 
-        if (!organization.id.equals(oauthClient.get().organizationId)) {
+        if (!organization.getId().equals(oauthClient.get().getOrganizationId())) {
             throw new AccessDeniedException();
         }
 
-        oauthClientDao.updateById(
-                clientId,
-                oauthClient.get().description,
-                oauthClient.get().grantTypes.stream().map(Enum::name).collect(Collectors.joining(Constants.COMMA)),
-                oauthClient.get().enabled,
-                String.join(Constants.COMMA, oauthClient.get().redirectUrls),
-                oauthClient.get().expiration,
-                oauthClient.get().refreshExpiration,
-                oauthClient.get().tokenFormat,
-                privateKeyString.trim(),
-                publicKeyString.trim(),
-                Instant.now(defaultClock)
+        oauthClientDao.update(
+                new OauthClient(
+                        clientId,
+                        oauthClient.get().getCreateTime(),
+                        oauthClient.get().getDescription(),
+                        oauthClient.get().getSecret(),
+                        oauthClient.get().getGrantTypes(),
+                        oauthClient.get().getOrganizationId(),
+                        oauthClient.get().isEnabled(),
+                        oauthClient.get().getRedirectUrls(),
+                        oauthClient.get().getExpiration(),
+                        oauthClient.get().getRefreshExpiration(),
+                        oauthClient.get().getTokenFormat(),
+                        privateKeyString.trim(),
+                        publicKeyString.trim(),
+                        Instant.now(defaultClock),
+                        oauthClient.get().getScopes(),
+                        null
+                )
         );
 
         return oauthClientDao.getById(clientId).orElseThrow(() -> new EntityNotFoundException("Client not found by id: " + clientId));

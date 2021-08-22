@@ -1,9 +1,10 @@
 package com.authbox.base.model;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
+import com.authbox.base.util.DurationToSecondsConverter;
+import com.authbox.base.util.GrantTypeConverter;
+import com.authbox.base.util.ListOfStringsConverter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -13,125 +14,111 @@ import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.google.common.base.MoreObjects;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+import org.hibernate.EmptyInterceptor;
+import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters;
 
+import javax.persistence.Column;
+import javax.persistence.Convert;
+import javax.persistence.Entity;
+import javax.persistence.Enumerated;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
+import javax.persistence.Table;
+import javax.persistence.Transient;
 import java.io.IOException;
 import java.io.Serializable;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
+import static javax.persistence.EnumType.STRING;
 
 @JsonInclude(NON_NULL)
-public class OauthClient implements Serializable {
+@Entity
+@Table(name = "oauth_client")
+@AllArgsConstructor
+@NoArgsConstructor
+@Setter
+@Getter
+@ToString
+public class OauthClient extends EmptyInterceptor implements Serializable {
 
     private static final long serialVersionUID = 12159753648252L;
 
-    public final String id;
-    public final Instant createTime;
-    public final String description;
-    public final String secret;
-    public final List<GrantType> grantTypes;
-    public final String organizationId;
-    public final boolean enabled;
-    public final List<String> redirectUrls;
-    public final Duration expiration;
-    public final Duration refreshExpiration;
-    public final TokenFormat tokenFormat;
+    @Id
+    private String id;
+
+    @Convert(converter = Jsr310JpaConverters.InstantConverter.class)
+    private Instant createTime;
+
+    private String description;
+
+    private String secret;
+
+    @Convert(converter = GrantTypeConverter.class)
+    @Column(name = "grant_types_csv")
+    private List<GrantType> grantTypes;
+
+    private String organizationId;
+
+    private boolean enabled;
+
+    @Convert(converter = ListOfStringsConverter.class)
+    @Column(name = "redirect_urls_csv")
+    private List<String> redirectUrls;
+
+    @Convert(converter = DurationToSecondsConverter.class)
+    @JsonDeserialize(using = DurationJsonDeserializer.class)
+    @JsonSerialize(using = DurationJsonSerializer.class)
+    @Column(name = "expiration_seconds")
+    private Duration expiration;
+
+    @Convert(converter = DurationToSecondsConverter.class)
+    @JsonDeserialize(using = DurationJsonDeserializer.class)
+    @JsonSerialize(using = DurationJsonSerializer.class)
+    @Column(name = "refresh_expiration_seconds")
+    private Duration refreshExpiration;
+
+    @Enumerated(STRING)
+    private TokenFormat tokenFormat;
+
     @JsonIgnore
-    public final String privateKey;
-    public final String publicKey;
-    public final Instant lastUpdated;
+    @ToString.Exclude
+    private String privateKey;
 
+    @ToString.Exclude
+    private String publicKey;
 
-    // Non-null, set at runtime, used for json DTO
+    @Convert(converter = Jsr310JpaConverters.InstantConverter.class)
+    private Instant lastUpdated;
+
+    @ManyToMany
+    @JoinTable(
+            name = "oauth_client_scope",
+            joinColumns = @JoinColumn(name = "client_id"),
+            inverseJoinColumns = @JoinColumn(name = "scope_id"))
     private List<OauthScope> scopes;
-    // Non-null, set at runtime, used for json DTO
+
+    @Transient
     private List<String> scopeIds;
 
-    @JsonCreator
-    public OauthClient(@JsonProperty("id") final String id,
-                       @JsonProperty("createTime") final Instant createTime,
-                       @JsonProperty("description") final String description,
-                       @JsonProperty("secret") final String secret,
-                       @JsonProperty("grantTypes") final List<GrantType> grantTypes,
-                       @JsonProperty("organizationId") final String organizationId,
-                       @JsonProperty("enabled") final boolean enabled,
-                       @JsonProperty("redirectUrls") final List<String> redirectUrls,
-                       @JsonDeserialize(using = DurationJsonDeserializer.class)
-                       @JsonSerialize(using = DurationJsonSerializer.class)
-                       @JsonProperty("expiration") final Duration expiration,
-                       @JsonDeserialize(using = DurationJsonDeserializer.class)
-                       @JsonSerialize(using = DurationJsonSerializer.class)
-                       @JsonProperty("refreshExpiration") final Duration refreshExpiration,
-                       @JsonProperty("tokenFormat") final TokenFormat tokenFormat,
-                       @JsonProperty("privateKey") final String privateKey,
-                       @JsonProperty("publicKey") final String publicKey,
-                       @JsonProperty("lastUpdated") final Instant lastUpdated) {
-        this.id = id;
-        this.createTime = createTime;
-        this.description = description;
-        this.secret = secret;
-        this.grantTypes = grantTypes;
-        this.organizationId = organizationId;
-        this.enabled = enabled;
-        this.redirectUrls = redirectUrls;
-        this.expiration = expiration;
-        this.refreshExpiration = refreshExpiration;
-        this.tokenFormat = tokenFormat;
-        this.privateKey = privateKey;
-        this.publicKey = publicKey;
-        this.lastUpdated = lastUpdated;
-    }
-
-    @Override
-    public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .add("id", id)
-                .add("createTime", createTime)
-                .add("description", description)
-                .add("grantTypes", grantTypes)
-                .add("organizationId", organizationId)
-                .add("enabled", enabled)
-                .add("scopes", scopes)
-                .add("redirectUrls", redirectUrls)
-                .add("expiration", expiration)
-                .add("refreshExpiration", refreshExpiration)
-                .add("tokenFormat", tokenFormat)
-                .add("lastUpdated", lastUpdated)
-                .add("privateKey", privateKey.length() + " bytes")
-                .add("publicKey", publicKey.length() + " bytes")
-                .toString();
-    }
-
-    public List<OauthScope> getScopes() {
-        return scopes;
-    }
-
-    public void setScopes(final List<OauthScope> scopes) {
-        this.scopes = scopes;
-    }
-
-
     public List<String> getScopeIds() {
-        return scopeIds;
-    }
-
-    public void setScopeIds(final List<String> scopeIds) {
-        this.scopeIds = scopeIds;
-    }
-
-
-    public OauthClient withScopeIds(final List<String> scopeIds) {
-        this.scopeIds = scopeIds;
-        return this;
-    }
-
-
-    public OauthClient withScopes(final List<OauthScope> scopes) {
-        this.scopes = scopes;
-        return this;
+        if (scopeIds != null) {
+            return scopeIds;
+        } else if (scopes != null) {
+            return scopes.stream().map(OauthScope::getId).collect(Collectors.toUnmodifiableList());
+        } else {
+            return null;
+        }
     }
 
     static class DurationJsonSerializer extends JsonSerializer<Duration> {

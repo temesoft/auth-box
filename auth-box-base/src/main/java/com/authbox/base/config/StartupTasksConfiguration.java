@@ -11,8 +11,6 @@ import javax.annotation.PreDestroy;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-import static com.authbox.base.model.AccessLog.AccessLogBuilder.accessLogBuilder;
-
 @Configuration
 public class StartupTasksConfiguration {
 
@@ -26,7 +24,7 @@ public class StartupTasksConfiguration {
     public void postConstructTasks() throws UnknownHostException {
         final Pair<String, String> ipAndHost = ipAndHostname();
         final String message = String.format("%s startup on ip='%s', hostname='%s'", source, ipAndHost.getFirst(), ipAndHost.getSecond());
-        accessLogService.create(accessLogBuilder(), message);
+        accessLogService.create(AccessLog.builder(), message);
         accessLogService.processCachedAccessLogs();
     }
 
@@ -34,7 +32,7 @@ public class StartupTasksConfiguration {
     public void preDestroyTasks() throws UnknownHostException {
         final Pair<String, String> ipAndHost = ipAndHostname();
         final String message = String.format("%s shutdown on ip='%s', hostname='%s'", source, ipAndHost.getFirst(), ipAndHost.getSecond());
-        accessLogService.create(accessLogBuilder(), message);
+        accessLogService.create(AccessLog.builder(), message);
         accessLogService.processCachedAccessLogs();
     }
 

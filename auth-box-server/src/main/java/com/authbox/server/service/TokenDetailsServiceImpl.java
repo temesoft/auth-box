@@ -5,6 +5,7 @@ import com.authbox.base.dao.OauthTokenDao;
 import com.authbox.base.dao.OauthUserDao;
 import com.authbox.base.exception.BadRequestException;
 import com.authbox.base.exception.Oauth2Exception;
+import com.authbox.base.model.AccessLog;
 import com.authbox.base.model.OauthClient;
 import com.authbox.base.model.OauthToken;
 import com.authbox.base.model.OauthUser;
@@ -43,7 +44,6 @@ import static com.authbox.base.config.Constants.OAUTH2_ATTR_USERNAME;
 import static com.authbox.base.config.Constants.OAUTH2_ATTR_USER_ID;
 import static com.authbox.base.config.Constants.PERIOD;
 import static com.authbox.base.config.Constants.SPACE;
-import static com.authbox.base.model.AccessLog.AccessLogBuilder.accessLogBuilder;
 import static com.authbox.base.model.TokenType.ACCESS_TOKEN;
 import static com.authbox.base.util.CertificateKeysUtils.generatePublicKey;
 import static com.authbox.base.util.HashUtils.sha256;
@@ -77,10 +77,10 @@ public class TokenDetailsServiceImpl implements TokenDetailsService {
     @Override
     public Map<String, Object> getAccessTokenDetails(final Organization organization, final String accessToken, @Nullable final OauthClient providedClient) {
         accessLogService.create(
-                accessLogBuilder()
+                AccessLog.builder()
                         .withRequestId(getRequestId())
                         .withDuration(getTimeSinceRequest())
-                        .withOrganizationId(organization.id),
+                        .withOrganizationId(organization.getId()),
                 "Validating Oauth2 access token details"
         );
         final String hash = sha256(accessToken);
@@ -88,105 +88,105 @@ public class TokenDetailsServiceImpl implements TokenDetailsService {
         if (oauthToken.isEmpty()) {
             LOGGER.debug("Unable to find OauthToken by access_token='{}', hash='{}'", accessToken, hash);
             accessLogService.create(
-                    accessLogBuilder()
+                    AccessLog.builder()
                             .withRequestId(getRequestId())
                             .withDuration(getTimeSinceRequest())
-                            .withOrganizationId(organization.id)
+                            .withOrganizationId(organization.getId())
                             .withError(MSG_UNAUTHORIZED_REQUEST),
                     "Unable to find Oauth2 token by hash='%s'", hash
             );
             throw new Oauth2Exception(MSG_UNAUTHORIZED_REQUEST);
         }
-        if (oauthToken.get().tokenType != ACCESS_TOKEN) {
+        if (oauthToken.get().getTokenType() != ACCESS_TOKEN) {
             LOGGER.debug("OauthToken is not ACCESS_TOKEN type. access_token='{}', hash='{}'", accessToken, hash);
             accessLogService.create(
-                    accessLogBuilder()
+                    AccessLog.builder()
                             .withRequestId(getRequestId())
                             .withDuration(getTimeSinceRequest())
-                            .withOrganizationId(organization.id)
-                            .withOauthTokenId(oauthToken.get().id)
+                            .withOrganizationId(organization.getId())
+                            .withOauthTokenId(oauthToken.get().getId())
                             .withError(MSG_UNAUTHORIZED_REQUEST),
                     "Oauth2 token is not ACCESS_TOKEN type. hash='%s'", hash
             );
             throw new Oauth2Exception(MSG_UNAUTHORIZED_REQUEST);
         }
-        if (!organization.id.equals(oauthToken.get().organizationId)) {
+        if (!organization.getId().equals(oauthToken.get().getOrganizationId())) {
             LOGGER.debug("OauthToken organization_id='{}' does not match OauthClient specified organization_id='{}'",
-                    oauthToken.get().organizationId, organization.id);
+                    oauthToken.get().getOrganizationId(), organization.getId());
             accessLogService.create(
-                    accessLogBuilder()
+                    AccessLog.builder()
                             .withRequestId(getRequestId())
                             .withDuration(getTimeSinceRequest())
-                            .withOrganizationId(organization.id)
+                            .withOrganizationId(organization.getId())
                             .withError(MSG_UNAUTHORIZED_REQUEST),
                     "Oauth2 token organization id='%s' does not match Oauth2 client specified organization id='%s'",
-                    oauthToken.get().organizationId, organization.id
+                    oauthToken.get().getOrganizationId(), organization.getId()
             );
             throw new Oauth2Exception(MSG_UNAUTHORIZED_REQUEST);
         }
 
         accessLogService.create(
-                accessLogBuilder()
+                AccessLog.builder()
                         .withRequestId(getRequestId())
                         .withDuration(getTimeSinceRequest())
-                        .withOauthTokenId(oauthToken.get().id)
-                        .withOrganizationId(organization.id),
+                        .withOauthTokenId(oauthToken.get().getId())
+                        .withOrganizationId(organization.getId()),
                 "Oauth2 token validated"
         );
 
-        final Optional<OauthClient> oauthClient = oauthClientDao.getById(oauthToken.get().clientId);
+        final Optional<OauthClient> oauthClient = oauthClientDao.getById(oauthToken.get().getClientId());
         if (oauthClient.isEmpty()) {
-            LOGGER.debug("Unable to find OauthClient by client_id='{}'", oauthToken.get().clientId);
+            LOGGER.debug("Unable to find OauthClient by client_id='{}'", oauthToken.get().getClientId());
             accessLogService.create(
-                    accessLogBuilder()
+                    AccessLog.builder()
                             .withRequestId(getRequestId())
                             .withDuration(getTimeSinceRequest())
-                            .withOrganizationId(organization.id)
+                            .withOrganizationId(organization.getId())
                             .withError(MSG_UNAUTHORIZED_REQUEST),
-                    "Unable to find Oauth2 client by client id='%s'", oauthToken.get().clientId
+                    "Unable to find Oauth2 client by client id='%s'", oauthToken.get().getClientId()
             );
             throw new Oauth2Exception(MSG_UNAUTHORIZED_REQUEST);
         }
-        if (!oauthClient.get().enabled) {
-            LOGGER.debug("OauthClient is disabled. client_id='{}'", oauthToken.get().clientId);
+        if (!oauthClient.get().isEnabled()) {
+            LOGGER.debug("OauthClient is disabled. client_id='{}'", oauthToken.get().getClientId());
             accessLogService.create(
-                    accessLogBuilder()
+                    AccessLog.builder()
                             .withRequestId(getRequestId())
                             .withDuration(getTimeSinceRequest())
-                            .withOrganizationId(organization.id)
-                            .withClientId(oauthClient.get().id)
+                            .withOrganizationId(organization.getId())
+                            .withClientId(oauthClient.get().getId())
                             .withError(MSG_UNAUTHORIZED_REQUEST),
-                    "Oauth2 client is disabled. client id='%s'", oauthToken.get().clientId
-            );
-            throw new Oauth2Exception(MSG_UNAUTHORIZED_REQUEST);
-        }
-
-        if (providedClient != null && !providedClient.id.equals(oauthToken.get().clientId)) {
-            LOGGER.debug("OauthClient provided (client_id: {}) does not correspond to OauthClient associated with provided token (client_id: {})", providedClient.id, oauthToken.get().clientId);
-            accessLogService.create(
-                    accessLogBuilder()
-                            .withRequestId(getRequestId())
-                            .withDuration(getTimeSinceRequest())
-                            .withOrganizationId(organization.id)
-                            .withClientId(oauthClient.get().id)
-                            .withError(MSG_UNAUTHORIZED_REQUEST),
-                    "Oauth2 client provided (client id: %s) does not correspond to Oauth2 client associated with provided token (client id: %s)", providedClient.id, oauthToken.get().clientId
+                    "Oauth2 client is disabled. client id='%s'", oauthToken.get().getClientId()
             );
             throw new Oauth2Exception(MSG_UNAUTHORIZED_REQUEST);
         }
 
-        if (!organization.id.equals(oauthClient.get().organizationId)) {
+        if (providedClient != null && !providedClient.getId().equals(oauthToken.get().getClientId())) {
+            LOGGER.debug("OauthClient provided (client_id: {}) does not correspond to OauthClient associated with provided token (client_id: {})", providedClient.getId(), oauthToken.get().getClientId());
+            accessLogService.create(
+                    AccessLog.builder()
+                            .withRequestId(getRequestId())
+                            .withDuration(getTimeSinceRequest())
+                            .withOrganizationId(organization.getId())
+                            .withClientId(oauthClient.get().getId())
+                            .withError(MSG_UNAUTHORIZED_REQUEST),
+                    "Oauth2 client provided (client id: %s) does not correspond to Oauth2 client associated with provided token (client id: %s)", providedClient.getId(), oauthToken.get().getClientId()
+            );
+            throw new Oauth2Exception(MSG_UNAUTHORIZED_REQUEST);
+        }
+
+        if (!organization.getId().equals(oauthClient.get().getOrganizationId())) {
             LOGGER.debug("OauthClient organization_id='{}' does not match OauthClient specified organization_id='{}'",
-                    oauthToken.get().organizationId, organization.id);
+                    oauthToken.get().getOrganizationId(), organization.getId());
             accessLogService.create(
-                    accessLogBuilder()
+                    AccessLog.builder()
                             .withRequestId(getRequestId())
                             .withDuration(getTimeSinceRequest())
-                            .withOrganizationId(organization.id)
-                            .withClientId(oauthClient.get().id)
+                            .withOrganizationId(organization.getId())
+                            .withClientId(oauthClient.get().getId())
                             .withError(MSG_UNAUTHORIZED_REQUEST),
                     "Oauth2 client organization id='%s' does not match Oauth2 client specified organization id='%s'",
-                    oauthToken.get().organizationId, organization.id
+                    oauthToken.get().getOrganizationId(), organization.getId()
             );
             throw new Oauth2Exception(MSG_UNAUTHORIZED_REQUEST);
         }
@@ -201,31 +201,31 @@ public class TokenDetailsServiceImpl implements TokenDetailsService {
     }
 
     private Map<String, Object> getJwtAccessTokenDetails(final OauthClient oauthClient, final OauthToken oauthToken, final String accessToken) {
-        if (isEmpty(oauthClient.publicKey)) {
-            LOGGER.debug("Client with oauth_client_id='{}' does not have public key to validate JWT token.", oauthClient.id);
+        if (isEmpty(oauthClient.getPublicKey())) {
+            LOGGER.debug("Client with oauth_client_id='{}' does not have public key to validate JWT token.", oauthClient.getId());
             accessLogService.create(
-                    accessLogBuilder()
+                    AccessLog.builder()
                             .withRequestId(getRequestId())
                             .withDuration(getTimeSinceRequest())
-                            .withOrganizationId(oauthClient.organizationId)
-                            .withClientId(oauthClient.id)
-                            .withOauthTokenId(oauthToken.id)
+                            .withOrganizationId(oauthClient.getOrganizationId())
+                            .withClientId(oauthClient.getId())
+                            .withOauthTokenId(oauthToken.getId())
                             .withError(MSG_INVALID_REQUEST),
-                    "Client with oauth_client_id='{}' does not have public key to validate JWT token.", oauthClient.id
+                    "Client with oauth_client_id='{}' does not have public key to validate JWT token.", oauthClient.getId()
             );
             throw new BadRequestException(MSG_INVALID_REQUEST);
         }
 
         final PublicKey publicKey;
         try {
-            publicKey = generatePublicKey(oauthClient.publicKey);
+            publicKey = generatePublicKey(oauthClient.getPublicKey());
         } catch (IllegalArgumentException e) {
             accessLogService.create(
-                    accessLogBuilder()
+                    AccessLog.builder()
                             .withRequestId(getRequestId())
                             .withDuration(getTimeSinceRequest())
-                            .withOrganizationId(oauthClient.organizationId)
-                            .withClientId(oauthClient.id)
+                            .withOrganizationId(oauthClient.getOrganizationId())
+                            .withClientId(oauthClient.getId())
                             .withError(MSG_UNAUTHORIZED_REQUEST),
                     e.getMessage()
             );
@@ -242,24 +242,24 @@ public class TokenDetailsServiceImpl implements TokenDetailsService {
         } catch (MalformedJwtException e) {
             LOGGER.debug("Unable to parse JWT token: {}", e.getMessage());
             accessLogService.create(
-                    accessLogBuilder()
+                    AccessLog.builder()
                             .withRequestId(getRequestId())
                             .withDuration(getTimeSinceRequest())
-                            .withOrganizationId(oauthClient.organizationId)
-                            .withClientId(oauthClient.id)
-                            .withOauthTokenId(oauthToken.id)
+                            .withOrganizationId(oauthClient.getOrganizationId())
+                            .withClientId(oauthClient.getId())
+                            .withOauthTokenId(oauthToken.getId())
                             .withError(MSG_UNAUTHORIZED_REQUEST),
                     "Unable to parse JWT token: %s", e.getMessage()
             );
             throw new Oauth2Exception(MSG_UNAUTHORIZED_REQUEST);
         } catch (ExpiredJwtException e) {
             accessLogService.create(
-                    accessLogBuilder()
+                    AccessLog.builder()
                             .withRequestId(getRequestId())
                             .withDuration(getTimeSinceRequest())
-                            .withOrganizationId(oauthClient.organizationId)
-                            .withClientId(oauthClient.id)
-                            .withOauthTokenId(oauthToken.id)
+                            .withOrganizationId(oauthClient.getOrganizationId())
+                            .withClientId(oauthClient.getId())
+                            .withOauthTokenId(oauthToken.getId())
                             .withError(MSG_UNAUTHORIZED_REQUEST),
                     "Oauth2 JWT token is expired"
             );
@@ -267,12 +267,12 @@ public class TokenDetailsServiceImpl implements TokenDetailsService {
         } catch (SignatureException e) {
             LOGGER.debug("Unable to verify JWT signature: {}", e.getMessage());
             accessLogService.create(
-                    accessLogBuilder()
+                    AccessLog.builder()
                             .withRequestId(getRequestId())
                             .withDuration(getTimeSinceRequest())
-                            .withOrganizationId(oauthClient.organizationId)
-                            .withClientId(oauthClient.id)
-                            .withOauthTokenId(oauthToken.id)
+                            .withOrganizationId(oauthClient.getOrganizationId())
+                            .withClientId(oauthClient.getId())
+                            .withOauthTokenId(oauthToken.getId())
                             .withError(MSG_UNAUTHORIZED_REQUEST),
                     "Unable to verify JWT signature: %s", e.getMessage()
             );
@@ -280,12 +280,12 @@ public class TokenDetailsServiceImpl implements TokenDetailsService {
         }
 
         accessLogService.create(
-                accessLogBuilder()
+                AccessLog.builder()
                         .withRequestId(getRequestId())
                         .withDuration(getTimeSinceRequest())
-                        .withOrganizationId(oauthClient.organizationId)
-                        .withClientId(oauthClient.id)
-                        .withOauthTokenId(oauthToken.id),
+                        .withOrganizationId(oauthClient.getOrganizationId())
+                        .withClientId(oauthClient.getId())
+                        .withOauthTokenId(oauthToken.getId()),
                 "Successfully validated JWT token and signature"
         );
 
@@ -299,16 +299,16 @@ public class TokenDetailsServiceImpl implements TokenDetailsService {
         final String organizationId = (String) defaultClaims.get(OAUTH2_ATTR_ORGANIZATION_ID);
         result.put(OAUTH2_ATTR_ORGANIZATION_ID, organizationId);
 
-        if (!oauthToken.organizationId.equals(organizationId)) {
-            LOGGER.debug("OauthToken organization_id='{}' does not match domain prefix specified organization_id='{}'", oauthToken.id, organizationId);
+        if (!oauthToken.getOrganizationId().equals(organizationId)) {
+            LOGGER.debug("OauthToken organization_id='{}' does not match domain prefix specified organization_id='{}'", oauthToken.getId(), organizationId);
             accessLogService.create(
-                    accessLogBuilder()
+                    AccessLog.builder()
                             .withRequestId(getRequestId())
                             .withDuration(getTimeSinceRequest())
-                            .withOrganizationId(oauthClient.organizationId)
-                            .withClientId(oauthClient.id)
+                            .withOrganizationId(oauthClient.getOrganizationId())
+                            .withClientId(oauthClient.getId())
                             .withError(MSG_UNAUTHORIZED_REQUEST),
-                    "Oauth2 token organization id='{}' does not match domain prefix specified organization id='{}'", oauthToken.id, organizationId
+                    "Oauth2 token organization id='{}' does not match domain prefix specified organization id='{}'", oauthToken.getId(), organizationId
             );
             throw new Oauth2Exception(MSG_UNAUTHORIZED_REQUEST);
         }
@@ -317,11 +317,11 @@ public class TokenDetailsServiceImpl implements TokenDetailsService {
             final String userId = defaultClaims.get(OAUTH2_ATTR_USER_ID).toString();
             result.put(OAUTH2_ATTR_USER_ID, userId);
             final OauthUser oauthUser = getUserById(userId, oauthClient);
-            result.put(OAUTH2_ATTR_USERNAME, oauthUser.username);
+            result.put(OAUTH2_ATTR_USERNAME, oauthUser.getUsername());
             try {
-                result.put(OAUTH2_ATTR_METADATA, objectMapper.readValue(oauthUser.metadata, Map.class));
+                result.put(OAUTH2_ATTR_METADATA, objectMapper.readValue(oauthUser.getMetadata(), Map.class));
             } catch (JsonProcessingException e) {
-                result.put(OAUTH2_ATTR_METADATA, oauthUser.metadata);
+                result.put(OAUTH2_ATTR_METADATA, oauthUser.getMetadata());
             }
         }
         return result.build();
@@ -332,26 +332,26 @@ public class TokenDetailsServiceImpl implements TokenDetailsService {
         if (oauthUser.isEmpty()) {
             LOGGER.debug("OauthUser not found by id='{}'", userId);
             accessLogService.create(
-                    accessLogBuilder()
+                    AccessLog.builder()
                             .withRequestId(getRequestId())
                             .withDuration(getTimeSinceRequest())
-                            .withOrganizationId(oauthClient.organizationId)
-                            .withClientId(oauthClient.id)
+                            .withOrganizationId(oauthClient.getOrganizationId())
+                            .withClientId(oauthClient.getId())
                             .withError(MSG_UNAUTHORIZED_REQUEST),
                     "Oauth2 user not found by id='%s'", userId
             );
             throw new Oauth2Exception(MSG_UNAUTHORIZED_REQUEST);
         }
-        if (!oauthUser.get().enabled) {
-            LOGGER.debug("OauthUser user disabled. id='{}'", oauthUser.get().id);
+        if (!oauthUser.get().isEnabled()) {
+            LOGGER.debug("OauthUser user disabled. id='{}'", oauthUser.get().getId());
             accessLogService.create(
-                    accessLogBuilder()
+                    AccessLog.builder()
                             .withRequestId(getRequestId())
                             .withDuration(getTimeSinceRequest())
-                            .withOrganizationId(oauthClient.organizationId)
-                            .withClientId(oauthClient.id)
+                            .withOrganizationId(oauthClient.getOrganizationId())
+                            .withClientId(oauthClient.getId())
                             .withError(MSG_UNAUTHORIZED_REQUEST),
-                    "OauthUser user disabled. id='%s'", oauthUser.get().id
+                    "OauthUser user disabled. id='%s'", oauthUser.get().getId()
             );
             throw new Oauth2Exception(MSG_UNAUTHORIZED_REQUEST);
         }
@@ -361,26 +361,26 @@ public class TokenDetailsServiceImpl implements TokenDetailsService {
     private Map<String, Object> getStandardAccessTokenDetails(final OauthToken oauthToken, final OauthClient oauthClient) {
         final ImmutableMap.Builder<String, Object> result = ImmutableMap.builder();
         final Instant now = Instant.now(defaultClock);
-        if (now.isAfter(oauthToken.expiration)) {
+        if (now.isAfter(oauthToken.getExpiration())) {
             return result.put(OAUTH2_ATTR_ACTIVE, false).build();
         }
         result.put(OAUTH2_ATTR_ACTIVE, true);
-        result.put(OAUTH2_ATTR_EXPIRES_IN, Duration.between(now, oauthToken.expiration).toSeconds());
-        result.put(OAUTH2_ATTR_EXPIRES, oauthToken.expiration.toEpochMilli() / 1000);
-        if (isNotEmpty(oauthToken.scopes)) {
-            result.put(OAUTH2_ATTR_SCOPE, join(SPACE, oauthToken.scopes));
+        result.put(OAUTH2_ATTR_EXPIRES_IN, Duration.between(now, oauthToken.getExpiration()).toSeconds());
+        result.put(OAUTH2_ATTR_EXPIRES, oauthToken.getExpiration().toEpochMilli() / 1000);
+        if (isNotEmpty(oauthToken.getScopes())) {
+            result.put(OAUTH2_ATTR_SCOPE, join(SPACE, oauthToken.getScopes()));
         }
-        result.put(OAUTH2_ATTR_CLIENT_ID, oauthToken.clientId);
-        result.put(OAUTH2_ATTR_ORGANIZATION_ID, oauthToken.organizationId);
+        result.put(OAUTH2_ATTR_CLIENT_ID, oauthToken.getClientId());
+        result.put(OAUTH2_ATTR_ORGANIZATION_ID, oauthToken.getOrganizationId());
 
-        if (oauthToken.oauthUserId != null) {
-            result.put(OAUTH2_ATTR_USER_ID, oauthToken.oauthUserId);
-            final OauthUser oauthUser = getUserById(oauthToken.oauthUserId, oauthClient);
+        if (oauthToken.getOauthUserId() != null) {
+            result.put(OAUTH2_ATTR_USER_ID, oauthToken.getOauthUserId());
+            final OauthUser oauthUser = getUserById(oauthToken.getOauthUserId(), oauthClient);
             try {
-                result.put(OAUTH2_ATTR_USERNAME, oauthUser.username);
-                result.put(OAUTH2_ATTR_METADATA, objectMapper.readValue(oauthUser.metadata, Map.class));
+                result.put(OAUTH2_ATTR_USERNAME, oauthUser.getUsername());
+                result.put(OAUTH2_ATTR_METADATA, objectMapper.readValue(oauthUser.getMetadata(), Map.class));
             } catch (JsonProcessingException e) {
-                result.put(OAUTH2_ATTR_METADATA, oauthUser.metadata);
+                result.put(OAUTH2_ATTR_METADATA, oauthUser.getMetadata());
             }
         }
         return result.build();

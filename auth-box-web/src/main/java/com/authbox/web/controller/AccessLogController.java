@@ -64,7 +64,7 @@ public class AccessLogController extends BaseController {
         final Organization organization = getOrganization();
         return accessLogDao.listBy(
                 ImmutableMap.of(
-                        LIST_CRITERIA_ORGANIZATION_ID, organization.id,
+                        LIST_CRITERIA_ORGANIZATION_ID, organization.getId(),
                         LIST_CRITERIA_REQUEST_ID, requestId
                 ),
                 PageRequest.of(0, 1000)
