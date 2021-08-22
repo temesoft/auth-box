@@ -1,7 +1,7 @@
 package com.authbox.server.service;
 
-import com.authbox.base.dao.OauthScopeDao;
 import com.authbox.base.exception.BadRequestException;
+import com.authbox.base.model.AccessLog;
 import com.authbox.base.model.OauthClient;
 import com.authbox.base.model.OauthScope;
 import com.authbox.base.service.AccessLogService;
@@ -10,13 +10,11 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static com.authbox.base.config.Constants.MSG_INVALID_SCOPE;
 import static com.authbox.base.config.Constants.SPACE;
 import static com.authbox.base.config.Constants.SPACE_SPLITTER;
-import static com.authbox.base.model.AccessLog.AccessLogBuilder.accessLogBuilder;
 import static com.authbox.server.util.RequestUtils.getRequestId;
 import static com.authbox.server.util.RequestUtils.getTimeSinceRequest;
 import static org.springframework.util.ObjectUtils.isEmpty;
@@ -25,11 +23,9 @@ public class ScopeServiceImpl implements ScopeService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ScopeServiceImpl.class);
 
-    private final OauthScopeDao oauthScopeDao;
     private final AccessLogService accessLogService;
 
-    public ScopeServiceImpl(final OauthScopeDao oauthScopeDao, final AccessLogService accessLogService) {
-        this.oauthScopeDao = oauthScopeDao;
+    public ScopeServiceImpl(final AccessLogService accessLogService) {
         this.accessLogService = accessLogService;
     }
 
@@ -41,26 +37,26 @@ public class ScopeServiceImpl implements ScopeService {
     @Override
     public List<OauthScope> getScopeListBasedOnRequestedAndAllowed(final String scopeStr, final OauthClient oauthClient) {
         final Optional<List<String>> requestedScopes = getScopes(scopeStr);
-        final List<OauthScope> oauthClientScopes = oauthScopeDao.listByClientId(oauthClient.id);
-        if (requestedScopes.isPresent() && !validateScopes(requestedScopes.get(), oauthClientScopes)) {
-            LOGGER.debug("Requested scope='{}' is not found in OauthClient scopes=[{}]", String.join(SPACE, requestedScopes.get()), oauthScopeListToSpaceDelimitedString(oauthClientScopes));
+        if (requestedScopes.isPresent() && !validateScopes(requestedScopes.get(), oauthClient.getScopes())) {
+            LOGGER.debug("Requested scope='{}' is not found in OauthClient scopes=[{}]",
+                    String.join(SPACE, requestedScopes.get()), oauthScopeListToSpaceDelimitedString(oauthClient.getScopes()));
             accessLogService.create(
-                    accessLogBuilder()
+                    AccessLog.builder()
                             .withRequestId(getRequestId())
                             .withDuration(getTimeSinceRequest())
-                            .withOrganizationId(oauthClient.organizationId)
-                            .withClientId(oauthClient.id)
+                            .withOrganizationId(oauthClient.getOrganizationId())
+                            .withClientId(oauthClient.getId())
                             .withError(MSG_INVALID_SCOPE),
                     "Requested scope='%s' is not found in Oauth2 client scopes=[%s]",
                     String.join(SPACE, requestedScopes.get()),
-                    oauthScopeListToSpaceDelimitedString(oauthClientScopes)
+                    oauthScopeListToSpaceDelimitedString(oauthClient.getScopes())
             );
             throw new BadRequestException(MSG_INVALID_SCOPE);
         }
-        return oauthClientScopes
+        return oauthClient.getScopes()
                 .stream()
                 .filter(oauthScope -> requestedScopes.isPresent())
-                .filter(oauthScope -> requestedScopes.get().contains(oauthScope.scope))
+                .filter(oauthScope -> requestedScopes.get().contains(oauthScope.getScope()))
                 .sorted()
                 .collect(Collectors.toList());
     }
@@ -83,10 +79,10 @@ public class ScopeServiceImpl implements ScopeService {
     }
 
     private boolean containsScope(final String scope, final List<OauthScope> clientScopes) {
-        return clientScopes.stream().anyMatch(oauthScope -> oauthScope.scope.equals(scope));
+        return clientScopes.stream().anyMatch(oauthScope -> oauthScope.getScope().equals(scope));
     }
 
     private String oauthScopeListToSpaceDelimitedString(final List<OauthScope> clientScopes) {
-        return clientScopes.stream().map(oauthScope -> oauthScope.scope).collect(Collectors.joining(SPACE));
+        return clientScopes.stream().map(OauthScope::getScope).collect(Collectors.joining(SPACE));
     }
 }

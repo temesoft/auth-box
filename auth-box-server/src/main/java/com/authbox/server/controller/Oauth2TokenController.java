@@ -1,6 +1,7 @@
 package com.authbox.server.controller;
 
 import com.authbox.base.exception.Oauth2Exception;
+import com.authbox.base.model.AccessLog;
 import com.authbox.base.model.GrantType;
 import com.authbox.base.model.OauthClient;
 import com.authbox.base.model.OauthTokenResponse;
@@ -28,7 +29,6 @@ import static com.authbox.base.config.Constants.MSG_UNAUTHORIZED_REQUEST;
 import static com.authbox.base.config.Constants.OAUTH2_ATTR_ACCESS_TOKEN;
 import static com.authbox.base.config.Constants.OAUTH2_ATTR_GRANT_TYPE;
 import static com.authbox.base.config.Constants.OAUTH_PREFIX;
-import static com.authbox.base.model.AccessLog.AccessLogBuilder.accessLogBuilder;
 import static com.authbox.server.util.RequestUtils.getRequestId;
 import static com.authbox.server.util.RequestUtils.getTimeSinceRequest;
 import static org.springframework.util.ObjectUtils.isEmpty;
@@ -49,7 +49,7 @@ public class Oauth2TokenController extends BaseController {
                                             final HttpServletResponse res,
                                             @RequestParam(OAUTH2_ATTR_GRANT_TYPE) final String grantTypeStr) {
         accessLogService.create(
-                accessLogBuilder()
+                AccessLog.builder()
                         .withRequestId(getRequestId())
                         .withDuration(getTimeSinceRequest()),
                 "Starting Oauth2 token generation (grant_type: '%s')",
@@ -59,10 +59,10 @@ public class Oauth2TokenController extends BaseController {
 
         if (!GrantType.contains(grantTypeStr)) {
             accessLogService.create(
-                    accessLogBuilder()
+                    AccessLog.builder()
                             .withRequestId(getRequestId())
                             .withDuration(getTimeSinceRequest())
-                            .withOrganizationId(organization.id)
+                            .withOrganizationId(organization.getId())
                             .withError(MSG_INVALID_GRANT_TYPE),
                     "Oauth2 grant type provided is not valid. grant type='%s'", grantTypeStr
             );
@@ -88,7 +88,7 @@ public class Oauth2TokenController extends BaseController {
     public Map<String, Object> introspectToken(final HttpServletRequest req,
                                                @RequestParam(value = OAUTH2_ATTR_ACCESS_TOKEN, required = false) final String token) {
         accessLogService.create(
-                accessLogBuilder()
+                AccessLog.builder()
                         .withRequestId(getRequestId())
                         .withDuration(getTimeSinceRequest()),
                 "Starting Oauth2 token introspection"
@@ -106,9 +106,9 @@ public class Oauth2TokenController extends BaseController {
         }
         if (accessToken.isEmpty()) {
             accessLogService.create(
-                    accessLogBuilder()
+                    AccessLog.builder()
                             .withRequestId(getRequestId())
-                            .withOrganizationId(organization.id)
+                            .withOrganizationId(organization.getId())
                             .withDuration(getTimeSinceRequest())
                             .withError(MSG_UNAUTHORIZED_REQUEST),
                     "Oauth2 access token is not provided"
@@ -119,10 +119,10 @@ public class Oauth2TokenController extends BaseController {
         if (!appProperties.isAllowTokenDetailsWithoutClientCredentials()) {
             // validates actual OauthClient
             accessLogService.create(
-                    accessLogBuilder()
+                    AccessLog.builder()
                             .withRequestId(getRequestId())
                             .withDuration(getTimeSinceRequest())
-                            .withOrganizationId(organization.id),
+                            .withOrganizationId(organization.getId()),
                     "Parsing and validating Oauth2 client"
             );
             final OauthClient oauthClient = parsingValidationService.getOauthClient(req, organization);

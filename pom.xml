@@ -5,7 +5,7 @@
 
     <groupId>com.authbox</groupId>
     <artifactId>auth-box</artifactId>
-    <version>0.1.18</version>
+    <version>0.1.19</version>
     <packaging>pom</packaging>
 
     <modules>
@@ -18,15 +18,14 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
-        <springfox.version>3.0.0</springfox.version>
-        <spring-security-oauth2.version>2.5.1.RELEASE</spring-security-oauth2.version>
+        <springfox.version>[3.0.0,)</springfox.version>
+        <spring-security-oauth2.version>[2.5.1.RELEASE,)</spring-security-oauth2.version>
         <h2.version>[1.4.200,)</h2.version>
-        <micrometer.version>1.7.3</micrometer.version>
         <commons-io.version>[2.8.0,)</commons-io.version>
         <jjwt.version>[0.11.1,)</jjwt.version>
         <bouncycastle.version>[1.68,)</bouncycastle.version>
         <commons-validator.version>[1.7,)</commons-validator.version>
-        <flyway.version>7.14.0</flyway.version>
+        <flyway.version>[7.14.0,)</flyway.version>
         <guava.version>30.1.1-jre</guava.version>
         <awaitility.version>[4.1.0,)</awaitility.version>
     </properties>
@@ -105,12 +104,6 @@
             <groupId>io.springfox</groupId>
             <artifactId>springfox-boot-starter</artifactId>
             <version>${springfox.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>io.micrometer</groupId>
-            <artifactId>micrometer-registry-graphite</artifactId>
-            <version>${micrometer.version}</version>
         </dependency>
 
         <dependency>

@@ -1,65 +1,48 @@
 package com.authbox.base.model;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.common.base.MoreObjects;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters;
 
+import javax.persistence.Column;
+import javax.persistence.Convert;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
 import java.io.Serializable;
 import java.time.Instant;
 
+@Entity
+@Table(name = "oauth_user")
+@AllArgsConstructor
+@NoArgsConstructor
+@Setter
+@Getter
+@ToString
 public class OauthUser implements Serializable {
 
     private static final long serialVersionUID = 12159753648257L;
 
-    public final String id;
-    public final Instant createTime;
-    public final String username;
+    @Id
+    private String id;
+    @Convert(converter = Jsr310JpaConverters.InstantConverter.class)
+    private Instant createTime;
+    private String username;
     @JsonIgnore
-    public final String password;
-    public final boolean enabled;
-    public final String organizationId;
-    public final String metadata;
-    public final boolean using2Fa;
+    @ToString.Exclude
+    private String password;
+    private boolean enabled;
+    private String organizationId;
+    private String metadata;
+    @Column(name = "using_2fa")
+    private boolean using2Fa;
     @JsonIgnore
-    public final String secret;
-    public final Instant lastUpdated;
-
-    @JsonCreator
-    public OauthUser(@JsonProperty("id") final String id,
-                     @JsonProperty("createTime") final Instant createTime,
-                     @JsonProperty("username") final String username,
-                     @JsonProperty("password") final String password,
-                     @JsonProperty("enabled") final boolean enabled,
-                     @JsonProperty("organizationId") final String organizationId,
-                     @JsonProperty("metadata") final String metadata,
-                     @JsonProperty("using2Fa") final boolean using2Fa,
-                     @JsonProperty("secret") final String secretBase32,
-                     @JsonProperty("lastUpdated") final Instant lastUpdated) {
-        this.id = id;
-        this.createTime = createTime;
-        this.username = username;
-        this.password = password;
-        this.enabled = enabled;
-        this.organizationId = organizationId;
-        this.metadata = metadata;
-        this.using2Fa = using2Fa;
-        this.secret = secretBase32;
-        this.lastUpdated = lastUpdated;
-    }
-
-    @Override
-    public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .add("id", id)
-                .add("createTime", createTime)
-                .add("username", username)
-                .add("enabled", enabled)
-                .add("organizationId", organizationId)
-                .add("metadata", metadata)
-                .add("using2Fa", using2Fa)
-                .add("secret", secret)
-                .add("lastUpdated", lastUpdated)
-                .toString();
-    }
+    @ToString.Exclude
+    private String secret;
+    @Convert(converter = Jsr310JpaConverters.InstantConverter.class)
+    private Instant lastUpdated;
 }

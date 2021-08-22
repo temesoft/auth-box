@@ -10,16 +10,16 @@ import java.util.Optional;
 
 public interface UserDao {
 
-    int insert(User user);
+    void insert(User user);
 
     Optional<User> getById(String id);
 
     Optional<User> getByUsername(String username);
 
-    int update(String userId, String username, String name, String password, boolean enabled, Instant lastUpdated);
+    void update(String userId, String username, String name, String password, boolean enabled, Instant lastUpdated);
 
     Page<User> listByOrganizationId(String organizationId, Pageable pageable);
 
-    int delete(User user);
+    void delete(User user);
 
 }

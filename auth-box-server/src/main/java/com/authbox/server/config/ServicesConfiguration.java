@@ -6,7 +6,6 @@ import com.authbox.base.config.ExceptionHandlerConfiguration;
 import com.authbox.base.config.StartupTasksConfiguration;
 import com.authbox.base.dao.AccessLogDao;
 import com.authbox.base.dao.OauthClientDao;
-import com.authbox.base.dao.OauthScopeDao;
 import com.authbox.base.dao.OauthTokenDao;
 import com.authbox.base.dao.OauthUserDao;
 import com.authbox.base.model.AccessLog;
@@ -56,8 +55,8 @@ public class ServicesConfiguration {
     }
 
     @Bean
-    ScopeService scopeService(final OauthScopeDao oauthScopeDao, final AccessLogService accessLogService) {
-        return new ScopeServiceImpl(oauthScopeDao, accessLogService);
+    ScopeService scopeService(final AccessLogService accessLogService) {
+        return new ScopeServiceImpl(accessLogService);
     }
 
     @Bean

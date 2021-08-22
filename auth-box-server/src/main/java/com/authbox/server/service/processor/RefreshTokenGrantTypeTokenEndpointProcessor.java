@@ -2,6 +2,7 @@ package com.authbox.server.service.processor;
 
 import com.authbox.base.exception.BadRequestException;
 import com.authbox.base.exception.Oauth2Exception;
+import com.authbox.base.model.AccessLog;
 import com.authbox.base.model.GrantType;
 import com.authbox.base.model.OauthClient;
 import com.authbox.base.model.OauthToken;
@@ -14,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.transaction.Transactional;
 import java.time.Instant;
 import java.util.Optional;
 
@@ -21,7 +23,6 @@ import static com.authbox.base.config.Constants.MSG_INVALID_REQUEST;
 import static com.authbox.base.config.Constants.MSG_INVALID_TOKEN;
 import static com.authbox.base.config.Constants.OAUTH2_ATTR_REFRESH_TOKEN;
 import static com.authbox.base.config.Constants.SPACE;
-import static com.authbox.base.model.AccessLog.AccessLogBuilder.accessLogBuilder;
 import static com.authbox.base.model.TokenFormat.JWT;
 import static com.authbox.base.model.TokenType.REFRESH_TOKEN;
 import static com.authbox.base.util.HashUtils.sha256;
@@ -37,12 +38,13 @@ public class RefreshTokenGrantTypeTokenEndpointProcessor extends TokenEndpointPr
     private static final Logger LOGGER = LoggerFactory.getLogger(RefreshTokenGrantTypeTokenEndpointProcessor.class);
 
     @Override
+    @Transactional
     public OauthTokenResponse process(final Organization organization, final HttpServletRequest req, final HttpServletResponse res) {
         accessLogService.create(
-                accessLogBuilder()
+                AccessLog.builder()
                         .withRequestId(getRequestId())
                         .withDuration(getTimeSinceRequest())
-                        .withOrganizationId(organization.id),
+                        .withOrganizationId(organization.getId()),
                 "Parsing and validating Oauth2 client"
         );
         final OauthClient oauthClient = parsingValidationService.getOauthClient(req, organization);
@@ -51,12 +53,12 @@ public class RefreshTokenGrantTypeTokenEndpointProcessor extends TokenEndpointPr
         if (isEmpty(refreshTokenStr)) {
             LOGGER.debug("Refresh token is not provided or empty");
             accessLogService.create(
-                    accessLogBuilder()
+                    AccessLog.builder()
                             .withRequestId(getRequestId())
                             .withDuration(getTimeSinceRequest())
-                            .withClientId(oauthClient.id)
+                            .withClientId(oauthClient.getId())
                             .withError(MSG_INVALID_REQUEST)
-                            .withOrganizationId(organization.id),
+                            .withOrganizationId(organization.getId()),
                     "Refresh token is not provided or empty"
             );
             throw new BadRequestException(MSG_INVALID_REQUEST);
@@ -67,94 +69,94 @@ public class RefreshTokenGrantTypeTokenEndpointProcessor extends TokenEndpointPr
         if (refreshToken.isEmpty()) {
             LOGGER.debug("Refresh token='{}' / hash='{}' not found", refreshTokenStr, hash);
             accessLogService.create(
-                    accessLogBuilder()
+                    AccessLog.builder()
                             .withRequestId(getRequestId())
                             .withDuration(getTimeSinceRequest())
-                            .withClientId(oauthClient.id)
+                            .withClientId(oauthClient.getId())
                             .withError(MSG_INVALID_REQUEST)
-                            .withOrganizationId(organization.id),
+                            .withOrganizationId(organization.getId()),
                     "Refresh token hash='%s' not found", hash
             );
             throw new Oauth2Exception(MSG_INVALID_TOKEN);
         }
 
-        if (!refreshToken.get().tokenType.equals(REFRESH_TOKEN)) {
-            LOGGER.debug("Provided token is not ACCESS_TOKEN. type='{}' / hash='{}'", refreshToken.get().tokenType, hash);
+        if (!refreshToken.get().getTokenType().equals(REFRESH_TOKEN)) {
+            LOGGER.debug("Provided token is not ACCESS_TOKEN. type='{}' / hash='{}'", refreshToken.get().getTokenType(), hash);
             accessLogService.create(
-                    accessLogBuilder()
+                    AccessLog.builder()
                             .withRequestId(getRequestId())
                             .withDuration(getTimeSinceRequest())
-                            .withClientId(oauthClient.id)
+                            .withClientId(oauthClient.getId())
                             .withError(MSG_INVALID_REQUEST)
-                            .withOrganizationId(organization.id),
-                    "Provided token is not ACCESS_TOKEN. type='%s' hash='%s'", refreshToken.get().tokenType.name(), hash
+                            .withOrganizationId(organization.getId()),
+                    "Provided token is not ACCESS_TOKEN. type='%s' hash='%s'", refreshToken.get().getTokenType().name(), hash
             );
             throw new Oauth2Exception(MSG_INVALID_TOKEN);
         }
 
-        if (!refreshToken.get().organizationId.equals(organization.id)) {
-            LOGGER.debug("Refresh does not belong to organization_id='{}'", organization.id);
+        if (!refreshToken.get().getOrganizationId().equals(organization.getId())) {
+            LOGGER.debug("Refresh does not belong to organization_id='{}'", organization.getId());
             accessLogService.create(
-                    accessLogBuilder()
+                    AccessLog.builder()
                             .withRequestId(getRequestId())
                             .withDuration(getTimeSinceRequest())
-                            .withClientId(oauthClient.id)
+                            .withClientId(oauthClient.getId())
                             .withError(MSG_INVALID_REQUEST)
-                            .withOrganizationId(organization.id),
-                    "Refresh does not belong to organization id='%s'", organization.id
+                            .withOrganizationId(organization.getId()),
+                    "Refresh does not belong to organization id='%s'", organization.getId()
             );
             throw new Oauth2Exception(MSG_INVALID_TOKEN);
         }
 
         final Instant now = Instant.now(defaultClock);
-        if (now.isAfter(refreshToken.get().expiration)) {
+        if (now.isAfter(refreshToken.get().getExpiration())) {
             LOGGER.debug("Refresh token expired");
             accessLogService.create(
-                    accessLogBuilder()
+                    AccessLog.builder()
                             .withRequestId(getRequestId())
                             .withDuration(getTimeSinceRequest())
-                            .withClientId(oauthClient.id)
+                            .withClientId(oauthClient.getId())
                             .withError(MSG_INVALID_REQUEST)
-                            .withOrganizationId(organization.id),
+                            .withOrganizationId(organization.getId()),
                     "Refresh token expired hash='%s'", hash
             );
             throw new Oauth2Exception(MSG_INVALID_TOKEN);
         }
 
-        final Optional<OauthUser> oauthUser = oauthUserDao.getById(refreshToken.get().oauthUserId);
+        final Optional<OauthUser> oauthUser = oauthUserDao.getById(refreshToken.get().getOauthUserId());
         if (oauthUser.isEmpty()) {
-            LOGGER.debug("OauthUser not found by id='{}'", refreshToken.get().oauthUserId);
+            LOGGER.debug("OauthUser not found by id='{}'", refreshToken.get().getOauthUserId());
             accessLogService.create(
-                    accessLogBuilder()
+                    AccessLog.builder()
                             .withRequestId(getRequestId())
                             .withDuration(getTimeSinceRequest())
-                            .withClientId(oauthClient.id)
+                            .withClientId(oauthClient.getId())
                             .withError(MSG_INVALID_REQUEST)
-                            .withOrganizationId(organization.id),
-                    "Oauth2 user not found by id='%s'", refreshToken.get().oauthUserId
+                            .withOrganizationId(organization.getId()),
+                    "Oauth2 user not found by id='%s'", refreshToken.get().getOauthUserId()
             );
             throw new BadRequestException(MSG_INVALID_REQUEST);
         }
 
-        if (!organization.id.equals(oauthUser.get().organizationId)) {
-            LOGGER.debug("OauthUser organization_id='{}' does not match request organization_id='{}'", oauthUser.get().organizationId, organization.id);
+        if (!organization.getId().equals(oauthUser.get().getOrganizationId())) {
+            LOGGER.debug("OauthUser organization_id='{}' does not match request organization_id='{}'", oauthUser.get().getOrganizationId(), organization.getId());
             accessLogService.create(
-                    accessLogBuilder()
+                    AccessLog.builder()
                             .withRequestId(getRequestId())
                             .withDuration(getTimeSinceRequest())
-                            .withClientId(oauthClient.id)
+                            .withClientId(oauthClient.getId())
                             .withError(MSG_INVALID_REQUEST)
-                            .withOrganizationId(organization.id),
-                    "Oauth2 user organization id='%s' does not match request organization id='%s'", oauthUser.get().organizationId, organization.id
+                            .withOrganizationId(organization.getId()),
+                    "Oauth2 user organization id='%s' does not match request organization id='%s'", oauthUser.get().getOrganizationId(), organization.getId()
             );
             throw new BadRequestException(MSG_INVALID_REQUEST);
         }
 
-        final String scope = join(SPACE, refreshToken.get().scopes);
-        if (oauthClient.tokenFormat.equals(JWT)) {
-            return createJwtAccessToken(organization, oauthClient, scope, getProcessingGrantType(), oauthUser.get(), getIp(req), getUserAgent(req), refreshToken.get().id);
+        final String scope = join(SPACE, refreshToken.get().getScopes());
+        if (oauthClient.getTokenFormat().equals(JWT)) {
+            return createJwtAccessToken(organization, oauthClient, scope, getProcessingGrantType(), oauthUser.get(), getIp(req), getUserAgent(req), refreshToken.get().getId());
         } else {
-            return createStandardAccessToken(organization, oauthClient, scope, getProcessingGrantType(), oauthUser.get(), getIp(req), getUserAgent(req), refreshToken.get().id);
+            return createStandardAccessToken(organization, oauthClient, scope, getProcessingGrantType(), oauthUser.get(), getIp(req), getUserAgent(req), refreshToken.get().getId());
         }
     }
 

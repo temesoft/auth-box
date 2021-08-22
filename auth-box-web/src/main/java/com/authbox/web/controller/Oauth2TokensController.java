@@ -44,7 +44,7 @@ public class Oauth2TokensController extends BaseController {
         if (oauthClient.isEmpty()) {
             throw new EntityNotFoundException("Oauth client not found by id: " + clientId);
         }
-        if (!organization.id.equals(oauthClient.get().organizationId)) {
+        if (!organization.getId().equals(oauthClient.get().getOrganizationId())) {
             throw new AccessDeniedException();
         }
         return oauthTokenDao.listByClientId(clientId, PageRequest.of(currentPage, pageSize));
@@ -60,7 +60,7 @@ public class Oauth2TokensController extends BaseController {
         if (oauthUser.isEmpty()) {
             throw new EntityNotFoundException("Oauth user not found by id: " + userId);
         }
-        if (!organization.id.equals(oauthUser.get().organizationId)) {
+        if (!organization.getId().equals(oauthUser.get().getOrganizationId())) {
             throw new AccessDeniedException();
         }
         return oauthTokenDao.listByUserId(userId, PageRequest.of(currentPage, pageSize));
@@ -71,7 +71,7 @@ public class Oauth2TokensController extends BaseController {
     public Page<OauthToken> listOauth2Token(@RequestParam(value = "pageSize", defaultValue = "10") final int pageSize,
                                             @RequestParam(value = "currentPage", defaultValue = "0") final int currentPage) {
         final Organization organization = getOrganization();
-        return oauthTokenDao.listByOrganizationId(organization.id, PageRequest.of(currentPage, pageSize));
+        return oauthTokenDao.listByOrganizationId(organization.getId(), PageRequest.of(currentPage, pageSize));
     }
 
     @GetMapping("/hash/{hash}")
@@ -82,7 +82,7 @@ public class Oauth2TokensController extends BaseController {
         if (oauthToken.isEmpty()) {
             throw new EntityNotFoundException("Oauth token not found by hash: " + hash);
         }
-        if (!organization.id.equals(oauthToken.get().organizationId)) {
+        if (!organization.getId().equals(oauthToken.get().getOrganizationId())) {
             throw new AccessDeniedException();
         }
         return oauthToken.get();
@@ -97,7 +97,7 @@ public class Oauth2TokensController extends BaseController {
         if (oauthToken.isEmpty()) {
             throw new EntityNotFoundException("Oauth token not found by token value: " + token);
         }
-        if (!organization.id.equals(oauthToken.get().organizationId)) {
+        if (!organization.getId().equals(oauthToken.get().getOrganizationId())) {
             throw new AccessDeniedException();
         }
         return oauthToken.get();
@@ -111,7 +111,7 @@ public class Oauth2TokensController extends BaseController {
         if (oauthToken.isEmpty()) {
             throw new EntityNotFoundException("Oauth token not found by id: " + id);
         }
-        if (!organization.id.equals(oauthToken.get().organizationId)) {
+        if (!organization.getId().equals(oauthToken.get().getOrganizationId())) {
             throw new AccessDeniedException();
         }
         return oauthToken.get();
@@ -126,10 +126,10 @@ public class Oauth2TokensController extends BaseController {
             if (oauthToken.isEmpty()) {
                 throw new EntityNotFoundException("Oauth token not found by id: " + id);
             }
-            if (!organization.id.equals(oauthToken.get().organizationId)) {
+            if (!organization.getId().equals(oauthToken.get().getOrganizationId())) {
                 throw new AccessDeniedException();
             }
-            oauthTokenDao.deleteById(oauthToken.get().id, oauthToken.get().hash);
+            oauthTokenDao.deleteById(oauthToken.get().getId(), oauthToken.get().getHash());
         });
     }
 }

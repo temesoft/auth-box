@@ -12,24 +12,14 @@ import java.util.Optional;
 
 public interface OauthClientDao {
 
-    int insert(OauthClient oauthClient);
+    void insert(OauthClient oauthClient);
 
     Optional<OauthClient> getById(String id);
 
     Page<OauthClient> listByOrganizationId(String organizationId, Pageable pageable);
 
-    int updateById(final String id,
-                   final String description,
-                   final String grantTypesCsv,
-                   final boolean enabled,
-                   final String redirectUrlsCsv,
-                   final Duration expiration,
-                   final Duration refreshExpiration,
-                   final TokenFormat tokenFormat,
-                   final String privateKey,
-                   final String publicKey,
-                   final Instant lastUpdated);
+    void update(OauthClient oauthClient);
 
-    int deleteById(String id);
+    void deleteById(String id);
 
 }

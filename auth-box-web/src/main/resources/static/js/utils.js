@@ -7,13 +7,13 @@ function initUiTools() {
 }
 
 function initTooltip() {
-    $("[title]").tooltip({
-      classes: {
-        "ui-tooltip": "highlight"
-      }
-    });
+//    $("[title]").tooltip({
+//      classes: {
+//        "ui-tooltip": "highlight"
+//      }
+//    });
 
-    $('.tooltip').not(this).hide();
+//    $('.tooltip').not(this).hide();
 }
 
 function isEmpty(value) {

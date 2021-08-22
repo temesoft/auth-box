@@ -58,12 +58,12 @@ public class AccessLogServiceImpl implements AccessLogService, DisposableBean {
     @Override
     public void create(final AccessLog.AccessLogBuilder builder, final String message, final String... arguments) {
         accessLogThreadCache.addAccessLog(
-                builder.build(
-                        UUID.randomUUID().toString(),
-                        Instant.now(defaultClock),
-                        source,
-                        (isEmpty(arguments) ? message : String.format(message, (Object[]) arguments))
-                )
+                builder
+                        .withId(UUID.randomUUID().toString())
+                        .withCreateTime(Instant.now(defaultClock))
+                        .withSource(source)
+                        .withMessage((isEmpty(arguments) ? message : String.format(message, (Object[]) arguments)))
+                        .build()
         );
     }
 

@@ -7,12 +7,12 @@ import java.util.Optional;
 
 public interface OrganizationDao {
 
-    int insert(Organization organization);
+    void insert(Organization organization);
 
     Optional<Organization> getById(String id);
 
     Optional<Organization> getByDomainPrefix(String domainPrefix);
 
-    int update(String id, String name, String domainPrefix, String address, boolean enabled, Instant lastUpdated);
+    void update(String id, String name, String domainPrefix, String address, boolean enabled, Instant lastUpdated);
 
 }

@@ -137,7 +137,9 @@ public class RegistrationController extends BaseController {
                         TokenFormat.STANDARD,
                         "",
                         "",
-                        now
+                        now,
+                        null,
+                        null
                 )
         );
 
@@ -169,7 +171,9 @@ public class RegistrationController extends BaseController {
                         TokenFormat.JWT,
                         rsaKeyPair.privateKeyPem,
                         rsaKeyPair.publicKeyPem,
-                        now
+                        now,
+                        null,
+                        null
                 )
         );
         oauthClientScopeDao.insert(
