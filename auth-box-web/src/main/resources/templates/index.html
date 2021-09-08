@@ -84,12 +84,12 @@
 
 <div class="container">
     <main class="form-signin">
-        <form method="post" id="signInForm" th:action="@{/login}">
+        <form method="post" th:action="@{/login}">
             <h2 class="h3 mb-3 fw-normal">Please sign in</h2>
             <input type="text" id="username" name="username" class="form-control" placeholder="Username" required autofocus>
             <input type="password" id="password" name="password" class="form-control" placeholder="Password" required>
 
-            <button class="w-100 btn btn-lg btn-primary" id="signInBtn" type="button" data-ng-click="signIn()">Sign in</button>
+            <button class="w-100 btn btn-lg btn-primary" id="signInBtn" type="submit">Sign in</button>
             <div th:if="${param.error}">
                 <strong class="text-danger">Invalid username and password.</strong>
             </div>
@@ -131,9 +131,33 @@
     }
 
     angular.module("authBoxApp", []).controller("authBoxAppController", function($scope, $http) {
-        $scope.signIn = function() {
+        $scope.registration = {"domainPrefix":"testing"};
+
+        $scope.updateOrganizationName = function() {
+            $scope.registration.domainPrefix = $scope.registration.organizationName.replace(/[^a-z0-9]/gi,'').toLowerCase();
+        };
+
+        $scope.register = function() {
             buttonLoading("#signInBtn");
-            document.getElementById("signInForm").submit();
+            $http({
+                method: 'POST',
+                url: '/register',
+                data: $scope.registration
+            }).then(
+                function success(response) {
+                    buttonReset();
+                    // TODO: Continue to secure management page.
+                },
+                function failure(response) {
+                    buttonReset();
+                    if (response.status == 403) {
+                        alert("Access denied");
+                    } else {
+                        alert(response.data.message, response.data.error);
+                        console.log(response.data.timestamp + ": " + response.data.message + " " + response.data.error);
+                    }
+                }
+            );
         };
     });
 </script>
