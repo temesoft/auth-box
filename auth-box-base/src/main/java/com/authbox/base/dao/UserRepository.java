@@ -1,6 +1,5 @@
 package com.authbox.base.dao;
 
-import com.authbox.base.model.OauthClient;
 import com.authbox.base.model.User;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Modifying;
