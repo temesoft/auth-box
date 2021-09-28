@@ -34,7 +34,6 @@ app.controller('accessLogController', function accessLogController($scope, $http
                         }
                         if ($scope.accessLogList.content[i].error != null) {
                             $scope.hasErrors = true;
-                            console.log("Error: ", $scope.accessLogList.content[i].error == "");
                             $scope.errorMessage = $scope.accessLogList.content[i].error;
                         }
                     }
