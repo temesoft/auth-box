@@ -26,6 +26,7 @@ app.controller('accessLogController', function accessLogController($scope, $http
                         initUiTools();
                         $scope.getIpDetails($scope.ip);
                     }
+
                     $scope.statusCode = -1;
                     for (var i = 0; i < $scope.accessLogList.content.length; i++) {
                         if ($scope.accessLogList.content[i].statusCode != null
