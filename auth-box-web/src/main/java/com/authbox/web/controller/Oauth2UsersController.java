@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
+import javax.transaction.Transactional;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.Optional;
@@ -127,6 +128,7 @@ public class Oauth2UsersController extends BaseController {
     }
 
     @PostMapping("/{id}")
+    @Transactional
     public OauthUser updateOauth2UserById(@PathVariable("id") final String userId,
                                           @RequestBody final OauthUser updatedOauthUser) {
         final Organization organization = getOrganization();

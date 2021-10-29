@@ -13,9 +13,7 @@
         <div class="row">
             <div class="col-md-9 mb-3">
                 <label for="domainPrefix" title="Only letter and numbers allowed">Oauth2 server url</label>
-                <div class="input-group">
-                    <h6>{{appProperties.protocol}}://{{organization.domainPrefix}}.{{appProperties.domain}}</h6>
-                </div>
+                <input value="{{appProperties.protocol}}://{{organization.domainPrefix}}.{{appProperties.domain}}" type="text" class="form-control" id="organization.url" readonly="readonly"/>
             </div>
         </div>
         <div class="row">

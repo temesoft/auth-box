@@ -29,21 +29,21 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public void insert(final User user) {
-        LOGGER.debug("Inserting user: {}", user);
+        LOGGER.debug("Inserting: {}", user);
         userRepository.save(user);
     }
 
     @Override
     @Cacheable(key = "#id", sync = true)
     public Optional<User> getById(final String id) {
-        LOGGER.debug("Fetching user by id='{}'", id);
+        LOGGER.debug("Fetching by id='{}'", id);
         return userRepository.findById(id);
     }
 
     @Override
     @Cacheable(key = "#username", sync = true)
     public Optional<User> getByUsername(final String username) {
-        LOGGER.debug("Fetching user by username='{}'", username);
+        LOGGER.debug("Fetching  by username='{}'", username);
         return userRepository.findByUsername(username);
     }
 
@@ -70,7 +70,7 @@ public class UserDaoImpl implements UserDao {
             @CacheEvict(key = "#username")
     })
     public void update(final String userId, final String username, final String name, final String password, final boolean enabled, final Instant lastUpdated) {
-        LOGGER.debug("Fetching user id='{}', username='{}'", userId, username);
+        LOGGER.debug("Fetching id='{}', username='{}'", userId, username);
         userRepository.update(userId, username, name, password, enabled, lastUpdated);
     }
 }

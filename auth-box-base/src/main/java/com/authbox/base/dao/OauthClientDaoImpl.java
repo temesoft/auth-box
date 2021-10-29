@@ -27,20 +27,20 @@ public class OauthClientDaoImpl implements OauthClientDao {
 
     @Override
     public void insert(final OauthClient oauthClient) {
-        LOGGER.debug("Inserting oauthClient: {}", oauthClient);
+        LOGGER.debug("Inserting: {}", oauthClient);
         oauthClientRepository.save(oauthClient);
     }
 
     @Override
     @Cacheable(key = "#id")
     public Optional<OauthClient> getById(final String id) {
-        LOGGER.debug("Fetching oauthClient by id='{}'", id);
+        LOGGER.debug("Fetching by id='{}'", id);
         return oauthClientRepository.findById(id);
     }
 
     @Override
     public Page<OauthClient> listByOrganizationId(final String organizationId, Pageable pageable) {
-        LOGGER.debug("List oauthClient by organizationId='{}'", organizationId);
+        LOGGER.debug("List by organizationId='{}'", organizationId);
         final long count = oauthClientRepository.countByOrganizationId(organizationId);
         final List<OauthClient> resultList = oauthClientRepository.listByOrganizationId(organizationId, pageable);
         return new PageImpl<>(resultList, pageable, count);

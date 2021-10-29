@@ -28,20 +28,20 @@ public class OauthTokenDaoImpl implements OauthTokenDao {
 
     @Override
     public void insert(final OauthToken oauthToken) {
-        LOGGER.debug("Inserting token: {}", oauthToken);
+        LOGGER.debug("Inserting: {}", oauthToken);
         oauthTokenRepository.save(oauthToken);
     }
 
     @Override
     @Cacheable(key = "#id", sync = true)
     public Optional<OauthToken> getById(final String id) {
-        LOGGER.debug("Fetching token by id='{}'", id);
+        LOGGER.debug("Fetching by id='{}'", id);
         return oauthTokenRepository.findById(id);
     }
 
     @Override
     public Page<OauthToken> listByClientId(final String clientId, final Pageable pageable) {
-        LOGGER.debug("List token(s) by clientId='{}'", clientId);
+        LOGGER.debug("List by clientId='{}'", clientId);
         final long count = oauthTokenRepository.countByClientId(clientId);
         final List<OauthToken> resultList = oauthTokenRepository.listByClientId(clientId, pageable);
         return new PageImpl<>(resultList, pageable, count);
@@ -49,7 +49,7 @@ public class OauthTokenDaoImpl implements OauthTokenDao {
 
     @Override
     public Page<OauthToken> listByUserId(final String userId, final Pageable pageable) {
-        LOGGER.debug("List token(s) by userId='{}'", userId);
+        LOGGER.debug("List by userId='{}'", userId);
         final long count = oauthTokenRepository.countByOauthUserId(userId);
         final List<OauthToken> resultList = oauthTokenRepository.listByOauthUserId(userId, pageable);
         return new PageImpl<>(resultList, pageable, count);
@@ -57,7 +57,7 @@ public class OauthTokenDaoImpl implements OauthTokenDao {
 
     @Override
     public Page<OauthToken> listByOrganizationId(final String organizationId, final Pageable pageable) {
-        LOGGER.debug("List token(s) by organizationId='{}'", organizationId);
+        LOGGER.debug("List by organizationId='{}'", organizationId);
         final long count = oauthTokenRepository.countByOrganizationId(organizationId);
         final List<OauthToken> resultList = oauthTokenRepository.listByOrganizationId(organizationId, pageable);
         return new PageImpl<>(resultList, pageable, count);
@@ -66,7 +66,7 @@ public class OauthTokenDaoImpl implements OauthTokenDao {
     @Override
     @Cacheable(key = "#hash", sync = true)
     public Optional<OauthToken> getByHash(final String hash) {
-        LOGGER.debug("Fetching token by hash='{}'", hash);
+        LOGGER.debug("Fetching by hash='{}'", hash);
         return oauthTokenRepository.findByHash(hash);
     }
 
@@ -76,7 +76,7 @@ public class OauthTokenDaoImpl implements OauthTokenDao {
             @CacheEvict(key = "#hash")
     })
     public void deleteById(final String id, final String hash) {
-        LOGGER.debug("Removing token by id='{}'", id);
+        LOGGER.debug("Removing by id='{}'", id);
         oauthTokenRepository.deleteById(id);
     }
 

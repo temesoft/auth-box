@@ -50,4 +50,7 @@ public class Constants {
     public static final String MSG_INVALID_TOKEN = "invalid token";
     public static final String MSG_INVALID_SCOPE = "invalid scope";
     public static final String MSG_ACCESS_DENIED = "access denied";
+
+    // Metric keys
+    public static final String METRIC_KEY_ACCESS_LOG_SERVICE_QUEUE = "log.service.queue";
 }

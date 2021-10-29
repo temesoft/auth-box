@@ -23,11 +23,16 @@ app.controller('accessLogController', function accessLogController($scope, $http
                         $scope.ip = $scope.accessLogList.content[0].ip;
                         $scope.userAgent = $scope.accessLogList.content[0].userAgent;
                         $scope.timestamp = $scope.accessLogList.content[0].createTime;
-                        $scope.statusCode = $scope.accessLogList.content[$scope.accessLogList.content.length - 1].statusCode;
                         initUiTools();
                         $scope.getIpDetails($scope.ip);
                     }
+
+                    $scope.statusCode = -1;
                     for (var i = 0; i < $scope.accessLogList.content.length; i++) {
+                        if ($scope.accessLogList.content[i].statusCode != null
+                            && $scope.accessLogList.content[i].statusCode != 0) {
+                            $scope.statusCode = $scope.accessLogList.content[i].statusCode;
+                        }
                         if ($scope.accessLogList.content[i].error != null) {
                             $scope.hasErrors = true;
                             $scope.errorMessage = $scope.accessLogList.content[i].error;

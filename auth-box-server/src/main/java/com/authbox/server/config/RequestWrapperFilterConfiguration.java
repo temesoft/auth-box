@@ -16,6 +16,7 @@ import javax.servlet.FilterChain;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import static com.authbox.base.config.Constants.OAUTH_PREFIX;
 import static com.authbox.base.util.HashUtils.makeRequestId;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
@@ -53,22 +54,24 @@ public class RequestWrapperFilterConfiguration {
                                         final HttpServletResponse response,
                                         final FilterChain chain) {
             final Stopwatch stopwatch = Stopwatch.createStarted();
-//            accessLogService.initCachedAccessLogs();
+            final boolean oauthCall = request.getRequestURI().startsWith(OAUTH_PREFIX);
             MDC.put(REQUEST_START_REQUEST_TIME_MDC_KEY, String.valueOf(System.currentTimeMillis()));
             try {
                 final String requestId;
-                if (!isEmpty(REQUEST_ID_HEADER) && !isEmpty(request.getHeader(REQUEST_ID_HEADER)) && request.getHeader(REQUEST_ID_HEADER).length() <= 36) {
+                if (!isEmpty(request.getHeader(REQUEST_ID_HEADER)) && request.getHeader(REQUEST_ID_HEADER).length() <= 36) {
                     requestId = request.getHeader(REQUEST_ID_HEADER);
                 } else {
                     requestId = makeRequestId();
                 }
-                accessLogService.create(
-                        AccessLog.builder()
-                                .withIp(NetUtils.getIp(request))
-                                .withUserAgent(NetUtils.getUserAgent(request))
-                                .withRequestId(requestId),
-                        "Request started: " + request.getMethod() + " " + request.getRequestURL()
-                );
+                if (oauthCall) {
+                    accessLogService.create(
+                            AccessLog.builder()
+                                    .withIp(NetUtils.getIp(request))
+                                    .withUserAgent(NetUtils.getUserAgent(request))
+                                    .withRequestId(requestId),
+                            "Request started: " + request.getMethod() + " " + request.getRequestURL()
+                    );
+                }
 
                 MDC.put(REQUEST_ID_MDC_KEY, requestId);
                 if (!isEmpty(REQUEST_ID_HEADER)) {
@@ -77,23 +80,27 @@ public class RequestWrapperFilterConfiguration {
                 MDC.put(REQUEST_IP_MDC_KEY, request.getRemoteAddr());
                 chain.doFilter(request, response);
             } catch (Exception e) {
-                accessLogService.create(
-                        AccessLog.builder()
-                                .withRequestId(MDC.get(REQUEST_ID_MDC_KEY))
-                                .withDuration(stopwatch.elapsed())
-                                .withStatusCode(response.getStatus())
-                                .withError("internal error"),
-                        e.getMessage()
-                );
+                if (oauthCall) {
+                    accessLogService.create(
+                            AccessLog.builder()
+                                    .withRequestId(MDC.get(REQUEST_ID_MDC_KEY))
+                                    .withDuration(stopwatch.elapsed())
+                                    .withStatusCode(response.getStatus())
+                                    .withError("internal error"),
+                            e.getMessage()
+                    );
+                }
                 LOGGER.error("Error during request processing", e);
             } finally {
-                accessLogService.create(
-                        AccessLog.builder()
-                                .withRequestId(MDC.get(REQUEST_ID_MDC_KEY))
-                                .withStatusCode(response.getStatus())
-                                .withDuration(stopwatch.stop().elapsed()),
-                        "Request finished"
-                );
+                if (oauthCall) {
+                    accessLogService.create(
+                            AccessLog.builder()
+                                    .withRequestId(MDC.get(REQUEST_ID_MDC_KEY))
+                                    .withStatusCode(response.getStatus())
+                                    .withDuration(stopwatch.stop().elapsed()),
+                            "Request finished"
+                    );
+                }
 
                 accessLogService.processCachedAccessLogs();
 

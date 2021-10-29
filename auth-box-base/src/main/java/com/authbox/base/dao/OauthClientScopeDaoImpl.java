@@ -19,43 +19,43 @@ public class OauthClientScopeDaoImpl implements OauthClientScopeDao {
 
     @Override
     public void insert(final OauthClientScope oauthClientScope) {
-        LOGGER.debug("Inserting oauthClientScope: {}", oauthClientScope);
+        LOGGER.debug("Inserting: {}", oauthClientScope);
         oauthClientScopeRepository.save(oauthClientScope);
     }
 
     @Override
     public Optional<OauthClientScope> getById(final String id) {
-        LOGGER.debug("Fetching oauthClientScope by id='{}'", id);
+        LOGGER.debug("Fetching by id='{}'", id);
         return oauthClientScopeRepository.findById(id);
     }
 
     @Override
     public List<OauthClientScope> listByClientId(final String clientId) {
-        LOGGER.debug("List oauthScope by clientId='{}'", clientId);
+        LOGGER.debug("List by clientId='{}'", clientId);
         return oauthClientScopeRepository.listByClientId(clientId);
     }
 
     @Override
     public long countByScopeIds(final List<String> scopeIds) {
-        LOGGER.debug("Count oauthScope by scopeIds={}", scopeIds);
+        LOGGER.debug("Count by scopeIds={}", scopeIds);
         return oauthClientScopeRepository.countByScopeIds(scopeIds);
     }
 
     @Override
     public void deleteById(final String id) {
-        LOGGER.debug("Delete oauthScope by id='{}'", id);
+        LOGGER.debug("Delete by id='{}'", id);
         oauthClientScopeRepository.deleteById(id);
     }
 
     @Override
     public void deleteByClientIdAndScopeId(final String clientId, final String scopeId) {
-        LOGGER.debug("Delete oauthScope by clientId='{}' and scopeId='{}'", clientId, scopeId);
+        LOGGER.debug("Delete by clientId='{}' and scopeId='{}'", clientId, scopeId);
         oauthClientScopeRepository.deleteByClientIdAndScopeId(clientId, scopeId);
     }
 
     @Override
     public void deleteByScopeId(final String scopeId) {
-        LOGGER.debug("Delete oauthScope by scopeId='{}'", scopeId);
+        LOGGER.debug("Delete by scopeId='{}'", scopeId);
         oauthClientScopeRepository.deleteByScopeId(scopeId);
     }
 }

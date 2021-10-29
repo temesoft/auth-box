@@ -28,26 +28,26 @@ public class OauthUserDaoImpl implements OauthUserDao {
 
     @Override
     public void insert(final OauthUser oauthUser) {
-        LOGGER.debug("Inserting oauthUser: {}", oauthUser);
+        LOGGER.debug("Inserting: {}", oauthUser);
         oauthUserRepository.save(oauthUser);
     }
 
     @Override
     @Cacheable(key = "#id", sync = true)
     public Optional<OauthUser> getById(final String id) {
-        LOGGER.debug("Fetching oauthUser by id='{}'", id);
+        LOGGER.debug("Fetching by id='{}'", id);
         return oauthUserRepository.findById(id);
     }
 
     @Override
     public Optional<OauthUser> getByUsernameAndOrganizationId(final String username, final String organizationId) {
-        LOGGER.debug("Fetching oauthUser by username='{}' and organizationId='{}'", username, organizationId);
+        LOGGER.debug("Fetching by username='{}' and organizationId='{}'", username, organizationId);
         return oauthUserRepository.findByUsernameAndOrganizationId(username, organizationId);
     }
 
     @Override
     public Page<OauthUser> listByOrganizationId(final String organizationId, final Pageable pageable) {
-        LOGGER.debug("List oauthUser(s) by organizationId='{}'", organizationId);
+        LOGGER.debug("List by organizationId='{}'", organizationId);
         final long count = oauthUserRepository.countByOrganizationId(organizationId);
         final List<OauthUser> resultList = oauthUserRepository.listByOrganizationId(organizationId, pageable);
         return new PageImpl<>(resultList, pageable, count);
@@ -56,14 +56,14 @@ public class OauthUserDaoImpl implements OauthUserDao {
     @Override
     @CacheEvict(key = "#id")
     public void deleteById(final String id) {
-        LOGGER.debug("Fetching oauthUser by id='{}'", id);
+        LOGGER.debug("Fetching by id='{}'", id);
         oauthUserRepository.deleteById(id);
     }
 
     @Override
     @CacheEvict(key = "#id")
     public void update(final String id, final String username, final String password, final boolean enabled, final String metadata, final boolean using2Fa, final Instant lastUpdated) {
-        LOGGER.debug("Updating oauthUser by id='{}', username='{}'", id, username);
+        LOGGER.debug("Updating by id='{}', username='{}'", id, username);
         oauthUserRepository.update(id, username, password, enabled, metadata, using2Fa, lastUpdated);
     }
 }
