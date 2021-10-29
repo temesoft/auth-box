@@ -1,5 +1,6 @@
 package com.authbox.web.config;
 
+import com.authbox.base.config.AppProperties;
 import com.authbox.base.config.DaoConfiguration;
 import com.authbox.base.config.ExceptionHandlerConfiguration;
 import com.authbox.base.config.StartupTasksConfiguration;
@@ -8,6 +9,7 @@ import com.authbox.base.model.AccessLog;
 import com.authbox.base.service.AccessLogService;
 import com.authbox.base.service.AccessLogServiceImpl;
 import com.authbox.base.service.AccessLogThreadCache;
+import io.micrometer.core.instrument.MeterRegistry;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -34,8 +36,12 @@ public class ServicesConfiguration {
     }
 
     @Bean
-    AccessLogService accessLogService(final Clock defaultClock, final AccessLog.Source source, final AccessLogDao accessLogDao) {
-        return new AccessLogServiceImpl(defaultClock, source, accessLogDao, new AccessLogThreadCache());
+    AccessLogService accessLogService(final AppProperties appProperties,
+                                      final MeterRegistry meterRegistry,
+                                      final Clock defaultClock,
+                                      final AccessLog.Source source,
+                                      final AccessLogDao accessLogDao) {
+        return new AccessLogServiceImpl(appProperties, meterRegistry, defaultClock, source, accessLogDao, new AccessLogThreadCache());
     }
 
     @Bean

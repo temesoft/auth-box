@@ -4,6 +4,8 @@ import com.google.common.hash.Hashing;
 
 import java.security.SecureRandom;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -19,16 +21,16 @@ public class HashUtils {
     }
 
     public static String makeRandomBase32() {
-        final var result = new StringBuilder();
+        final String result;
         final var characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
         final var charactersLength = characters.length();
-        for (var i = 0; i < 64; i++) {
-            result.append(characters.charAt((int) Math.floor(SECURE_RANDOM.nextDouble() * charactersLength)));
-        }
-        return result.toString();
+        result = IntStream.range(0, 64)
+                .mapToObj(i -> String.valueOf(characters.charAt((int) Math.floor(SECURE_RANDOM.nextDouble() * charactersLength))))
+                .collect(Collectors.joining());
+        return result;
     }
 
     public static String makeRequestId() {
-        return UUID.randomUUID().toString().replace("-", "");
+        return UUID.randomUUID().toString();
     }
 }

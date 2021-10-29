@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.transaction.Transactional;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.Collection;
@@ -52,6 +53,7 @@ public class OrganizationController extends BaseController {
 
 
     @PostMapping
+    @Transactional
     public Organization update(@RequestBody final Organization updatedOrganization) {
         final Organization organization = getOrganization();
         if (!organization.getId().equals(updatedOrganization.getId())) {

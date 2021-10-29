@@ -32,14 +32,14 @@ public class OrganizationDaoImpl implements OrganizationDao {
     @Override
     @Cacheable(key = "#id", sync = true)
     public Optional<Organization> getById(final String id) {
-        LOGGER.debug("Fetching organization by organization_id='{}'", id);
+        LOGGER.debug("Fetching by organization_id='{}'", id);
         return organizationRepository.findById(id);
     }
 
     @Override
     @Cacheable(key = "#domainPrefix", sync = true)
     public Optional<Organization> getByDomainPrefix(final String domainPrefix) {
-        LOGGER.debug("Fetching organization by domain_prefix='{}'", domainPrefix);
+        LOGGER.debug("Fetching by domain_prefix='{}'", domainPrefix);
         return organizationRepository.findByDomainPrefix(domainPrefix);
     }
 
@@ -49,7 +49,7 @@ public class OrganizationDaoImpl implements OrganizationDao {
             @CacheEvict(key = "#domainPrefix")
     })
     public void update(final String id, final String name, final String domainPrefix, final String address, final boolean enabled, final Instant lastUpdated) {
-        LOGGER.debug("Updating organization by organization_id='{}'", id);
+        LOGGER.debug("Updating by organization_id='{}'", id);
         organizationRepository.update(id, name, domainPrefix, address, enabled, lastUpdated);
     }
 }

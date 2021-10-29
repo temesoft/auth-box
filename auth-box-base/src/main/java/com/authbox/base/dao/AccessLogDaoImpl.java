@@ -50,19 +50,19 @@ public class AccessLogDaoImpl implements AccessLogDao {
 
     @Override
     public Optional<AccessLog> getById(final String id) {
-        LOGGER.debug("Fetching AccessLog by id='{}'", id);
+        LOGGER.debug("Fetching by id='{}'", id);
         return accessLogRepository.findById(id);
     }
 
     @Override
     public void insert(final AccessLog accessLog) {
-        LOGGER.debug("Inserting AccessLog: {}", accessLog);
+        LOGGER.debug("Inserting: {}", accessLog);
         accessLogRepository.save(accessLog);
     }
 
     @Override
     public Page<AccessLog> listBy(final Map<String, String> criteria, final Pageable pageable) {
-        LOGGER.debug("List AccessLog by criteria='{}'", criteria);
+        LOGGER.debug("List by criteria='{}'", criteria);
         final StringBuilder whereQuery = new StringBuilder();
         final List<Integer> sqlTypes = Lists.newArrayList();
         final List<Object> values = Lists.newArrayList();

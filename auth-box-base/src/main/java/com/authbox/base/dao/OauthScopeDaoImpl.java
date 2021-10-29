@@ -28,26 +28,26 @@ public class OauthScopeDaoImpl implements OauthScopeDao {
 
     @Override
     public void insert(final OauthScope oauthScope) {
-        LOGGER.debug("Inserting oauthScope: {}", oauthScope);
+        LOGGER.debug("Inserting: {}", oauthScope);
         oauthScopeRepository.save(oauthScope);
     }
 
     @Override
     @Cacheable(key = "#id", sync = true)
     public Optional<OauthScope> getById(final String id) {
-        LOGGER.debug("Fetching oauthScope by id='{}'", id);
+        LOGGER.debug("Fetching by id='{}'", id);
         return oauthScopeRepository.findById(id);
     }
 
     @Override
     public List<OauthScope> listByIds(final List<String> ids) {
-        LOGGER.debug("List oauthScope by ids={}", ids);
+        LOGGER.debug("List by ids={}", ids);
         return ImmutableList.copyOf(oauthScopeRepository.findAllById(ids));
     }
 
     @Override
     public Page<OauthScope> listByOrganizationId(final String organizationId, final Pageable pageable) {
-        LOGGER.debug("List oauthScope by organizationId={}", organizationId);
+        LOGGER.debug("List by organizationId={}", organizationId);
         final long count = oauthScopeRepository.countByOrganizationId(organizationId);
         final List<OauthScope> resultList = oauthScopeRepository.listByOrganizationId(organizationId, pageable);
         return new PageImpl<>(resultList, pageable, count);
@@ -55,7 +55,7 @@ public class OauthScopeDaoImpl implements OauthScopeDao {
 
     @Override
     public boolean existsByOrganizationIdAndScope(final String organizationId, final String scope) {
-        LOGGER.debug("Exists oauthScope by exists by organizationId='{}' and scope={}", organizationId, scope);
+        LOGGER.debug("Exists by organizationId='{}' and scope={}", organizationId, scope);
         final long count = oauthScopeRepository.countByOrganizationIdAndScope(organizationId, scope);
         return count > 0;
     }
@@ -63,14 +63,14 @@ public class OauthScopeDaoImpl implements OauthScopeDao {
     @Override
     @CacheEvict(key = "#id")
     public void deleteById(final String id) {
-        LOGGER.debug("Delete oauthScope by id={}", id);
+        LOGGER.debug("Delete by id={}", id);
         oauthScopeRepository.deleteById(id);
     }
 
     @Override
     @CacheEvict(key = "#id")
     public void update(final String id, final String scope, final String description) {
-        LOGGER.debug("Update oauthScope by id={}", id);
+        LOGGER.debug("Update by id={}", id);
         // final String id, final String scope, final String description
         oauthScopeRepository.updateScopeAndDescription(id, scope, description);
     }
