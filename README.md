@@ -23,7 +23,7 @@ Full deployment of AuthBox (Oauth2 server and web management panel) is running o
 <h3><a href="https://oauth2.cloud" target="newOauth2CloudWindow">https://oauth2.cloud</a></h3> 
 
 * Hardware: [Raspberry Pi 3 ARMv7](https://www.raspberrypi.org/products/raspberry-pi-3-model-a-plus/) :smiley:
-* Software: OpenJDK 11, Spring-Boot 2.5.x, MySql 5.7
+* Software: OpenJDK 11, Spring-Boot 2.6.x, MySql 8
 
 Please create an account to see complete functionality. 
 Registration process will create the following:
