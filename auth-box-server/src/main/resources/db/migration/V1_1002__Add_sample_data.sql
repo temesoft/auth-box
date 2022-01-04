@@ -10,7 +10,7 @@ VALUES
     '2021-03-16 11:11:11'
 );
 
-INSERT INTO user (id, create_time, username, password, name, roles_csv, enabled, organization_id, last_updated)
+INSERT INTO users (id, create_time, username, password, name, roles_csv, enabled, organization_id, last_updated)
 VALUES
 (
     '8841e4ca-fc72-45f9-8af1-528e87b0b3f0',

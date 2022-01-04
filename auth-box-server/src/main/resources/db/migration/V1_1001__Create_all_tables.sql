@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS user (
+CREATE TABLE IF NOT EXISTS users (
   id          VARCHAR(36)   NOT NULL,
   create_time DATETIME      NOT NULL,
   username    VARCHAR(255)  NOT NULL,
@@ -10,9 +10,9 @@ CREATE TABLE IF NOT EXISTS user (
   last_updated DATETIME      NOT NULL,
   PRIMARY KEY (id)
 );
-ALTER TABLE user ADD INDEX idx_user_username (username);
-ALTER TABLE user ADD INDEX idx_user_organization_id (organization_id);
-ALTER TABLE user ADD INDEX idx_user_create_time (create_time);
+ALTER TABLE users ADD INDEX idx_users_username (username);
+ALTER TABLE users ADD INDEX idx_users_organization_id (organization_id);
+ALTER TABLE users ADD INDEX idx_users_create_time (create_time);
 
 
 CREATE TABLE IF NOT EXISTS organization (
