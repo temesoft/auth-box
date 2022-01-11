@@ -63,15 +63,17 @@ public class OrganizationController extends BaseController {
         if (isEmpty(updatedOrganization.getName())) {
             throw new BadRequestException("Organization name can not be empty");
         }
+        updatedOrganization.setLastUpdated(Instant.now(defaultClock));
         organizationDao.update(
                 updatedOrganization.getId(),
                 updatedOrganization.getName(),
                 updatedOrganization.getDomainPrefix(),
                 updatedOrganization.getAddress(),
                 updatedOrganization.isEnabled(),
-                Instant.now(defaultClock)
+                updatedOrganization.getLogoUrl(),
+                updatedOrganization.getLastUpdated()
         );
-        return getOrganization(organization.getId());
+        return updatedOrganization;
     }
 
     static void validateDomainPrefix(final OrganizationDao organizationDao, final String domainPrefix, final String providedOrganizationId) {

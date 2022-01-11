@@ -37,6 +37,7 @@ public class Organization implements Serializable {
     private String domainPrefix;
     private String address;
     private boolean enabled;
+    private String logoUrl;
     @Convert(converter = Jsr310JpaConverters.InstantConverter.class)
     private Instant lastUpdated;
 }

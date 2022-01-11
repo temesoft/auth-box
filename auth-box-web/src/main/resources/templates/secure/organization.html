@@ -13,7 +13,8 @@
         <div class="row">
             <div class="col-md-9 mb-3">
                 <label for="domainPrefix" title="Only letter and numbers allowed">Oauth2 server url</label>
-                <input value="{{appProperties.protocol}}://{{organization.domainPrefix}}.{{appProperties.domain}}" type="text" class="form-control" id="organization.url" readonly="readonly"/>
+                <input value="{{appProperties.protocol}}://{{organization.domainPrefix}}.{{appProperties.domain}}"
+                       type="text" class="form-control" id="organization.url" readonly="readonly"/>
             </div>
         </div>
         <div class="row">
@@ -22,7 +23,7 @@
                 <div class="input-group">
                     <input data-ng-model="organization.domainPrefix" type="text" class="form-control required"
                            style="width:{{organization.domainPrefix.length}}em !important;"
-                           id="domainPrefix" data-ng-change="validateDomainPrefix()">
+                           id="domainPrefix" data-ng-change="validateDomainPrefix()"/>
                 </div>
             </div>
         </div>
@@ -30,9 +31,20 @@
             <div class="col-md-5 mb-3">
                 <label for="organizationName">Organization name</label>
                 <input data-ng-model="organization.name" type="text" class="form-control required" id="organizationName"
-                       placeholder="" value="" required="required">
+                       placeholder="" value="" required="required"/>
             </div>
         </div>
+
+        <div class="row">
+            <div class="col-md-5 mb-3">
+                <label for="logoUrl">Logo URL <small class="muted">(optional, square)</small></label>
+                <input data-ng-model="organization.logoUrl" type="text" class="form-control" id="logoUrl" placeholder="" value=""/>
+            </div>
+            <div data-ng-if="organization.logoUrl" class="col-md-3 mb-3">
+                <img data-ng-src="{{organization.logoUrl}}" width="128" height="128" alt="logo url" />
+            </div>
+        </div>
+
         <hr class="mb-4">
 
         <div class="row">

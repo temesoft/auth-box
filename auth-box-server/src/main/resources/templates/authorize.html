@@ -76,6 +76,9 @@
 <body class="text-center">
 <main class="form-signin">
     <form method="post" action="/oauth/authorize">
+        <center th:if="${logoUrl != null && logoUrl != ''}">
+            <img th:src="${logoUrl}" width="128" height="128" class="center" />
+        </center>
         <h2 class="h3 mb-3 fw-normal">Please sign in</h2>
         <input type="text" id="username" name="username" class="form-control" placeholder="Username" required autofocus>
         <input type="password" id="password" name="password" class="form-control" placeholder="Password" required>
