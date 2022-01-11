@@ -1,5 +1,4 @@
 app.controller('organizationController', function organizationController($scope, $http){
-    $scope.message = 'Hello World';
     $scope.organization = null;
 
     $scope.loadOrganization = function() {
@@ -10,6 +9,7 @@ app.controller('organizationController', function organizationController($scope,
             function success(response){
                 if ($scope.$parent.validate(response)) {
                     $scope.organization = response.data;
+                    console.log("loaded org", $scope.organization);
                 }
             },
             $scope.$parent.logFailure,
@@ -28,6 +28,7 @@ app.controller('organizationController', function organizationController($scope,
                 if ($scope.$parent.validate(response)) {
                     $scope.$parent.logSuccess("Organization details updated");
                     $scope.organization = response.data;
+                    console.log("updated org", $scope.organization);
                     $("#modalEnterPrivateKey").modal('hide');
                     $scope.$parent.loadInitialAppData();
                 }

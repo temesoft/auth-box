@@ -32,7 +32,7 @@ public class OrganizationControllerTest {
     @Test
     public void testOrganizationController_checkAvailableDomainPrefix() {
         final OrganizationDao organizationDao = mock(OrganizationDao.class);
-        final Organization organization = new Organization(ORG_ID, now(), "Test Org", "test", "", true, now());
+        final Organization organization = new Organization(ORG_ID, now(), "Test Org", "test", "", true, "", now());
         when(organizationDao.getById(ORG_ID)).thenReturn(Optional.of(organization));
         when(organizationDao.getByDomainPrefix(any(String.class))).thenReturn(Optional.empty());
         when(organizationDao.getByDomainPrefix("something")).thenReturn(Optional.of(organization));

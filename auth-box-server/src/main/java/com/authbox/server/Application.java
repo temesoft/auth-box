@@ -15,6 +15,7 @@ public class Application {
     private static ConfigurableApplicationContext applicationContext;
 
     public static void main(final String... args) {
+        System.setProperty("java.net.preferIPv4Stack", "true");
         applicationContext = SpringApplication.run(Application.class, args);
     }
 

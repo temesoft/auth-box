@@ -14,6 +14,7 @@ public class CreateAccountWithOrganizationRequest {
     public final String name;
     public final String organizationName;
     public final String domainPrefix;
+    public final String logoUrl;
 
     public CreateAccountWithOrganizationRequest(
             @JsonProperty("id") final String id,
@@ -22,7 +23,8 @@ public class CreateAccountWithOrganizationRequest {
             @JsonProperty("password2") final String password2,
             @JsonProperty("name") final String name,
             @JsonProperty("organizationName") final String organizationName,
-            @JsonProperty("domainPrefix") final String domainPrefix) {
+            @JsonProperty("domainPrefix") final String domainPrefix,
+            @JsonProperty("logoUrl") final String logoUrl) {
         this.id = id;
         this.username = username;
         this.password = password;
@@ -30,5 +32,6 @@ public class CreateAccountWithOrganizationRequest {
         this.name = name;
         this.organizationName = organizationName;
         this.domainPrefix = domainPrefix;
+        this.logoUrl = logoUrl;
     }
 }

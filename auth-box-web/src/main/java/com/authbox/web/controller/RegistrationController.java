@@ -30,6 +30,7 @@ import java.time.Instant;
 import static com.authbox.base.util.HashUtils.makeRandomBase32;
 import static com.authbox.base.util.HashUtils.sha256;
 import static java.util.UUID.randomUUID;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.springframework.util.ObjectUtils.isEmpty;
 
 @RestController
@@ -90,6 +91,7 @@ public class RegistrationController extends BaseController {
                         request.domainPrefix.trim(),
                         "",
                         true,
+                        isBlank(request.logoUrl) ? "" : request.logoUrl.trim(),
                         now
                 )
         );

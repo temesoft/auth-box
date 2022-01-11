@@ -64,6 +64,9 @@
 <body class="text-center">
 <main class="form-signin">
     <form method="post" action="/oauth/authorize/2fa">
+        <center th:if="${logoUrl != null && logoUrl != ''}">
+            <img th:src="${logoUrl}" width="128" height="128" class="center" />
+        </center>
         <h2 class="h3 mb-3 fw-normal">Use Google Authenticator code to continue</h2>
         <input type="text" id="code2fa" name="code2fa" class="form-control" placeholder="Google Authenticator Code" required autofocus>
 

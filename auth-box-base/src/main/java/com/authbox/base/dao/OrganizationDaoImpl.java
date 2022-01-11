@@ -48,8 +48,8 @@ public class OrganizationDaoImpl implements OrganizationDao {
             @CacheEvict(key = "#id"),
             @CacheEvict(key = "#domainPrefix")
     })
-    public void update(final String id, final String name, final String domainPrefix, final String address, final boolean enabled, final Instant lastUpdated) {
+    public void update(final String id, final String name, final String domainPrefix, final String address, final boolean enabled, final String logoUrl, final Instant lastUpdated) {
         LOGGER.debug("Updating by organization_id='{}'", id);
-        organizationRepository.update(id, name, domainPrefix, address, enabled, lastUpdated);
+        organizationRepository.update(id, name, domainPrefix, address, enabled, logoUrl, lastUpdated);
     }
 }

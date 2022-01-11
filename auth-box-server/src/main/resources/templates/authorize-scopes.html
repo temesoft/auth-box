@@ -77,6 +77,9 @@
 <body class="text-center">
 <main class="form-signin">
     <form method="post" action="/oauth/authorize/finish" id="authorizeForm">
+        <center th:if="${logoUrl != null && logoUrl != ''}">
+            <img th:src="${logoUrl}" width="128" height="128" class="center" />
+        </center>
         <h2 class="h3 mb-3 fw-normal">Please authorize</h2>
 
         <table class="table w-100 text-left">

@@ -32,7 +32,7 @@
         .form-signin {
             width: 100%;
             background-color:#fff;
-            max-width: 330px;
+            max-width: 530px;
             padding: 20px;
             margin: auto;
         }
@@ -51,13 +51,9 @@
         }
         .form-signin input[type="text"] {
             margin-bottom: -1px;
-            border-bottom-right-radius: 0;
-            border-bottom-left-radius: 0;
         }
         .form-signin input[type="password"] {
             margin-bottom: 10px;
-            border-top-left-radius: 0;
-            border-top-right-radius: 0;
         }
         .bd-placeholder-img {
             font-size: 1.125rem;
@@ -95,14 +91,12 @@
             <div class="row">
                 <div class="col-md-12 mb-3">
                     <label for="registration.name">Name</label>
-                    <br/>
                     <input data-ng-model="registration.name" type="text" class="form-control required" id="registration.name"/>
                 </div>
             </div>
             <div class="row">
                 <div class="col-md-12 mb-3">
                     <label for="registration.password">Password</label>
-                    <br/>
                     <input data-ng-model="registration.password" type="password" class="form-control" id="registration.password"/>
                 </div>
             </div>
@@ -117,6 +111,16 @@
                     <label for="registration.organizationName">Organization name</label>
                     <br/>
                     <input data-ng-model="registration.organizationName" type="text" class="form-control" id="registration.organizationName"  data-ng-change="updateOrganizationName()"/>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-8 mb-3">
+                    <label for="registration.logoUrl">Logo URL <small class="muted">(optional, square)</small></label>
+                    <br/>
+                    <input data-ng-model="registration.logoUrl" type="text" class="form-control" id="registration.logoUrl"/>
+                </div>
+                <div data-ng-if="registration.logoUrl" class="col-md-3 mb-3">
+                    <img data-ng-src="{{registration.logoUrl}}" width="128" height="128" alt="logo url" />
                 </div>
             </div>
             <div class="row">

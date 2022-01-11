@@ -13,6 +13,6 @@ public interface OrganizationDao {
 
     Optional<Organization> getByDomainPrefix(String domainPrefix);
 
-    void update(String id, String name, String domainPrefix, String address, boolean enabled, Instant lastUpdated);
+    void update(String id, String name, String domainPrefix, String address, boolean enabled, String logoUrl, Instant lastUpdated);
 
 }

@@ -799,6 +799,9 @@ public class Oauth2AuthorizeController extends BaseController {
         if (scopeList != null) {
             builder.put("scopeList", scopeList);
         }
+        if (organization.getLogoUrl() != null) {
+            builder.put("logoUrl", organization.getLogoUrl());
+        }
         return builder;
     }
 }
