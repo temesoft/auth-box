@@ -20,10 +20,12 @@ Management portal provides a UI and restful API for querying and management of O
 
 ## Demo
 Full deployment of AuthBox (Oauth2 server and web management panel) is running on
-<h3><a href="https://oauth2.cloud" target="newOauth2CloudWindow">https://oauth2.cloud</a></h3> 
+<h3><a href='https://oauth2.cloud' target='newOauth2CloudWindow'>
+https://oauth2.cloud
+</a></h3> 
 
-* Hardware: [Raspberry Pi 3 ARMv7](https://www.raspberrypi.org/products/raspberry-pi-3-model-a-plus/) :smiley:
-* Software: OpenJDK 11, Spring-Boot 2.6.x, MySql 8
+* Hardware: [Raspberry Pi 2 Model B](https://www.raspberrypi.com/products/raspberry-pi-2-model-b/) :smiley:
+* Software: OpenJDK 11, Spring-Boot 2.6.2, MySql, Redis, Docker 
 
 Please create an account to see complete functionality. 
 Registration process will create the following:
@@ -40,7 +42,7 @@ Registration process will create the following:
 AuthBox is [RFC 6749](https://tools.ietf.org/html/rfc6749) compliant Oauth2 server implementation.
 It features the following available grant types: `password`, `client_credentials`, `authorization_code`, and `refresh_token`.
 As part of `authorization_code` it provides ability to use Two Factor Authentication (2FA) using 
-[Google Authenticator](https://support.google.com/accounts/answer/1066447).
+[Google Authenticator](https://support.google.com/accounts/answer/1066447) or [Authy](https://authy.com/download/)
 
 By default, Oauth2 server `auth-box-server` and management portal `auth-box-web` utilize 
 [MySql](https://www.mysql.com/) for data storage, and optionally [Redis](https://redis.io/) for 
