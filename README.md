@@ -25,7 +25,7 @@ https://oauth2.cloud
 </a></h3> 
 
 * Hardware: [Raspberry Pi 2 Model B](https://www.raspberrypi.com/products/raspberry-pi-2-model-b/) :smiley:
-* Software: OpenJDK 11, Spring-Boot 2.6.2, MySql, Redis, Docker 
+* Software: OpenJDK 11, Spring-Boot, MySql, Redis, Docker 
 
 Please create an account to see complete functionality. 
 Registration process will create the following:
@@ -87,6 +87,10 @@ java -jar auth-box-server.jar
 | info.app.description | Application description | Auth box server |
 | info.app.version | Application version | @project.version@ |
 | info.app.domain | Application domain | oauth2.cloud |
+| info.app.protocol | Application protocol | https |
+| info.app.accessQueueProcessingIdle | Duration for processing queue when idle | 5s |
+| info.app.accessQueueProcessingPull | Duration for processing queue when pulling | 1s |
+| info.app.allowTokenDetailsWithoutClientCredentials | Allow token details endpoint call without client credentials provided | true |
 | server.port | Server listening port | 9999 |
 | spring.datasource.url | Database JDBC url | jdbc:mysql://${MYSQL_HOST:localhost}:3306/authbox?serverTimezone=UTC&useLegacyDatetimeCode=false |
 | spring.datasource.username | Database username | root |
@@ -107,6 +111,10 @@ java -jar auth-box-server.jar
 | info.app.version | Application version | @project.version@ |
 | info.app.domain | Application domain | oauth2.cloud |
 | info.app.registration-enabled | Registration of new Organizations/Users enabled | true |
+| info.app.accessQueueProcessingIdle | Duration for processing queue when idle | 5s |
+| info.app.accessQueueProcessingPull | Duration for processing queue when pulling | 1s |
+| info.app.registrationEnabled | Registration is enabled | oauth2.cloud |
+| info.app.allowTokenDetailsWithoutClientCredentials | Allow token details endpoint call without client credentials provided | true |
 | server.port | Server listening port | 8888 |
 | spring.datasource.url | Database JDBC url | jdbc:mysql://${MYSQL_HOST:localhost}:3306/authbox?serverTimezone=UTC&useLegacyDatetimeCode=false |
 | spring.datasource.username | Database username | root |
