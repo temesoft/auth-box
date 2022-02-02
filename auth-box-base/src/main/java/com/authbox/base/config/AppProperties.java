@@ -24,6 +24,6 @@ public class AppProperties {
     private Duration accessQueueProcessingPull = Duration.ofSeconds(1);
     private int port = 0;
     private boolean registrationEnabled = true;
-    private boolean allowTokenDetailsWithoutClientCredentials = false;
+    private boolean allowTokenDetailsWithoutClientCredentials = true;
 
 }
