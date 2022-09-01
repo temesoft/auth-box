@@ -13,7 +13,7 @@
         <maven.compiler.target>11</maven.compiler.target>
         <webjars.locator.version>0.45</webjars.locator.version>
         <webjars.bootstrap.version>4.6.0</webjars.bootstrap.version>
-        <webjars.jquery.version>3.6.0</webjars.jquery.version>
+        <webjars.jquery.version>3.6.1</webjars.jquery.version>
         <webjars.font-awesome.version>5.15.4</webjars.font-awesome.version>
         <webjars.angularjs.version>1.8.2</webjars.angularjs.version>
         <webjars.angular-ui-bootstrap.version>2.5.0</webjars.angular-ui-bootstrap.version>
