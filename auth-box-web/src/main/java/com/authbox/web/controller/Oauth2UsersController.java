@@ -8,6 +8,9 @@ import com.authbox.base.model.Organization;
 import com.authbox.base.util.HashUtils;
 import com.authbox.web.model.DeleteUsersRequest;
 import com.authbox.web.model.PasswordChangeRequest;
+import com.authbox.web.service.QrCodeGeneratorService;
+import com.google.zxing.WriterException;
+import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -22,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
 import javax.transaction.Transactional;
+import java.awt.image.BufferedImage;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.Optional;
@@ -33,18 +37,13 @@ import static org.springframework.http.MediaType.IMAGE_PNG_VALUE;
 import static org.springframework.util.ObjectUtils.isEmpty;
 
 @RestController
+@AllArgsConstructor
 @RequestMapping(API_PREFIX + "/oauth2-user")
 public class Oauth2UsersController extends BaseController {
 
     private final PasswordEncoder passwordEncoder;
-    private final RestTemplate restTemplate;
+    private final QrCodeGeneratorService qrCodeGeneratorService;
     private final Clock defaultClock;
-
-    public Oauth2UsersController(final PasswordEncoder passwordEncoder, final RestTemplate restTemplate, final Clock defaultClock) {
-        this.passwordEncoder = passwordEncoder;
-        this.restTemplate = restTemplate;
-        this.defaultClock = defaultClock;
-    }
 
     @GetMapping
     public Page<OauthUser> getOauth2Users(@RequestParam(value = "pageSize", defaultValue = "10") final int pageSize,
@@ -105,7 +104,7 @@ public class Oauth2UsersController extends BaseController {
     }
 
     @GetMapping(value = "/{id}/2fa-qr-code", produces = IMAGE_PNG_VALUE)
-    public byte[] generate2FaQrCodeImage(@PathVariable("id") final String userId) {
+    public BufferedImage generate2FaQrCodeImage(@PathVariable("id") final String userId) throws WriterException {
         final Organization organization = getOrganization();
         final Optional<OauthUser> oauthUser = oauthUserDao.getById(userId);
         if (oauthUser.isEmpty()) {
@@ -116,7 +115,7 @@ public class Oauth2UsersController extends BaseController {
             throw new AccessDeniedException();
         }
 
-        final String qrCodeUrl = "https://chart.googleapis.com/chart?chs=200x200&chld=M%%7C0&cht=qr&chl=otpauth://totp/"
+        final String qrCodeUrl = "otpauth://totp/"
                 + organization.getName()
                 + " ("
                 + oauthUser.get().getUsername()
@@ -124,7 +123,7 @@ public class Oauth2UsersController extends BaseController {
                 + oauthUser.get().getSecret()
                 + "&issuer=auth-box";
 
-        return restTemplate.getForObject(qrCodeUrl, byte[].class);
+        return qrCodeGeneratorService.generateQrCode(qrCodeUrl);
     }
 
     @PostMapping("/{id}")
@@ -186,16 +185,17 @@ public class Oauth2UsersController extends BaseController {
         if (isEmpty(newOauthUser.getUsername())) {
             throw new BadRequestException("Username can not be empty");
         }
+
+        // check if username already there
+        if (oauthUserDao.getByUsernameAndOrganizationId(newOauthUser.getUsername().trim(), organization.getId()).isPresent()) {
+            throw new BadRequestException("Username already exists: " + newOauthUser.getUsername().trim());
+        }
+
         final String password;
         if (isEmpty(newOauthUser.getPassword())) {
             password = passwordEncoder.encode(UUID.randomUUID().toString());
         } else {
             password = passwordEncoder.encode(newOauthUser.getPassword().trim());
-        }
-
-        // check if username already there
-        if (oauthUserDao.getByUsernameAndOrganizationId(newOauthUser.getUsername().trim(), organization.getId()).isPresent()) {
-            throw new BadRequestException("Username already exists: " + newOauthUser.getUsername().trim());
         }
 
         final String id = UUID.randomUUID().toString();

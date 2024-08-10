@@ -6,6 +6,7 @@ import com.authbox.base.model.AccessLog;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.util.concurrent.Uninterruptibles;
 import io.micrometer.core.instrument.MeterRegistry;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
@@ -24,9 +25,9 @@ import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.apache.commons.lang3.ArrayUtils.isEmpty;
 
+@Slf4j
 public class AccessLogServiceImpl implements AccessLogService, DisposableBean {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AccessLogServiceImpl.class);
     private static final BlockingQueue<AccessLog> QUEUE = new LinkedBlockingDeque<>();
 
     private final AppProperties appProperties;
@@ -95,7 +96,7 @@ public class AccessLogServiceImpl implements AccessLogService, DisposableBean {
     }
 
     private class AccessLogQueueConsumer implements Runnable {
-
+        @Override
         public void run() {
             try {
                 while (true) {
@@ -108,7 +109,7 @@ public class AccessLogServiceImpl implements AccessLogService, DisposableBean {
                     }
                 }
             } catch (final Exception e) {
-                LOGGER.info("Stopping '{}' thread, received exception: {}", this.getClass().getSimpleName(), e.getMessage());
+                log.info("Stopping '{}' thread, received exception: {}", this.getClass().getSimpleName(), e.getMessage());
                 Thread.currentThread().interrupt();
             }
         }

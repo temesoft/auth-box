@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.ToString;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 import static com.authbox.base.config.Constants.OAUTH2_ATTR_ACCESS_TOKEN;
@@ -19,6 +20,7 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 @ToString
 public class OauthTokenResponse implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 12159753648256L;
 
     @JsonProperty(OAUTH2_ATTR_ACCESS_TOKEN)

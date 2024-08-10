@@ -13,6 +13,7 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
+import java.io.Serial;
 import java.io.Serializable;
 import java.time.Instant;
 import java.util.List;
@@ -29,6 +30,7 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 @ToString
 public class OauthScope implements Comparable<OauthScope>, Serializable {
 
+    @Serial
     private static final long serialVersionUID = 12159753648254L;
 
     @Id

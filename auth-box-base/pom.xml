@@ -5,30 +5,20 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>auth-box-base</artifactId>
-    <version>0.1.21</version>
+    <version>0.1.22</version>
     <packaging>jar</packaging>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
     </properties>
 
     <parent>
         <groupId>com.authbox</groupId>
         <artifactId>auth-box</artifactId>
-        <version>0.1.21</version>
+        <version>0.1.22</version>
     </parent>
-
-    <dependencies>
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>[1.18.20,)</version>
-            <scope>provided</scope>
-        </dependency>
-
-    </dependencies>
 
     <build>
         <finalName>auth-box-base</finalName>

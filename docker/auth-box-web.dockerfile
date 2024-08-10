@@ -1,4 +1,4 @@
-FROM azul/zulu-openjdk-debian:11
+FROM azul/zulu-openjdk-debian:21
 
 MAINTAINER Dmitriy Temesov <dt@temesoft.com>
 

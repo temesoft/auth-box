@@ -24,15 +24,14 @@ Full deployment of AuthBox (Oauth2 server and web management panel) is running o
 https://oauth2.cloud
 </a></h3> 
 
-* Hardware: [Raspberry Pi 2 Model B](https://www.raspberrypi.com/products/raspberry-pi-2-model-b/) :smiley:
-* Software: OpenJDK 11, Spring-Boot, MySql, Redis, Docker 
+* Software: OpenJDK 17, Spring-Boot, MySql 
 
 Please create an account to see complete functionality. 
 Registration process will create the following:
 
 * Oauth2 management panel Admin account.
 * Oauth2 client for service-to-service auth (`client_credentials`) which uses standard Oauth2 token.
-* Oauth2 client for user auth (`password`, `authorization_code`, `refresh_token`) which uses JWT (custom RSA 2048 bit private key signed) token.
+* Oauth2 client for user auth (`password`, `authorization_code`, `refresh_token`) which uses JWT (RSA 2048 bit private key signed) token.
 * One Oauth2 scope which is assigned to both clients.
 * Oauth2 user (username: `test`; password: `test`) to demo user authentication or/and authorization.
 
@@ -45,8 +44,7 @@ As part of `authorization_code` it provides ability to use Two Factor Authentica
 [Google Authenticator](https://support.google.com/accounts/answer/1066447) or [Authy](https://authy.com/download/)
 
 By default, Oauth2 server `auth-box-server` and management portal `auth-box-web` utilize 
-[MySql](https://www.mysql.com/) for data storage, and optionally [Redis](https://redis.io/) for 
-DAO caching and web session store.
+[MySql](https://www.mysql.com/) for data storage
 
 `auth-box-server` and `auth-box-web` are docker/k8s ready and come with [Dockerfile(s)](docker/) and [docker-compose](docker/) scripts.
 
@@ -96,10 +94,8 @@ java -jar auth-box-server.jar
 | spring.datasource.username | Database username | root |
 | spring.datasource.password | Database password | r00t |
 | spring.flyway.enabled | Flyway database migration flag | true |
-| spring.cache.type | DAO cache type (possible values are: caffeine/redis/none) | none |
+| spring.cache.type | DAO cache type (possible values are: caffeine/none) | none |
 | spring.cache.cache-names | Cache names to enable in csv list (possible values are OauthClient,OauthScope,OauthToken,OauthUser,Organization,User) | N/A |
-| spring.redis.host | Redis cache server host (disabled when not specified) | N/A |
-| spring.redis.port | Redis cache server port | 6379 |
 
 <a name="management_panel_auth-box-web_configuration" />
 
@@ -120,11 +116,8 @@ java -jar auth-box-server.jar
 | spring.datasource.username | Database username | root |
 | spring.datasource.password | Database password | r00t |
 | spring.flyway.enabled | Flyway database migration flag | true |
-| spring.cache.type | DAO cache type (possible values are: caffeine/redis/none) | none |
+| spring.cache.type | DAO cache type (possible values are: caffeine/none) | none |
 | spring.cache.cache-names | Cache names to enable in csv list (possible values are OauthClient,OauthScope,OauthToken,OauthUser,Organization,User) | N/A |
-| spring.session.store-type | Web session storage type (possible values are none/redis) | none |
-| spring.redis.host | Redis cache server host (disabled when not specified) | N/A |
-| spring.redis.port | Redis cache server port | 6379 |
 | ipstack.url | IP details api url | https://api.ipstack.com/{ip}?access_key=YOUR_API_KEY |
 | ipstack.enabled | IP details functionality enabled | false |
  
@@ -143,9 +136,9 @@ docker build -f docker/auth-box-server.dockerfile -t auth-box-server .
     
 #### Build auth-box-web docker container
 ```shell script
-docker build -f docker/auth-box-web.dockerfile -t auth-box-web .
+docker build -f docker/auth-box-web.dockerfile -t auth-box-web . 
 ```    
-#### Start all demo (mysql, redis, auth-box-web, auth-box-server) on localhost:8888 (web UI portal) and localhost:9999 (oauth2 server)
+#### Start all demo (mysql, auth-box-web, auth-box-server) on localhost:8888 (web UI portal) and localhost:9999 (oauth2 server)
  ```shell script
 docker-compose -f docker/demo-docker-compose.yml up
 #   Once the docker services startes use the following:
@@ -158,14 +151,7 @@ docker-compose -f docker/demo-docker-compose.yml up
  ```shell script
 docker run -p 3306:3306 --rm --name mysql -e MYSQL_ROOT_PASSWORD=r00t -e MYSQL_DATABASE=authbox -it mysql:latest
 ```
-#### MySql container (arm)
-```shell script
-docker run -p 3306:3306 --rm --name mysql -e MYSQL_ROOT_PASSWORD=r00t -e MYSQL_DATABASE=authbox -it biarms/mysql
-```    
-#### Redis container (i386)
-```shell script
-docker run --name some-redis -p 6379:6379 --rm -it redis
-```
+
 <a name="support" />
 
 ## Support & contribution
@@ -178,5 +164,5 @@ To contribute to this project - please create a PR :smiley:
 
 * the freedom to use the software for any purpose,
 * the freedom to change the software to suit your needs,
-* the freedom to share the software with your friends and neighbors, and
+* the freedom to share the software with your friends and neighbors
 * the freedom to share the changes you make.

@@ -11,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
+import javax.transaction.Transactional;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -55,6 +56,7 @@ public class OauthUserDaoImpl implements OauthUserDao {
 
     @Override
     @CacheEvict(key = "#id")
+    @Transactional
     public void deleteById(final String id) {
         LOGGER.debug("Fetching by id='{}'", id);
         oauthUserRepository.deleteById(id);
@@ -62,6 +64,7 @@ public class OauthUserDaoImpl implements OauthUserDao {
 
     @Override
     @CacheEvict(key = "#id")
+    @Transactional
     public void update(final String id, final String username, final String password, final boolean enabled, final String metadata, final boolean using2Fa, final Instant lastUpdated) {
         LOGGER.debug("Updating by id='{}', username='{}'", id, username);
         oauthUserRepository.update(id, username, password, enabled, metadata, using2Fa, lastUpdated);

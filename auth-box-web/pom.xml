@@ -4,23 +4,23 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>auth-box-web</artifactId>
-    <version>0.1.21</version>
+    <version>0.1.22</version>
     <packaging>jar</packaging>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
         <webjars.locator.version>0.42</webjars.locator.version>
         <webjars.bootstrap.version>4.6.0</webjars.bootstrap.version>
-        <webjars.jquery.version>3.6.0</webjars.jquery.version>
+        <webjars.jquery.version>3.6.4</webjars.jquery.version>
         <webjars.font-awesome.version>5.15.4</webjars.font-awesome.version>
         <webjars.angularjs.version>1.8.2</webjars.angularjs.version>
         <webjars.angular-ui-bootstrap.version>2.5.0</webjars.angular-ui-bootstrap.version>
         <webjars.angular-toastr.version>2.1.1</webjars.angular-toastr.version>
         <webjars.bootstrap4-toggle.version>3.6.0</webjars.bootstrap4-toggle.version>
         <webjars.select2.version>4.0.13</webjars.select2.version>
-        <webjars.momentjs.version>2.29.1</webjars.momentjs.version>
+        <webjars.momentjs.version>2.29.4</webjars.momentjs.version>
         <webjars.angular-moment.version>1.0.0</webjars.angular-moment.version>
         <webjars.popper.version>1.14.7</webjars.popper.version>
         <webjars.jquery-cookie.version>1.4.1-1</webjars.jquery-cookie.version>
@@ -29,7 +29,7 @@
     <parent>
         <groupId>com.authbox</groupId>
         <artifactId>auth-box</artifactId>
-        <version>0.1.21</version>
+        <version>0.1.22</version>
     </parent>
 
     <dependencies>

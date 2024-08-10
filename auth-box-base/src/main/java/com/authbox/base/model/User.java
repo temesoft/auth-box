@@ -19,6 +19,7 @@ import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import java.io.Serial;
 import java.io.Serializable;
 import java.time.Instant;
 import java.util.Collection;
@@ -37,6 +38,7 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 @ToString
 public class User implements UserDetails, Serializable {
 
+    @Serial
     private static final long serialVersionUID = 12159753648257L;
 
     @Id
@@ -59,8 +61,7 @@ public class User implements UserDetails, Serializable {
     @Override
     @JsonIgnore
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return roles.stream().map((Function<String, GrantedAuthority>) SimpleGrantedAuthority::new)
-                .collect(Collectors.toUnmodifiableList());
+        return roles.stream().map((Function<String, GrantedAuthority>) SimpleGrantedAuthority::new).toList();
     }
 
     @Override

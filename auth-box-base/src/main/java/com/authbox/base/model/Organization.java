@@ -12,6 +12,7 @@ import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import java.io.Serial;
 import java.io.Serializable;
 import java.time.Instant;
 
@@ -27,6 +28,7 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 @ToString
 public class Organization implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 12159753648251L;
 
     @Id

@@ -25,5 +25,4 @@ public class AppProperties {
     private int port = 0;
     private boolean registrationEnabled = true;
     private boolean allowTokenDetailsWithoutClientCredentials = true;
-
 }

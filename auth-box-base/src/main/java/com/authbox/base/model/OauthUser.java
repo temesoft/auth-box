@@ -13,6 +13,7 @@ import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import java.io.Serial;
 import java.io.Serializable;
 import java.time.Instant;
 
@@ -25,6 +26,7 @@ import java.time.Instant;
 @ToString
 public class OauthUser implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 12159753648257L;
 
     @Id

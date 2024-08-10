@@ -33,6 +33,7 @@ import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import java.io.IOException;
+import java.io.Serial;
 import java.io.Serializable;
 import java.time.Duration;
 import java.time.Instant;
@@ -52,6 +53,7 @@ import static javax.persistence.EnumType.STRING;
 @ToString
 public class OauthClient extends EmptyInterceptor implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 12159753648252L;
 
     @Id
@@ -115,7 +117,7 @@ public class OauthClient extends EmptyInterceptor implements Serializable {
         if (scopeIds != null) {
             return scopeIds;
         } else if (scopes != null) {
-            return scopes.stream().map(OauthScope::getId).collect(Collectors.toUnmodifiableList());
+            return scopes.stream().map(OauthScope::getId).toList();
         } else {
             return null;
         }

@@ -14,8 +14,9 @@ import com.authbox.base.service.AccessLogService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.Jwt;
+import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.impl.DefaultClaims;
@@ -233,12 +234,12 @@ public class TokenDetailsServiceImpl implements TokenDetailsService {
         }
 
         final ImmutableMap.Builder<String, Object> result = ImmutableMap.builder();
-        final Jwt jwt;
+        final Jws<Claims> jws;
         try {
-            jwt = Jwts.parserBuilder()
-                    .setSigningKey(publicKey)
+            jws = Jwts.parser()
+                    .verifyWith(publicKey)
                     .build()
-                    .parse(accessToken);
+                    .parseSignedClaims(accessToken);
         } catch (MalformedJwtException e) {
             LOGGER.debug("Unable to parse JWT token: {}", e.getMessage());
             accessLogService.create(
@@ -289,7 +290,7 @@ public class TokenDetailsServiceImpl implements TokenDetailsService {
                 "Successfully validated JWT token and signature"
         );
 
-        final DefaultClaims defaultClaims = (DefaultClaims) jwt.getBody();
+        final DefaultClaims defaultClaims = (DefaultClaims) jws.getPayload();
         final Instant now = Instant.now(defaultClock);
 
         result.put(OAUTH2_ATTR_ACTIVE, true);

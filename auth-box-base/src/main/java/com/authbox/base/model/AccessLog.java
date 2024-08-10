@@ -15,6 +15,7 @@ import javax.persistence.Entity;
 import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import java.io.Serial;
 import java.io.Serializable;
 import java.time.Duration;
 import java.time.Instant;
@@ -31,6 +32,7 @@ import static javax.persistence.EnumType.STRING;
 @Table(name = "access_log")
 public class AccessLog implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 12149753600001L;
 
     @Id

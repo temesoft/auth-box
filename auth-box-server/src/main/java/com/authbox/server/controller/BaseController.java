@@ -43,8 +43,8 @@ public abstract class BaseController {
         String host = URI.create(req.getRequestURL().toString()).getHost();
         final InetAddressValidator validator = InetAddressValidator.getInstance();
         if (isNotBlank(appProperties.getDomain())
-                && !validator.isValidInet4Address(host)
-                && !validator.isValidInet6Address(host)) {
+            && !validator.isValidInet4Address(host)
+            && !validator.isValidInet6Address(host)) {
             host = host.replace("." + appProperties.getDomain(), "");
         }
         MDC.put(RequestWrapperFilterConfiguration.REQUEST_DOMAIN_PREFIX_MDC_KEY, host);
@@ -52,7 +52,12 @@ public abstract class BaseController {
     }
 
     protected Organization getByDomainPrefix(final String organizationDomainPrefix) {
-        final Optional<Organization> organization = organizationDao.getByDomainPrefix(organizationDomainPrefix);
+        final Optional<Organization> organization;
+        if ("localhost.".equalsIgnoreCase(organizationDomainPrefix)) {
+            organization = organizationDao.getByDomainPrefix("localhost");
+        } else {
+            organization = organizationDao.getByDomainPrefix(organizationDomainPrefix);
+        }
         if (organization.isEmpty() || !organization.get().isEnabled()) {
             LOGGER.debug("Organization not found by domain_prefix='{}' or disabled", organizationDomainPrefix);
             accessLogService.create(

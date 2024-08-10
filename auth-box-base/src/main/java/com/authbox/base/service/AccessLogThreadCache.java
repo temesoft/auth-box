@@ -9,17 +9,17 @@ import java.util.List;
 @Component
 public class AccessLogThreadCache {
 
-    private static ThreadLocal<List<AccessLog>> threadLocal = ThreadLocal.withInitial(ArrayList::new);
+    private static final ThreadLocal<List<AccessLog>> THREAD_LOCAL_CACHE = ThreadLocal.withInitial(ArrayList::new);
 
     public void cleanup() {
-        threadLocal.remove();
+        THREAD_LOCAL_CACHE.remove();
     }
 
     public void addAccessLog(final AccessLog accessLog) {
-        threadLocal.get().add(accessLog);
+        THREAD_LOCAL_CACHE.get().add(accessLog);
     }
 
     public List<AccessLog> getAll() {
-        return threadLocal.get();
+        return THREAD_LOCAL_CACHE.get();
     }
 }

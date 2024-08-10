@@ -10,6 +10,7 @@ import com.authbox.base.model.OauthTokenResponse;
 import com.authbox.base.model.OauthUser;
 import com.authbox.base.model.Organization;
 import com.authbox.server.service.TokenEndpointProcessor;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,9 +36,8 @@ import static java.lang.String.join;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.springframework.util.ObjectUtils.isEmpty;
 
+@Slf4j
 public class AuthorizationCodeGrantTypeTokenEndpointProcessor extends TokenEndpointProcessor {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(AuthorizationCodeGrantTypeTokenEndpointProcessor.class);
 
     @Override
     @Transactional
@@ -53,7 +53,7 @@ public class AuthorizationCodeGrantTypeTokenEndpointProcessor extends TokenEndpo
 
         final String code = req.getParameter(OAUTH2_ATTR_CODE);
         if (isEmpty(code)) {
-            LOGGER.debug("Authorization code is missing or empty");
+            log.debug("Authorization code is missing or empty");
             accessLogService.create(
                     AccessLog.builder()
                             .withRequestId(getRequestId())
@@ -69,7 +69,7 @@ public class AuthorizationCodeGrantTypeTokenEndpointProcessor extends TokenEndpo
         final String hash = sha256(code);
         final Optional<OauthToken> oauthToken = oauthTokenDao.getByHash(hash);
         if (oauthToken.isEmpty()) {
-            LOGGER.debug("Authorization code='{}', hash='{}' was not found", code, hash);
+            log.debug("Authorization code='{}', hash='{}' was not found", code, hash);
             accessLogService.create(
                     AccessLog.builder()
                             .withRequestId(getRequestId())
@@ -83,7 +83,7 @@ public class AuthorizationCodeGrantTypeTokenEndpointProcessor extends TokenEndpo
         }
 
         if (!oauthToken.get().getTokenType().equals(AUTHORIZATION_CODE)) {
-            LOGGER.debug("Provided token is not ACCESS_TOKEN. type='{}' token='{}' / hash='{}'", oauthToken.get().getTokenType(), code, hash);
+            log.debug("Provided token is not ACCESS_TOKEN. type='{}' token='{}' / hash='{}'", oauthToken.get().getTokenType(), code, hash);
             accessLogService.create(
                     AccessLog.builder()
                             .withRequestId(getRequestId())
@@ -97,7 +97,7 @@ public class AuthorizationCodeGrantTypeTokenEndpointProcessor extends TokenEndpo
         }
 
         if (isNotEmpty(oauthToken.get().getLinkedTokenId())) {
-            LOGGER.debug("Provided authorization code token is already used. token='{}' / hash='{}'", code, hash);
+            log.debug("Provided authorization code token is already used. token='{}' / hash='{}'", code, hash);
             accessLogService.create(
                     AccessLog.builder()
                             .withRequestId(getRequestId())
@@ -112,7 +112,7 @@ public class AuthorizationCodeGrantTypeTokenEndpointProcessor extends TokenEndpo
 
         final Instant now = Instant.now(defaultClock);
         if (now.isAfter(oauthToken.get().getExpiration())) {
-            LOGGER.debug("Authorization code expired code='{}', hash='{}'", code, hash);
+            log.debug("Authorization code expired code='{}', hash='{}'", code, hash);
             accessLogService.create(
                     AccessLog.builder()
                             .withRequestId(getRequestId())
@@ -126,7 +126,7 @@ public class AuthorizationCodeGrantTypeTokenEndpointProcessor extends TokenEndpo
         }
 
         if (isEmpty(oauthToken.get().getOauthUserId())) {
-            LOGGER.debug("Authorization code user id not available");
+            log.debug("Authorization code user id not available");
             accessLogService.create(
                     AccessLog.builder()
                             .withRequestId(getRequestId())
@@ -140,7 +140,7 @@ public class AuthorizationCodeGrantTypeTokenEndpointProcessor extends TokenEndpo
         }
         final Optional<OauthUser> oauthUser = oauthUserDao.getById(oauthToken.get().getOauthUserId());
         if (oauthUser.isEmpty()) {
-            LOGGER.debug("Authorization code user not found by id='{}'", oauthToken.get().getOauthUserId());
+            log.debug("Authorization code user not found by id='{}'", oauthToken.get().getOauthUserId());
             accessLogService.create(
                     AccessLog.builder()
                             .withRequestId(getRequestId())

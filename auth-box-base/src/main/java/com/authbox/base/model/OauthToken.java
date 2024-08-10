@@ -15,6 +15,7 @@ import javax.persistence.Entity;
 import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import java.io.Serial;
 import java.io.Serializable;
 import java.time.Instant;
 import java.util.List;
@@ -32,6 +33,7 @@ import static javax.persistence.EnumType.STRING;
 @ToString
 public class OauthToken implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 12159753648255L;
 
     @Id

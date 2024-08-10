@@ -19,5 +19,8 @@ public class SecurityConfigurationTest {
         assertThat(passwordEncoder.encode(PASSWORD_TEXT)).isNotBlank().hasSize(60).startsWith("$"); // BCrypt format
         assertThat(passwordEncoder.matches(PASSWORD_TEXT, PASSWORD_HASH)).isTrue(); // encoded password and known hash should match
         assertThat(passwordEncoder.encode(PASSWORD_TEXT)).isNotEqualTo(PASSWORD_HASH); // each hash of same password should be different
+
+        assertThat(passwordEncoder.matches("tester", "$2a$10$14VcPh6ctZ9zQ64CGjXtnO.rKce4obEkPEJ4n0Jz9J.76qTa3Wuw2")).isTrue();
+        assertThat(passwordEncoder.matches("qweqwe", "$2a$10$th30RQRD177ka5.JWvXTqe2vX2faH9UEnrIz25kormL6DNvotu7BW")).isTrue();
     }
 }
