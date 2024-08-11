@@ -20,9 +20,7 @@ Management portal provides a UI and restful API for querying and management of O
 
 ## Demo
 Full deployment of AuthBox (Oauth2 server and web management panel) is running on
-<h3><a href='https://oauth2.cloud' target='newOauth2CloudWindow'>
-https://oauth2.cloud
-</a></h3> 
+<h3><a href='https://oauth2.cloud' target='newOauth2CloudWindow'>https://oauth2.cloud</a></h3> 
 
 * Software: OpenJDK 17, Spring-Boot, MySql 
 

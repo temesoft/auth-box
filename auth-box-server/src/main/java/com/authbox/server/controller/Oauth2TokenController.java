@@ -9,6 +9,8 @@ import com.authbox.base.model.Organization;
 import com.authbox.server.service.TokenDetailsService;
 import com.authbox.server.service.TokenEndpointProcessor;
 import io.micrometer.core.annotation.Timed;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,8 +18,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -39,7 +39,6 @@ public class Oauth2TokenController extends BaseController {
 
     @Autowired
     private List<TokenEndpointProcessor> tokenEndpointProcessors;
-
     @Autowired
     private TokenDetailsService tokenDetailsService;
 
@@ -85,8 +84,9 @@ public class Oauth2TokenController extends BaseController {
     @PostMapping("/introspection")
     @GetMapping("/introspection")
     @Timed("introspectToken")
-    public Map<String, Object> introspectToken(final HttpServletRequest req,
-                                               @RequestParam(value = OAUTH2_ATTR_ACCESS_TOKEN, required = false) final String token) {
+    public Map<String, Object> introspectToken(
+            final HttpServletRequest req,
+            @RequestParam(value = OAUTH2_ATTR_ACCESS_TOKEN, required = false) final String token) {
         accessLogService.create(
                 AccessLog.builder()
                         .withRequestId(getRequestId())

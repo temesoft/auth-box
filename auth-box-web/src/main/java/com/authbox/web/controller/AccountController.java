@@ -7,7 +7,10 @@ import com.authbox.web.config.Constants;
 import com.authbox.web.model.CreateAccountRequest;
 import com.authbox.web.model.DeleteAccountsRequest;
 import com.authbox.web.model.PasswordChangeRequest;
+import com.authbox.web.model.UpdateUserRequest;
 import com.google.common.collect.ImmutableList;
+import lombok.AllArgsConstructor;
+import lombok.val;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
@@ -22,26 +25,21 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.Optional;
-import java.util.function.Consumer;
 
 import static java.util.UUID.randomUUID;
 import static org.springframework.util.ObjectUtils.isEmpty;
 
 @RestController
 @RequestMapping(Constants.API_PREFIX + "/account")
+@AllArgsConstructor
 public class AccountController extends BaseController {
 
     private final Clock defaultClock;
     private final PasswordEncoder passwordEncoder;
-
-    public AccountController(final Clock defaultClock, final PasswordEncoder passwordEncoder) {
-        this.defaultClock = defaultClock;
-        this.passwordEncoder = passwordEncoder;
-    }
 
     @GetMapping
     @PreAuthorize("hasRole('USER') || hasRole('ADMIN')")
@@ -52,7 +50,7 @@ public class AccountController extends BaseController {
     @PostMapping
     @PreAuthorize("hasRole('USER') || hasRole('ADMIN')")
     @Transactional
-    public User updateCurrentAccount(@RequestBody final User updatedUser) {
+    public User updateCurrentAccount(@RequestBody final UpdateUserRequest updatedUser) {
         final User user = getCurrentUser();
         userDao.update(user.getId(), user.getUsername(), updatedUser.getName(), user.getPassword(), updatedUser.isEnabled(), Instant.now(defaultClock));
         return userDao.getById(user.getId()).orElseThrow(() -> new BadRequestException("User not found by id: " + user.getId()));
@@ -79,8 +77,16 @@ public class AccountController extends BaseController {
         if (!passwordChangeRequest.newPassword.equals(passwordChangeRequest.newPassword2)) {
             throw new BadRequestException("New password and new password 2 do not match");
         }
-        userDao.update(user.getId(), user.getUsername(), user.getName(), passwordEncoder.encode(passwordChangeRequest.newPassword), user.isEnabled(), Instant.now(defaultClock));
-        return userDao.getById(user.getId()).orElseThrow(() -> new BadRequestException("User not found by id: " + user.getId()));
+        userDao.update(
+                user.getId(),
+                user.getUsername(),
+                user.getName(),
+                passwordEncoder.encode(passwordChangeRequest.newPassword),
+                user.isEnabled(),
+                Instant.now(defaultClock)
+        );
+        return userDao.getById(user.getId())
+                .orElseThrow(() -> new BadRequestException("User not found by id: " + user.getId()));
     }
 
     @GetMapping("/list")
@@ -123,12 +129,17 @@ public class AccountController extends BaseController {
         }
         final String userId = randomUUID().toString();
         final Instant now = Instant.now(defaultClock);
+
+        val password = (isEmpty(request.password) ?
+                passwordEncoder.encode(randomUUID().toString())
+                : passwordEncoder.encode(request.password.trim()));
+
         userDao.insert(
                 new User(
                         userId,
                         now,
                         request.username.trim(),
-                        (isEmpty(request.password) ? passwordEncoder.encode(randomUUID().toString()) : passwordEncoder.encode(request.password.trim())),
+                        password,
                         request.name.trim(),
                         ImmutableList.of(request.role.name()),
                         true,
@@ -136,14 +147,15 @@ public class AccountController extends BaseController {
                         now
                 )
         );
-        return userDao.getById(userId).orElseThrow(() -> new BadRequestException("User not found by id: " + userId));
+        return userDao.getById(userId)
+                .orElseThrow(() -> new BadRequestException("User not found by id: " + userId));
     }
 
     @PostMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public ResponseEntity<String> updateAccount(@PathVariable("id") final String id,
-                                                @RequestBody final User updatedUser) {
+                                                @RequestBody final UpdateUserRequest updatedUser) {
         final User adminUser = getCurrentUserVerifyAdmin();
         final Optional<User> user = userDao.getById(updatedUser.getId());
         if (user.isEmpty()) {
@@ -168,11 +180,16 @@ public class AccountController extends BaseController {
                 throw new BadRequestException("This username is taken, please select another user");
             }
         }
+
+        val password = (isEmpty(updatedUser.getPassword()) ?
+                passwordEncoder.encode(randomUUID().toString())
+                : passwordEncoder.encode(updatedUser.getPassword().trim()));
+
         userDao.update(
                 updatedUser.getId(),
                 updatedUser.getUsername().trim(),
                 updatedUser.getName().trim(),
-                (isEmpty(updatedUser.getPassword()) ? passwordEncoder.encode(randomUUID().toString()) : passwordEncoder.encode(updatedUser.getPassword().trim())),
+                password,
                 updatedUser.isEnabled(),
                 Instant.now(defaultClock)
         );
@@ -184,21 +201,18 @@ public class AccountController extends BaseController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> deleteAccounts(@RequestBody final DeleteAccountsRequest request) {
         final User adminUser = getCurrentUserVerifyAdmin();
-        request.accountIds.stream().parallel().forEach(new Consumer<String>() {
-            @Override
-            public void accept(final String accountId) {
-                final Optional<User> foundUser = userDao.getById(accountId);
-                if (foundUser.isEmpty()) {
-                    throw new BadRequestException("User not found by id: " + accountId);
-                }
-                if (!adminUser.getOrganizationId().equals(foundUser.get().getOrganizationId())) {
-                    throw new AccessDeniedException();
-                }
-                if (adminUser.getId().equals(foundUser.get().getId())) {
-                    throw new BadRequestException("User is unable to remove self");
-                }
-                userDao.delete(foundUser.get());
+        request.accountIds.stream().parallel().forEach(accountId -> {
+            final Optional<User> foundUser = userDao.getById(accountId);
+            if (foundUser.isEmpty()) {
+                throw new BadRequestException("User not found by id: " + accountId);
             }
+            if (!adminUser.getOrganizationId().equals(foundUser.get().getOrganizationId())) {
+                throw new AccessDeniedException();
+            }
+            if (adminUser.getId().equals(foundUser.get().getId())) {
+                throw new BadRequestException("User is unable to remove self");
+            }
+            userDao.delete(foundUser.get());
         });
         return ResponseEntity.ok("{}");
     }

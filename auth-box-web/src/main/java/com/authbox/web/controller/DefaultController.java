@@ -30,6 +30,11 @@ public class DefaultController extends BaseController {
         return createModelAndView("register");
     }
 
+    @GetMapping({"/sign-in.html"})
+    public ModelAndView signInPage() {
+        return createModelAndView("sign-in");
+    }
+
     @GetMapping({"/login"})
     public ModelAndView loginPage() {
         return createModelAndView("index");

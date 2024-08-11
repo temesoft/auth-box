@@ -1,17 +1,18 @@
 package com.authbox.server.controller;
 
-import com.authbox.server.TestConstants;
-import com.google.common.collect.ImmutableMap;
-import com.authbox.server.Application;
 import com.authbox.base.model.ErrorResponse;
 import com.authbox.base.model.OauthTokenResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.utils.URLEncodedUtils;
+import com.authbox.server.Application;
+import com.authbox.server.TestConstants;
+import com.google.common.collect.ImmutableMap;
+import jakarta.annotation.Nullable;
+import org.apache.hc.core5.http.NameValuePair;
+import org.apache.hc.core5.net.URLEncodedUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +20,6 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
-import javax.annotation.Nullable;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
@@ -52,10 +52,10 @@ public class Oauth2TokenControllerWithAuthorizationCodeTest {
     public void testCreateOauth2Token_Success_GetAuthorizePageBack() {
         final ResponseEntity<String> responseEntity = restTemplate.getForEntity(
                 OAUTH_PREFIX + "/authorize"
-                        + "?client_id=" + TestConstants.VALID_CLIENT_ID
-                        + "&redirect_uri=" + TestConstants.VALID_REDIRECT_URL
-                        + "&response_type=code"
-                        + "&scope=another/scope some/scope",
+                + "?client_id=" + TestConstants.VALID_CLIENT_ID
+                + "&redirect_uri=" + TestConstants.VALID_REDIRECT_URL
+                + "&response_type=code"
+                + "&scope=another/scope some/scope",
                 String.class
         );
         if (responseEntity.getStatusCode().is2xxSuccessful()) {
@@ -178,10 +178,10 @@ public class Oauth2TokenControllerWithAuthorizationCodeTest {
     public void testCreateOauth2Token_Failure_BadDomainPrefix() {
         final ResponseEntity<ErrorResponse> responseEntity = restTemplate.getForEntity(
                 "http://127.0.0.1:" + port + OAUTH_PREFIX + "/authorize"
-                        + "?client_id=" + TestConstants.VALID_CLIENT_ID
-                        + "&redirect_uri=" + TestConstants.VALID_REDIRECT_URL
-                        + "&response_type=code"
-                        + "&scope=another/scope some/scope",
+                + "?client_id=" + TestConstants.VALID_CLIENT_ID
+                + "&redirect_uri=" + TestConstants.VALID_REDIRECT_URL
+                + "&response_type=code"
+                + "&scope=another/scope some/scope",
                 ErrorResponse.class
         );
         if (responseEntity.getStatusCode().is4xxClientError()) {

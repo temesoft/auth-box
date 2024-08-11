@@ -24,7 +24,7 @@ import io.jsonwebtoken.security.SignatureException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 import java.security.PublicKey;
 import java.time.Clock;
 import java.time.Duration;

@@ -1,14 +1,14 @@
 package com.authbox.server.controller;
 
-import com.authbox.server.TestConstants;
 import com.authbox.base.model.ErrorResponse;
 import com.authbox.server.Application;
+import com.authbox.server.TestConstants;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -183,7 +183,7 @@ public class Oauth2TokenControllerTest {
     public void testGetDetailsOauth2Token_BadDomainPrefix() {
         final ResponseEntity<ErrorResponse> responseEntity = restTemplate.postForEntity(
                 "http://127.0.0.1:" + port + OAUTH_PREFIX + "/introspection?access_token=" + TestConstants.VALID_TOKEN
-                        + "&client_id=" + TestConstants.VALID_CLIENT_ID + "&client_secret=" + TestConstants.VALID_CLIENT_SECRET,
+                + "&client_id=" + TestConstants.VALID_CLIENT_ID + "&client_secret=" + TestConstants.VALID_CLIENT_SECRET,
                 "",
                 ErrorResponse.class);
         if (responseEntity.getStatusCode().is4xxClientError()) {

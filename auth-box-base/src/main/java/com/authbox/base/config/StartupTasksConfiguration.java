@@ -2,12 +2,12 @@ package com.authbox.base.config;
 
 import com.authbox.base.model.AccessLog;
 import com.authbox.base.service.AccessLogService;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.util.Pair;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 

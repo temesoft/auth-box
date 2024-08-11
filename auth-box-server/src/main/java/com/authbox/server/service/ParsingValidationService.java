@@ -4,7 +4,7 @@ import com.authbox.base.model.OauthClient;
 import com.authbox.base.model.Organization;
 import org.springframework.data.util.Pair;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.Optional;
 
 public interface ParsingValidationService {

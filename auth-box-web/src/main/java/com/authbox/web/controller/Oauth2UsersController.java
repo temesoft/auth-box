@@ -5,6 +5,7 @@ import com.authbox.base.exception.BadRequestException;
 import com.authbox.base.exception.EntityNotFoundException;
 import com.authbox.base.model.OauthUser;
 import com.authbox.base.model.Organization;
+import com.authbox.base.model.UpdateOauthUserRequest;
 import com.authbox.base.util.HashUtils;
 import com.authbox.web.model.DeleteUsersRequest;
 import com.authbox.web.model.PasswordChangeRequest;
@@ -23,7 +24,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 import java.awt.image.BufferedImage;
 import java.time.Clock;
 import java.time.Instant;
@@ -128,7 +129,7 @@ public class Oauth2UsersController extends BaseController {
     @PostMapping("/{id}")
     @Transactional
     public OauthUser updateOauth2UserById(@PathVariable("id") final String userId,
-                                          @RequestBody final OauthUser updatedOauthUser) {
+                                          @RequestBody final UpdateOauthUserRequest updatedOauthUser) {
         final Organization organization = getOrganization();
 
         final Optional<OauthUser> oauthUser = oauthUserDao.getById(userId);
@@ -178,7 +179,7 @@ public class Oauth2UsersController extends BaseController {
     }
 
     @PostMapping
-    public OauthUser createOauth2User(@RequestBody final OauthUser newOauthUser) {
+    public OauthUser createOauth2User(@RequestBody final UpdateOauthUserRequest newOauthUser) {
         final Organization organization = getOrganization();
 
         if (isEmpty(newOauthUser.getUsername())) {

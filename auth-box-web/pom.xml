@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>auth-box-web</artifactId>
-    <version>0.1.22</version>
+    <version>0.1.23</version>
     <packaging>jar</packaging>
 
     <properties>
@@ -29,7 +29,7 @@
     <parent>
         <groupId>com.authbox</groupId>
         <artifactId>auth-box</artifactId>
-        <version>0.1.22</version>
+        <version>0.1.23</version>
     </parent>
 
     <dependencies>
@@ -46,8 +46,8 @@
         </dependency>
 
         <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
+            <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
         </dependency>
 
         <!-- webjars -->
@@ -118,15 +118,6 @@
         </dependency>
 
 
-
-
-
-        <!-- test scope -->
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-inline</artifactId>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
 
     <build>

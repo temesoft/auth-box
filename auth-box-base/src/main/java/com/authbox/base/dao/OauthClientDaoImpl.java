@@ -41,9 +41,7 @@ public class OauthClientDaoImpl implements OauthClientDao {
     @Override
     public Page<OauthClient> listByOrganizationId(final String organizationId, Pageable pageable) {
         LOGGER.debug("List by organizationId='{}'", organizationId);
-        final long count = oauthClientRepository.countByOrganizationId(organizationId);
-        final List<OauthClient> resultList = oauthClientRepository.listByOrganizationId(organizationId, pageable);
-        return new PageImpl<>(resultList, pageable, count);
+        return oauthClientRepository.findAllByOrganizationId(organizationId, pageable);
     }
 
     @Override

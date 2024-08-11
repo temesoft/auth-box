@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>auth-box-base</artifactId>
-    <version>0.1.22</version>
+    <version>0.1.23</version>
     <packaging>jar</packaging>
 
     <properties>
@@ -17,7 +17,7 @@
     <parent>
         <groupId>com.authbox</groupId>
         <artifactId>auth-box</artifactId>
-        <version>0.1.22</version>
+        <version>0.1.23</version>
     </parent>
 
     <build>

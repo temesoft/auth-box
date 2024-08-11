@@ -9,11 +9,9 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
 import java.time.Instant;
-import java.util.List;
 import java.util.Optional;
 
 @CacheConfig(cacheNames = CacheNamesConfiguration.CACHE_USER)
@@ -49,9 +47,7 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public Page<User> listByOrganizationId(final String organizationId, final Pageable pageable) {
-        final long count = userRepository.countByOrganizationId(organizationId);
-        final List<User> resultList = userRepository.listByOrganizationId(organizationId, pageable);
-        return new PageImpl<>(resultList, pageable, count);
+        return userRepository.listByOrganizationId(organizationId, pageable);
     }
 
     @Override

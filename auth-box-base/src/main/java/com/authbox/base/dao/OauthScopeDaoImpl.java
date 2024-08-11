@@ -48,9 +48,7 @@ public class OauthScopeDaoImpl implements OauthScopeDao {
     @Override
     public Page<OauthScope> listByOrganizationId(final String organizationId, final Pageable pageable) {
         LOGGER.debug("List by organizationId={}", organizationId);
-        final long count = oauthScopeRepository.countByOrganizationId(organizationId);
-        final List<OauthScope> resultList = oauthScopeRepository.listByOrganizationId(organizationId, pageable);
-        return new PageImpl<>(resultList, pageable, count);
+        return oauthScopeRepository.listByOrganizationId(organizationId, pageable);
     }
 
     @Override

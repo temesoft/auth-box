@@ -1,21 +1,30 @@
 package com.authbox.base.util;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+/**
+ * Provides various client request networking related functionalities
+ */
 public class NetUtils {
 
+    /**
+     * Returns IP address of the client,
+     * when using proxy to receive request and X-Forwarded-For is available returns correct IP address
+     */
     public static String getIp(final HttpServletRequest req) {
-        final String ip = req.getHeader("x-forwarded-for");
+        final String ip = req.getHeader("X-Forwarded-For");
         if (isNotBlank(ip)) {
-            return ip;
+            return ip.split(",")[0];
         }
         return req.getRemoteHost();
     }
 
+    /**
+     * Returns user agent header to identify client making a request
+     */
     public static String getUserAgent(final HttpServletRequest req) {
         return req.getHeader("User-Agent");
     }
-
 }

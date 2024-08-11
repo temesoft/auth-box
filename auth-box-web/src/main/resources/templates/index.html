@@ -1,13 +1,16 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org" data-ng-app="authBoxApp">
 <head>
-    <title>Auth-box Web</title>
+    <title>AuthBox</title>
     <link href="data:image/x-icon;base64,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" rel="icon" type="image/x-icon" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="/webjars/bootstrap/css/bootstrap.min.css"/>
     <link rel="stylesheet" href="/webjars/font-awesome/css/all.min.css"/>
     <link rel="stylesheet" href="/webjars/angularjs/angular-csp.css"/>
     <style>
+        body {
+            padding-top: 1.0rem;
+        }
         html {
             font-size: 14px;
         }
@@ -67,46 +70,167 @@
         }
     </style>
 </head>
+
 <body data-ng-controller="authBoxAppController">
-<div class="d-flex flex-column flex-md-row align-items-center p-3 px-md-4 mb-3 bg-dark border-bottom box-shadow">
-    <h5 class="my-0 mr-md-auto font-weight-normal"><a href="/" class="text-white">Oauth2.cloud</a></h5>
-    <nav class="my-2 my-md-0 mr-md-3">
-        <a class="p-2 text-white" href="/register.html" th:if="${appProperties.registrationEnabled}">Register</a>
-        <a class="p-2 text-white" target="newWindow" href="https://github.com/temesoft/auth-box">GitHub Auth-Box Project</a>
-        <a class="p-2 text-white" target="newWindow" href="https://github.com/temesoft/auth-box/issues">Support</a>
-    </nav>
-</div>
 
-<div class="pricing-header px-3 py-3 _pt-md-8 _pb-md-4 mx-auto text-center">
-    <h1 class="display-4">Auth-Box</h1>
-    <p class="lead">Open source Oauth2 server and management panel</p>
-</div>
+<nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+    <a class="navbar-brand" href="#">AuthBox</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault"
+            aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
 
-<div class="container">
-    <main class="form-signin">
-        <form method="post" th:action="@{/login}">
-            <h2 class="h3 mb-3 fw-normal">Please sign in</h2>
-            <input type="text" id="username" name="username" class="form-control" placeholder="Username" required autofocus>
-            <input type="password" id="password" name="password" class="form-control" placeholder="Password" required>
+    <div class="collapse navbar-collapse" id="navbarsExampleDefault">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item">
+                <a class="nav-link">&nbsp;</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/sign-in.html">Sign in</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link">|</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/register.html">Register</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link">|</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="https://github.com/temesoft/auth-box" target="newWindow">GitHub Project</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link">|</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="https://github.com/temesoft/auth-box/issues" target="newWindow">Support</a>
+            </li>
+        </ul>
+    </div>
+</nav>
 
-            <button class="w-100 btn btn-lg btn-primary" id="signInBtn" type="submit">Sign in</button>
-            <div th:if="${param.error}">
-                <strong class="text-danger">Invalid username and password.</strong>
+<main role="main">
+
+    <!-- Main jumbotron for a primary marketing message or call to action -->
+    <div class="jumbotron">
+        <div class="container">
+            <h1 class="display-3"><img src="/img/oauth2.png" alt="OAuth2 logo" height="100"/> AuthBox</h1>
+            <p>
+                Secure, Open-Source OAuth2 Server and Management Panel.
+                <br/>
+                Welcome to AuthBox, your go-to solution for secure, efficient, and fully compliant OAuth2 server implementation.
+                AuthBox is an open-source project (GPL-3.0 license), freely available for anyone looking to integrate a robust authorization framework
+                into their applications.
+            </p>
+            <p><a class="btn btn-primary btn-lg" href="/register.html" role="button">Register new account and give it a try &raquo;</a></p>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Example row of columns -->
+        <div class="row">
+            <div class="col-md-4">
+                <h2>What is AuthBox?</h2>
+                <p>
+AuthBox is a comprehensive <a href="https://github.com/temesoft/auth-box" target="newWindow">open-source OAuth2 server</a>
+implemented in Java, designed to simplify the authorization process for developers.
+                    <br/>
+AuthBox adheres to the OAuth2 protocol, specifically the <a href="https://datatracker.ietf.org/doc/html/rfc6749" target="newWindowRfc">RFC 6749</a>
+standard, ensuring that your application’s authorization flow is secure and compliant.
+                    <br/><br/>
+We invite you to explore AuthBox through our live demo. Experience firsthand how easy it is to set up and manage an
+OAuth2 server with AuthBox. Click the link below to get started and see how AuthBox can enhance your application's
+security and authorization workflows.
+                <p><a class="btn btn-primary" href="/register.html" role="button">Register new account and give it a try &raquo;</a></p>
+                </p>
             </div>
-            <div th:if="${param.logout}">
-                <strong class="text-danger">You have been logged out.</strong>
+            <div class="col-md-4">
+                <h2>Components of AuthBox</h2>
+                <p>
+AuthBox Server (auth-box-server): This is the core of the AuthBox project. The auth-box-server is a fully functional
+OAuth2 server that handles all aspects of the OAuth2 authorization process, including issuing tokens, validating access,
+and managing client credentials.
+                    <br/><br/>
+AuthBox Management Portal (auth-box-web): The auth-box-web is the management interface for your OAuth2 server.
+It provides a user-friendly UI and a comprehensive RESTful API, making it easy to manage and query your OAuth2
+configurations. Whether you're adding new clients, monitoring token usage, or adjusting settings, the management
+portal has you covered.
+                </p>
             </div>
-            <div th:if="${errorMessage}">
-                <strong class="text-danger" th:text="${errorMessage}"></strong>
+            <div class="col-md-4">
+                <h2>Why Choose AuthBox?</h2>
+                <p>
+&bull; Open-Source: AuthBox is freely available for anyone to use, modify, and distribute. It's perfect for developers who
+need a reliable OAuth2 server without the costs associated with proprietary solutions.
+                    <br/><br/>
+&bull; RFC 6749 Compliant: AuthBox is built to comply with the OAuth2 specification, ensuring that your implementation
+follows industry standards for security and interoperability.
+                    <br/><br/>
+&bull; User-Friendly Management: With the AuthBox Management Portal, managing your OAuth2 server has never been easier.
+The intuitive UI and RESTful API provide powerful tools to oversee your authorization infrastructure.
+                </p>
             </div>
-            <br/><br/>
-            <div th:if="${appProperties.registrationEnabled}">
-                Don't have an account, please <a href="/register.html">register</a> it is free, and receive your own domain
-                <strong>https://<em class="text-primary">something</em>.<span th:text="${appProperties.domain}"></span></strong>
+        </div>
+
+        <hr>
+
+        <div class="row">
+            <div class="col-md-12">
+<h3>Get Started with Your Own OAuth2 Service</h3>
+                <br/>
+With AuthBox, setting up your own OAuth2 service has never been easier. You can download AuthBox code and set up
+your own instance of Oauth2 service OR register a new account for free and instantly receive your very own
+OAuth2 service instance. This instance is hosted under a custom domain, giving your organization a unique and
+professional identity.
+                <br/><br/>
+<h3>Your Custom OAuth2 Domain</h3>
+                <br/>
+When you sign up, you’ll be able to create a custom domain for your OAuth2 service in the following format:
+                <br/><br/>
+&nbsp; &nbsp; &nbsp; <code>https://{your-org}.oauth2.cloud</code>
+                <br/><br/>
+This domain is unique to your organization and is where your OAuth2 server will be hosted. It allows you to manage your
+OAuth2 service independently, while benefiting from all the features and security provided by AuthBox.
             </div>
-        </form>
-    </main>
-</div>
+        </div>
+
+        <hr>
+
+        <div class="row">
+            <div class="col-md-12">
+<h3>What You Get:</h3>
+&bull; Instant Setup: As soon as you register, your OAuth2 service instance will be ready to use. No need to worry about complex
+configurations or lengthy setup processes.
+                <br/><br/>
+&bull; Custom Domain: Your service is accessible via a custom domain, providing a professional and branded experience for your
+organization and users.
+                <br/><br/>
+&bull; Full Management Access: With the AuthBox Management Portal, you can fully control your OAuth2 instance, including client
+registrations, token management, and more.
+                <br/><br/>
+&bull; Free to Use: AuthBox offers this service completely free, making it accessible for organizations of any size, from
+startups to large enterprises.
+            </div>
+        </div>
+
+        <hr>
+
+        <div class="row">
+            <div class="col-md-12">
+<h3>Ready to Get Started?</h3>
+<a href="/register.html">Create your free account</a> today and start managing your OAuth2 service under your custom domain.
+            </div>
+        </div>
+
+        <hr>
+    </div> <!-- /container -->
+
+</main>
+
+<!--<footer class="container">-->
+<!--    <p>&copy; Company 2017-2018</p>-->
+<!--</footer>-->
 
 <script src="/webjars/jquery/jquery.min.js"></script>
 <script src="/webjars/angularjs/angular.min.js"></script>

@@ -12,7 +12,7 @@ import com.authbox.base.model.TokenFormat;
 import com.authbox.base.util.CertificateKeysUtils;
 import com.authbox.web.config.Constants;
 import com.authbox.web.model.DeleteClientsRequest;
-import io.swagger.annotations.ApiParam;
+import jakarta.transaction.Transactional;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.util.io.pem.PemWriter;
@@ -28,7 +28,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.transaction.Transactional;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.security.KeyFactory;
@@ -110,7 +109,7 @@ public class Oauth2ClientsController extends BaseController {
 
         final Instant now = Instant.now(defaultClock);
         if (isNotBlank(updatedOauthClient.getPrivateKey())
-                && !updatedOauthClient.getPrivateKey().equals(oauthClient.get().getPrivateKey())) {
+            && !updatedOauthClient.getPrivateKey().equals(oauthClient.get().getPrivateKey())) {
             final PrivateKey privateKey;
             try {
                 privateKey = generatePrivateKey(updatedOauthClient.getPrivateKey());
@@ -220,7 +219,7 @@ public class Oauth2ClientsController extends BaseController {
         }
 
         if (updatedOauthClient.getGrantTypes().contains(authorization_code)
-                && isEmpty(updatedOauthClient.getRedirectUrls())) {
+            && isEmpty(updatedOauthClient.getRedirectUrls())) {
             throw new BadRequestException("Redirect url list can not be empty when '" + authorization_code.name() + "' is selected");
         }
 
@@ -229,7 +228,7 @@ public class Oauth2ClientsController extends BaseController {
         }
 
         if (updatedOauthClient.getGrantTypes().contains(refresh_token)
-                && isEmpty(updatedOauthClient.getRefreshExpiration() == null)) {
+            && isEmpty(updatedOauthClient.getRefreshExpiration() == null)) {
             throw new BadRequestException("Refresh token expiration can not be empty");
         }
 
@@ -339,9 +338,7 @@ public class Oauth2ClientsController extends BaseController {
     @PreAuthorize("hasAuthority('SCOPE_organization/write') OR isAuthenticated()")
     public OauthClient assignKeys(
             @PathVariable("id") final String clientId,
-            @ApiParam(allowMultiple = true, format = "text", required = true)
             @RequestParam("publicKey") final String publicKeyString,
-            @ApiParam(allowMultiple = true, format = "text", required = true)
             @RequestParam("privateKey") final String privateKeyString) {
         final Organization organization = getOrganization();
 

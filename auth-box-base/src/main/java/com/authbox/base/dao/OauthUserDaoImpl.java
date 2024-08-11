@@ -2,18 +2,16 @@ package com.authbox.base.dao;
 
 import com.authbox.base.config.CacheNamesConfiguration;
 import com.authbox.base.model.OauthUser;
+import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
-import javax.transaction.Transactional;
 import java.time.Instant;
-import java.util.List;
 import java.util.Optional;
 
 @CacheConfig(cacheNames = CacheNamesConfiguration.CACHE_OAUTH_USER)
@@ -49,9 +47,7 @@ public class OauthUserDaoImpl implements OauthUserDao {
     @Override
     public Page<OauthUser> listByOrganizationId(final String organizationId, final Pageable pageable) {
         LOGGER.debug("List by organizationId='{}'", organizationId);
-        final long count = oauthUserRepository.countByOrganizationId(organizationId);
-        final List<OauthUser> resultList = oauthUserRepository.listByOrganizationId(organizationId, pageable);
-        return new PageImpl<>(resultList, pageable, count);
+        return oauthUserRepository.findByOrganizationId(organizationId, pageable);
     }
 
     @Override

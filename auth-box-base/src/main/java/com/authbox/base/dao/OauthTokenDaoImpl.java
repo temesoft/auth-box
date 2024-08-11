@@ -9,10 +9,8 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
-import java.util.List;
 import java.util.Optional;
 
 @CacheConfig(cacheNames = CacheNamesConfiguration.CACHE_OAUTH_TOKEN)
@@ -42,25 +40,19 @@ public class OauthTokenDaoImpl implements OauthTokenDao {
     @Override
     public Page<OauthToken> listByClientId(final String clientId, final Pageable pageable) {
         LOGGER.debug("List by clientId='{}'", clientId);
-        final long count = oauthTokenRepository.countByClientId(clientId);
-        final List<OauthToken> resultList = oauthTokenRepository.listByClientId(clientId, pageable);
-        return new PageImpl<>(resultList, pageable, count);
+        return oauthTokenRepository.listByClientId(clientId, pageable);
     }
 
     @Override
     public Page<OauthToken> listByUserId(final String userId, final Pageable pageable) {
         LOGGER.debug("List by userId='{}'", userId);
-        final long count = oauthTokenRepository.countByOauthUserId(userId);
-        final List<OauthToken> resultList = oauthTokenRepository.listByOauthUserId(userId, pageable);
-        return new PageImpl<>(resultList, pageable, count);
+        return oauthTokenRepository.listByOauthUserId(userId, pageable);
     }
 
     @Override
     public Page<OauthToken> listByOrganizationId(final String organizationId, final Pageable pageable) {
         LOGGER.debug("List by organizationId='{}'", organizationId);
-        final long count = oauthTokenRepository.countByOrganizationId(organizationId);
-        final List<OauthToken> resultList = oauthTokenRepository.listByOrganizationId(organizationId, pageable);
-        return new PageImpl<>(resultList, pageable, count);
+        return oauthTokenRepository.listByOrganizationId(organizationId, pageable);
     }
 
     @Override

@@ -1,6 +1,6 @@
 package com.authbox.base.util;
 
-import javax.persistence.AttributeConverter;
+import jakarta.persistence.AttributeConverter;
 import java.time.Duration;
 
 public class DurationToMsConverter implements AttributeConverter<Duration, Long> {
