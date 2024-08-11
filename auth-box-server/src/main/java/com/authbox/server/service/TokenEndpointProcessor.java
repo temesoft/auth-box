@@ -130,7 +130,6 @@ public abstract class TokenEndpointProcessor {
                 .subject(oauthClient.getId())
                 .claim(OAUTH2_ATTR_SCOPE, scope)
                 .claim(OAUTH2_ATTR_ORGANIZATION_ID, organization.getId())
-                .claim("typ", "JWT")
                 .issuedAt(Date.from(now))
                 .expiration(Date.from(expiration))
                 .signWith(privateKey);
