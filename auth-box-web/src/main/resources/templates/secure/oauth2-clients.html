@@ -4,27 +4,27 @@
             client</a>
     </h2>
     <div class="btn-toolbar mb-2 mb-md-0" data-ng-if="oauth2Clients">
-        <nav aria-label="Page navigation" class="m-1" data-ng-if="oauth2Clients.totalElements > 0 && oauth2Clients.totalElements > pageSize">
+        <nav aria-label="Page navigation" class="m-1" data-ng-if="oauth2Clients.page.totalElements > 0 && oauth2Clients.page.totalElements > pageSize">
             <ul class="pagination">
-                <li class="page-item disabled" data-ng-if="oauth2Clients.number == 0">
+                <li class="page-item disabled" data-ng-if="oauth2Clients.page.number == 0">
                     <a class="page-link">Previous</a>
                 </li>
-                <li class="page-item cursor-pointer" data-ng-if="oauth2Clients.number > 0">
-                    <a class="page-link" data-ng-click="loadOauth2Clients(oauth2Clients.size, oauth2Clients.number-1)">Previous</a>
+                <li class="page-item cursor-pointer" data-ng-if="oauth2Clients.page.number > 0">
+                    <a class="page-link" data-ng-click="loadOauth2Clients(oauth2Clients.page.size, oauth2Clients.page.number-1)">Previous</a>
                 </li>
 
-                <li class="page-item" data-ng-repeat="n in paginationRange(1, oauth2Clients.totalPages, oauth2Clients.number + 1)">
-                    <span data-ng-if="oauth2Clients.number + 1 == n" class="page-link bg-secondary white">
+                <li class="page-item" data-ng-repeat="n in paginationRange(1, oauth2Clients.page.totalPages, oauth2Clients.page.number + 1)">
+                    <span data-ng-if="oauth2Clients.page.number + 1 == n" class="page-link bg-secondary white">
                         <strong class="">{{n}}</strong>
                     </span>
-                    <a data-ng-if="oauth2Clients.number + 1 != n" class="page-link cursor-pointer" data-ng-click="loadOauth2Clients(oauth2Clients.size, n-1)">{{n}}</a>
+                    <a data-ng-if="oauth2Clients.page.number + 1 != n" class="page-link cursor-pointer" data-ng-click="loadOauth2Clients(oauth2Clients.page.size, n-1)">{{n}}</a>
                 </li>
 
-                <li class="page-item disabled" data-ng-if="oauth2Clients.number + 1 == oauth2Clients.totalPages">
+                <li class="page-item disabled" data-ng-if="oauth2Clients.page.number + 1 == oauth2Clients.page.totalPages">
                     <a class="page-link">Next</a>
                 </li>
-                <li class="page-item cursor-pointer" data-ng-if="oauth2Clients.number + 1 != oauth2Clients.totalPages">
-                    <a class="page-link" data-ng-click="loadOauth2Clients(oauth2Clients.size, oauth2Clients.number + 1)">Next</a>
+                <li class="page-item cursor-pointer" data-ng-if="oauth2Clients.page.number + 1 != oauth2Clients.page.totalPages">
+                    <a class="page-link" data-ng-click="loadOauth2Clients(oauth2Clients.page.size, oauth2Clients.page.number + 1)">Next</a>
                 </li>
             </ul>
         </nav>
@@ -87,7 +87,6 @@
                            data-ng-model="oauth2Client.enabled" data-toggle="toggle" data-size="xs"
                            data-ng-change="enableDisableClient(oauth2Client.enabled, oauth2Client.id)"
                            data-on="Enabled" data-off="Disabled">
-                    <!--                    <input type="checkbox" name="selectScopeCheckbox"  checked="checked" data-toggle="toggle" data-size="sm">-->
                 </td>
                 <td>
                     <span data-ng-repeat="grantType in oauth2Client.grantTypes.sort()">

@@ -33,33 +33,33 @@
         <i class="fas fa-key fa-fw text-muted"></i> Oauth2 Tokens
     </h2>
     <div class="btn-toolbar mb-2 mb-md-0" data-ng-if="oauth2Tokens">
-        <nav aria-label="Page navigation" class="m-1" data-ng-if="oauth2Tokens.totalElements > 0 && oauth2Tokens.totalElements > pageSize">
+        <nav aria-label="Page navigation" class="m-1" data-ng-if="oauth2Tokens.page.totalElements > 0 && oauth2Tokens.page.totalElements > pageSize">
             <ul class="pagination">
-                <li class="page-item disabled" data-ng-if="oauth2Tokens.number == 0">
+                <li class="page-item disabled" data-ng-if="oauth2Tokens.page.number == 0">
                     <a class="page-link">Previous</a>
                 </li>
-                <li class="page-item cursor-pointer" data-ng-if="oauth2Tokens.number > 0">
-                    <a class="page-link" data-ng-if="routeParams.clientId" data-ng-click="loadOauth2TokensFor('client', routeParams.clientId, oauth2Tokens.size, oauth2Tokens.number-1)">Previous</a>
-                    <a class="page-link" data-ng-if="routeParams.userId" data-ng-click="loadOauth2TokensFor('user', routeParams.userId, oauth2Tokens.size, oauth2Tokens.number-1)">Previous</a>
-                    <a class="page-link" data-ng-if="!routeParams.clientId && !routeParams.userId" data-ng-click="loadOauth2Tokens(oauth2Tokens.size, oauth2Tokens.number-1)">Previous</a>
+                <li class="page-item cursor-pointer" data-ng-if="oauth2Tokens.page.number > 0">
+                    <a class="page-link" data-ng-if="routeParams.clientId" data-ng-click="loadOauth2TokensFor('client', routeParams.clientId, oauth2Tokens.page.size, oauth2Tokens.page.number-1)">Previous</a>
+                    <a class="page-link" data-ng-if="routeParams.userId" data-ng-click="loadOauth2TokensFor('user', routeParams.userId, oauth2Tokens.page.size, oauth2Tokens.page.number-1)">Previous</a>
+                    <a class="page-link" data-ng-if="!routeParams.clientId && !routeParams.userId" data-ng-click="loadOauth2Tokens(oauth2Tokens.page.size, oauth2Tokens.page.number-1)">Previous</a>
                 </li>
 
-                <li class="page-item" data-ng-repeat="n in paginationRange(1, oauth2Tokens.totalPages, oauth2Tokens.number + 1)">
-                    <span data-ng-if="oauth2Tokens.number + 1 == n" class="page-link bg-secondary white">
+                <li class="page-item" data-ng-repeat="n in paginationRange(1, oauth2Tokens.page.totalPages, oauth2Tokens.page.number + 1)">
+                    <span data-ng-if="oauth2Tokens.page.number + 1 == n" class="page-link bg-secondary white">
                         <strong class="">{{n}}</strong>
                     </span>
-                    <a data-ng-if="oauth2Tokens.number + 1 != n && routeParams.clientId" class="page-link cursor-pointer" data-ng-click="loadOauth2TokensFor('client', routeParams.clientId, oauth2Tokens.size, n-1)">{{n}}</a>
-                    <a data-ng-if="oauth2Tokens.number + 1 != n && routeParams.userId" class="page-link cursor-pointer" data-ng-click="loadOauth2TokensFor('user', routeParams.userId, oauth2Tokens.size, n-1)">{{n}}</a>
-                    <a data-ng-if="oauth2Tokens.number + 1 != n && !routeParams.clientId && !routeParams.userId" class="page-link cursor-pointer" data-ng-click="loadOauth2Tokens(oauth2Tokens.size, n-1)">{{n}}</a>
+                    <a data-ng-if="oauth2Tokens.number + 1 != n && routeParams.clientId" class="page-link cursor-pointer" data-ng-click="loadOauth2TokensFor('client', routeParams.clientId, oauth2Tokens.page.size, n-1)">{{n}}</a>
+                    <a data-ng-if="oauth2Tokens.number + 1 != n && routeParams.userId" class="page-link cursor-pointer" data-ng-click="loadOauth2TokensFor('user', routeParams.userId, oauth2Tokens.page.size, n-1)">{{n}}</a>
+                    <a data-ng-if="oauth2Tokens.number + 1 != n && !routeParams.clientId && !routeParams.userId" class="page-link cursor-pointer" data-ng-click="loadOauth2Tokens(oauth2Tokens.page.size, n-1)">{{n}}</a>
                 </li>
 
-                <li class="page-item disabled" data-ng-if="oauth2Tokens.number + 1 == oauth2Tokens.totalPages">
+                <li class="page-item disabled" data-ng-if="oauth2Tokens.page.number + 1 == oauth2Tokens.page.totalPages">
                     <a class="page-link">Next</a>
                 </li>
-                <li class="page-item cursor-pointer" data-ng-if="oauth2Tokens.number + 1 != oauth2Tokens.totalPages">
-                    <a class="page-link" data-ng-if="routeParams.clientId" data-ng-click="loadOauth2TokensFor('client', routeParams.clientId, oauth2Tokens.size, oauth2Tokens.number + 1)">Next</a>
-                    <a class="page-link" data-ng-if="routeParams.userId" data-ng-click="loadOauth2TokensFor('user', routeParams.userId, oauth2Tokens.size, oauth2Tokens.number + 1)">Next</a>
-                    <a class="page-link" data-ng-if="!routeParams.clientId && !routeParams.userId" data-ng-click="loadOauth2Tokens(oauth2Tokens.size, oauth2Tokens.number + 1)">Next</a>
+                <li class="page-item cursor-pointer" data-ng-if="oauth2Tokens.page.number + 1 != oauth2Tokens.page.totalPages">
+                    <a class="page-link" data-ng-if="routeParams.clientId" data-ng-click="loadOauth2TokensFor('client', routeParams.clientId, oauth2Tokens.page.size, oauth2Tokens.page.number + 1)">Next</a>
+                    <a class="page-link" data-ng-if="routeParams.userId" data-ng-click="loadOauth2TokensFor('user', routeParams.userId, oauth2Tokens.page.size, oauth2Tokens.page.number + 1)">Next</a>
+                    <a class="page-link" data-ng-if="!routeParams.clientId && !routeParams.userId" data-ng-click="loadOauth2Tokens(oauth2Tokens.page.size, oauth2Tokens.page.number + 1)">Next</a>
                 </li>
             </ul>
         </nav>

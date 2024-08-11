@@ -33,27 +33,27 @@
                     </div>
                 </div>
             </div>
-            <nav aria-label="Page navigation" class="m-1" data-ng-if="accounts.totalElements > 0 && accounts.totalElements > pageSize">
+            <nav aria-label="Page navigation" class="m-1" data-ng-if="accounts.page.totalElements > 0 && accounts.page.totalElements > pageSize">
                 <ul class="pagination float-right">
-                    <li class="page-item disabled" data-ng-if="accounts.number == 0">
+                    <li class="page-item disabled" data-ng-if="accounts.page.number == 0">
                         <a class="page-link">Previous</a>
                     </li>
-                    <li class="page-item cursor-pointer" data-ng-if="accounts.number > 0">
-                        <a class="page-link" data-ng-click="loadAccounts(accounts.size, accounts.number-1)">Previous</a>
+                    <li class="page-item cursor-pointer" data-ng-if="accounts.page.number > 0">
+                        <a class="page-link" data-ng-click="loadAccounts(accounts.page.size, accounts.page.number-1)">Previous</a>
                     </li>
 
-                    <li class="page-item" data-ng-repeat="n in paginationRange(1, accounts.totalPages, accounts.number + 1)">
-                        <span data-ng-if="accounts.number + 1 == n" class="page-link bg-secondary white">
+                    <li class="page-item" data-ng-repeat="n in paginationRange(1, accounts.page.totalPages, accounts.page.number + 1)">
+                        <span data-ng-if="accounts.page.number + 1 == n" class="page-link bg-secondary white">
                             <strong class="">{{n}}</strong>
                         </span>
-                        <a data-ng-if="accounts.number + 1 != n" class="page-link cursor-pointer" data-ng-click="loadAccounts(accounts.size, n-1)">{{n}}</a>
+                        <a data-ng-if="accounts.page.number + 1 != n" class="page-link cursor-pointer" data-ng-click="loadAccounts(accounts.page.size, n-1)">{{n}}</a>
                     </li>
 
-                    <li class="page-item disabled" data-ng-if="accounts.number + 1 == accounts.totalPages">
+                    <li class="page-item disabled" data-ng-if="accounts.number + 1 == accounts.page.totalPages">
                         <a class="page-link">Next</a>
                     </li>
-                    <li class="page-item cursor-pointer" data-ng-if="accounts.number + 1 != accounts.totalPages">
-                        <a class="page-link" data-ng-click="loadAccounts(accounts.size, accounts.number + 1)">Next</a>
+                    <li class="page-item cursor-pointer" data-ng-if="accounts.page.number + 1 != accounts.page.totalPages">
+                        <a class="page-link" data-ng-click="loadAccounts(accounts.page.size, accounts.page.number + 1)">Next</a>
                     </li>
                 </ul>
             </nav>

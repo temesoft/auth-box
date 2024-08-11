@@ -16,10 +16,10 @@
             Header name: <code>X-Request-ID</code>
         </span>
     </div>
-    <div class="m-1" data-ng-if="accessLogList && accessLogList.totalElements == 0">
+    <div class="m-1" data-ng-if="accessLogList && accessLogList.page.totalElements == 0">
         <span class="text-danger">Unable to find any access log records by provided request id</span>
     </div>
-    <div class="table-responsive mt-4" data-ng-if="accessLogList && accessLogList.totalElements > 0">
+    <div class="table-responsive mt-4" data-ng-if="accessLogList && accessLogList.page.totalElements > 0">
         <table class="table table-striped table-sm">
             <tr>
                 <th>Timestamp</th>
