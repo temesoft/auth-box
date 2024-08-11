@@ -24,7 +24,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.transaction.Transactional;
 import java.security.PrivateKey;
 import java.time.Clock;
 import java.time.Instant;
@@ -47,7 +46,6 @@ import static com.authbox.base.util.CertificateKeysUtils.generatePrivateKey;
 import static com.authbox.base.util.HashUtils.sha256;
 import static com.authbox.server.util.RequestUtils.getRequestId;
 import static com.authbox.server.util.RequestUtils.getTimeSinceRequest;
-import static io.jsonwebtoken.SignatureAlgorithm.RS384;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
@@ -128,13 +126,14 @@ public abstract class TokenEndpointProcessor {
                 "Signing JWT access token using private key"
         );
         final JwtBuilder jwsBuilder = Jwts.builder()
-                .setIssuer(organization.getId())
-                .setSubject(oauthClient.getId())
+                .issuer(organization.getId())
+                .subject(oauthClient.getId())
                 .claim(OAUTH2_ATTR_SCOPE, scope)
                 .claim(OAUTH2_ATTR_ORGANIZATION_ID, organization.getId())
-                .setIssuedAt(Date.from(now))
-                .setExpiration(Date.from(expiration))
-                .signWith(privateKey, RS384);
+                .claim("typ", "JWT")
+                .issuedAt(Date.from(now))
+                .expiration(Date.from(expiration))
+                .signWith(privateKey);
         if (oauthUser != null) {
             jwsBuilder.claim(OAUTH2_ATTR_USER_ID, oauthUser.getId());
 

@@ -22,7 +22,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.RestTemplate;
 
 import javax.transaction.Transactional;
 import java.awt.image.BufferedImage;
@@ -116,12 +115,12 @@ public class Oauth2UsersController extends BaseController {
         }
 
         final String qrCodeUrl = "otpauth://totp/"
-                + organization.getName()
-                + " ("
-                + oauthUser.get().getUsername()
-                + ")?secret="
-                + oauthUser.get().getSecret()
-                + "&issuer=auth-box";
+                                 + organization.getName()
+                                 + " ("
+                                 + oauthUser.get().getUsername()
+                                 + ")?secret="
+                                 + oauthUser.get().getSecret()
+                                 + "&issuer=auth-box";
 
         return qrCodeGeneratorService.generateQrCode(qrCodeUrl);
     }
