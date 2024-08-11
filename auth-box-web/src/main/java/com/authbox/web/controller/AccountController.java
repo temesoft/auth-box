@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.transaction.Transactional;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.Optional;
@@ -50,6 +51,7 @@ public class AccountController extends BaseController {
 
     @PostMapping
     @PreAuthorize("hasRole('USER') || hasRole('ADMIN')")
+    @Transactional
     public User updateCurrentAccount(@RequestBody final User updatedUser) {
         final User user = getCurrentUser();
         userDao.update(user.getId(), user.getUsername(), updatedUser.getName(), user.getPassword(), updatedUser.isEnabled(), Instant.now(defaultClock));
@@ -58,6 +60,7 @@ public class AccountController extends BaseController {
 
     @PostMapping("/password")
     @PreAuthorize("hasRole('USER') || hasRole('ADMIN')")
+    @Transactional
     public User updateCurrentAccountPassword(@RequestBody final PasswordChangeRequest passwordChangeRequest) {
         final User user = getCurrentUser();
         // verify new password min length
@@ -138,6 +141,7 @@ public class AccountController extends BaseController {
 
     @PostMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
+    @Transactional
     public ResponseEntity<String> updateAccount(@PathVariable("id") final String id,
                                                 @RequestBody final User updatedUser) {
         final User adminUser = getCurrentUserVerifyAdmin();
