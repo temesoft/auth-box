@@ -16,14 +16,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Stopwatch;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
-
 import jakarta.annotation.Nullable;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
 import java.security.PrivateKey;
 import java.time.Clock;
 import java.time.Instant;
@@ -46,12 +45,12 @@ import static com.authbox.base.util.CertificateKeysUtils.generatePrivateKey;
 import static com.authbox.base.util.HashUtils.sha256;
 import static com.authbox.server.util.RequestUtils.getRequestId;
 import static com.authbox.server.util.RequestUtils.getTimeSinceRequest;
+import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
+@Slf4j
 public abstract class TokenEndpointProcessor {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(TokenEndpointProcessor.class);
 
     @Autowired
     protected Clock defaultClock;
@@ -89,7 +88,7 @@ public abstract class TokenEndpointProcessor {
         final Instant now = Instant.now(defaultClock);
         final Instant expiration = Instant.now(defaultClock).plusSeconds(oauthClient.getExpiration().toSeconds());
         final Stopwatch stopwatch = Stopwatch.createStarted();
-        LOGGER.debug("Prepare keys for JWT token");
+        log.debug("Prepare keys for JWT token");
         accessLogService.create(
                 AccessLog.builder()
                         .withRequestId(getRequestId())
@@ -116,7 +115,7 @@ public abstract class TokenEndpointProcessor {
         }
 
         final Optional<String> refreshToken = createRefreshTokenIfNeeded(grantType, oauthClient, scope, oauthUser, ip, userAgent);
-        LOGGER.debug("Sign JWT token");
+        log.debug("Sign JWT token");
         accessLogService.create(
                 AccessLog.builder()
                         .withRequestId(getRequestId())
@@ -140,14 +139,14 @@ public abstract class TokenEndpointProcessor {
             try {
                 metadata = objectMapper.readValue(oauthUser.getMetadata(), Map.class);
             } catch (JsonProcessingException e) {
-                LOGGER.debug("Unable to parse metadata for OauthUser user_id='{}'", oauthUser.getId());
+                log.debug("Unable to parse metadata for OauthUser user_id='{}'", oauthUser.getId());
             }
 
             jwsBuilder.claim(OAUTH2_ATTR_METADATA, metadata);
         }
 
         final String jwt = jwsBuilder.compact();
-        LOGGER.debug("JWT token created in: " + stopwatch.stop());
+        log.debug("JWT token created in: {}", stopwatch.stop());
 
         final String oauthTokenId = UUID.randomUUID().toString();
         final OauthToken oauthToken = new OauthToken(
@@ -251,6 +250,10 @@ public abstract class TokenEndpointProcessor {
                                                         @Nullable final OauthUser oauthUser,
                                                         final String ip,
                                                         final String userAgent) {
+        if (isEmpty(oauthClient.getGrantTypes())
+            || !oauthClient.getGrantTypes().contains(GrantType.refresh_token)) {
+            return Optional.empty();
+        }
         if (grantType == authorization_code || grantType == password) {
             final Instant now = Instant.now(defaultClock);
             final Instant expiration = Instant.now(defaultClock).plusSeconds(oauthClient.getRefreshExpiration().toSeconds());
