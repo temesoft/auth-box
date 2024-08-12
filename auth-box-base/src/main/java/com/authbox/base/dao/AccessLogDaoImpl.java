@@ -2,6 +2,8 @@ package com.authbox.base.dao;
 
 import com.authbox.base.model.AccessLog;
 import com.google.common.collect.Lists;
+import lombok.AllArgsConstructor;
+import lombok.val;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -13,26 +15,26 @@ import org.springframework.jdbc.core.RowMapper;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.Duration;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 import static java.sql.Types.INTEGER;
 import static java.sql.Types.VARCHAR;
 
+@AllArgsConstructor
 public class AccessLogDaoImpl implements AccessLogDao {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AccessLogDaoImpl.class);
     private static final String SQL_LIST_BY = "SELECT id, create_time, organization_id, oauth_token_id, client_id, request_id, source, duration_ms, message, error, status_code, ip, user_agent " +
-            "FROM access_log %s " +
-            "ORDER BY create_time ASC, duration_ms ASC " +
-            "LIMIT ? " +
-            "OFFSET ?";
+                                              "FROM access_log %s " +
+                                              "ORDER BY create_time ASC, duration_ms ASC " +
+                                              "LIMIT ? " +
+                                              "OFFSET ?";
     private static final String SQL_COUNT_BY = "SELECT count(id) " +
-            "FROM access_log %s " +
-            "ORDER BY create_time ASC, duration_ms ASC " +
-            "LIMIT ? " +
-            "OFFSET ?";
+                                               "FROM access_log %s " +
+                                               "ORDER BY create_time ASC, duration_ms ASC " +
+                                               "LIMIT ? " +
+                                               "OFFSET ?";
     private static final String WHERE_CLAUSE = "WHERE ";
     private static final String AND_OPERAND = " AND ";
     private static final String LIST_CRITERIA_TOKEN_ID = "tokenId";
@@ -42,11 +44,6 @@ public class AccessLogDaoImpl implements AccessLogDao {
 
     private final JdbcTemplate jdbcTemplate;
     private final AccessLogRepository accessLogRepository;
-
-    public AccessLogDaoImpl(final JdbcTemplate jdbcTemplate, final AccessLogRepository accessLogRepository) {
-        this.jdbcTemplate = jdbcTemplate;
-        this.accessLogRepository = accessLogRepository;
-    }
 
     @Override
     public Optional<AccessLog> getById(final String id) {
@@ -63,9 +60,9 @@ public class AccessLogDaoImpl implements AccessLogDao {
     @Override
     public Page<AccessLog> listBy(final Map<String, String> criteria, final Pageable pageable) {
         LOGGER.debug("List by criteria='{}'", criteria);
-        final StringBuilder whereQuery = new StringBuilder();
-        final List<Integer> sqlTypes = Lists.newArrayList();
-        final List<Object> values = Lists.newArrayList();
+        val whereQuery = new StringBuilder();
+        val sqlTypes = Lists.<Integer>newArrayList();
+        val values = Lists.newArrayList();
         if (!criteria.isEmpty()) {
             whereQuery.append(WHERE_CLAUSE);
             if (criteria.containsKey(LIST_CRITERIA_TOKEN_ID)) {
@@ -98,14 +95,14 @@ public class AccessLogDaoImpl implements AccessLogDao {
         values.add(pageable.getPageNumber() * pageable.getPageSize());
         sqlTypes.add(INTEGER);
 
-        final int count = Optional.ofNullable(jdbcTemplate.queryForObject(
+        val count = Optional.ofNullable(jdbcTemplate.queryForObject(
                 String.format(SQL_COUNT_BY, whereQuery),
                 values.toArray(),
                 sqlTypes.stream().mapToInt(x -> x).toArray(),
                 Integer.class
         )).orElse(0);
 
-        final List<AccessLog> resultList = jdbcTemplate.query(
+        val resultList = jdbcTemplate.query(
                 String.format(SQL_LIST_BY, whereQuery),
                 values.toArray(),
                 sqlTypes.stream().mapToInt(x -> x).toArray(),

@@ -5,23 +5,19 @@ import com.authbox.base.dao.OauthTokenDao;
 import com.authbox.base.dao.OauthUserDao;
 import com.authbox.base.exception.Oauth2Exception;
 import com.authbox.base.model.AccessLog;
-import com.authbox.base.model.OauthClient;
-import com.authbox.base.model.OauthToken;
-import com.authbox.base.model.OauthUser;
-import com.authbox.base.model.Organization;
 import com.authbox.server.service.ParsingValidationService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableMap;
 import io.micrometer.core.annotation.Timed;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import jakarta.servlet.http.HttpServletRequest;
 import java.util.Map;
 import java.util.Optional;
 
@@ -42,9 +38,9 @@ import static org.springframework.util.ObjectUtils.isEmpty;
 
 @RestController
 @RequestMapping(OAUTH_PREFIX)
+@AllArgsConstructor
+@Slf4j
 public class UserInfoController extends BaseController {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(UserInfoController.class);
 
     private final OauthTokenDao oauthTokenDao;
     private final OauthUserDao oauthUserDao;
@@ -52,25 +48,19 @@ public class UserInfoController extends BaseController {
     private final ObjectMapper objectMapper;
     private final ParsingValidationService parsingValidationService;
 
-    public UserInfoController(final OauthTokenDao oauthTokenDao, final OauthUserDao oauthUserDao, final OauthClientDao oauthClientDao, final ObjectMapper objectMapper, final ParsingValidationService parsingValidationService) {
-        this.oauthTokenDao = oauthTokenDao;
-        this.oauthUserDao = oauthUserDao;
-        this.oauthClientDao = oauthClientDao;
-        this.objectMapper = objectMapper;
-        this.parsingValidationService = parsingValidationService;
-    }
 
     @GetMapping("/user")
     @Timed("getUserInfo")
-    public Map<String, Object> getUserInfo(final HttpServletRequest req,
-                                           @RequestParam(value = OAUTH2_ATTR_ACCESS_TOKEN, required = false) final String token) {
+    public Map<String, Object> getUserInfo(
+            final HttpServletRequest req,
+            @RequestParam(value = OAUTH2_ATTR_ACCESS_TOKEN, required = false) final String token) {
         accessLogService.create(
                 AccessLog.builder()
                         .withRequestId(getRequestId())
                         .withDuration(getTimeSinceRequest()),
                 "Processing user info request"
         );
-        final Organization organization = getOrganization(req);
+        val organization = getOrganization(req);
 
         Optional<String> accessToken = Optional.ofNullable(token);
         if (accessToken.isEmpty()) {
@@ -99,9 +89,9 @@ public class UserInfoController extends BaseController {
             parsingValidationService.getOauthClient(req, organization);
         }
 
-        final Optional<OauthToken> accessOauthToken = oauthTokenDao.getByHash(sha256(accessToken.get()));
+        val accessOauthToken = oauthTokenDao.getByHash(sha256(accessToken.get()));
         if (accessOauthToken.isEmpty()) {
-            LOGGER.debug("Access token='{}' / hash='{}' not found", accessToken.get(), sha256(accessToken.get()));
+            log.debug("Access token='{}' / hash='{}' not found", accessToken.get(), sha256(accessToken.get()));
             accessLogService.create(
                     AccessLog.builder()
                             .withRequestId(getRequestId())
@@ -113,7 +103,8 @@ public class UserInfoController extends BaseController {
             throw new Oauth2Exception(MSG_INVALID_TOKEN);
         }
         if (!accessOauthToken.get().getTokenType().equals(ACCESS_TOKEN)) {
-            LOGGER.debug("Provided token is not ACCESS_TOKEN. type='{}' token='{}' / hash='{}'", accessOauthToken.get().getTokenType(), accessToken.get(), sha256(accessToken.get()));
+            log.debug("Provided token is not ACCESS_TOKEN. type='{}' token='{}' / hash='{}'",
+                    accessOauthToken.get().getTokenType(), accessToken.get(), sha256(accessToken.get()));
             accessLogService.create(
                     AccessLog.builder()
                             .withRequestId(getRequestId())
@@ -121,12 +112,13 @@ public class UserInfoController extends BaseController {
                             .withOrganizationId(organization.getId())
                             .withClientId(accessOauthToken.get().getClientId())
                             .withError(MSG_INVALID_TOKEN),
-                    "Provided token is not ACCESS_TOKEN. type='%s' token='%s' / hash='%s'", accessOauthToken.get().getTokenType().name(), accessToken.get(), sha256(accessToken.get())
+                    "Provided token is not ACCESS_TOKEN. type='%s' token='%s' / hash='%s'",
+                    accessOauthToken.get().getTokenType().name(), accessToken.get(), sha256(accessToken.get())
             );
             throw new Oauth2Exception(MSG_INVALID_TOKEN);
         }
         if (!accessOauthToken.get().getOrganizationId().equals(organization.getId())) {
-            LOGGER.debug("Token does not belong to organization_id='{}'", organization.getId());
+            log.debug("Token does not belong to organization_id='{}'", organization.getId());
             accessLogService.create(
                     AccessLog.builder()
                             .withRequestId(getRequestId())
@@ -140,7 +132,7 @@ public class UserInfoController extends BaseController {
         }
 
         if (isEmpty(accessOauthToken.get().getOauthUserId())) {
-            LOGGER.debug("Access token='{}' / hash='{}' is not linked to a oauth user", accessToken.get(), sha256(accessToken.get()));
+            log.debug("Access token='{}' / hash='{}' is not linked to a oauth user", accessToken.get(), sha256(accessToken.get()));
             accessLogService.create(
                     AccessLog.builder()
                             .withRequestId(getRequestId())
@@ -153,9 +145,9 @@ public class UserInfoController extends BaseController {
             throw new Oauth2Exception(MSG_INVALID_TOKEN);
         }
 
-        final Optional<OauthUser> oauthUser = oauthUserDao.getById(accessOauthToken.get().getOauthUserId());
+        val oauthUser = oauthUserDao.getById(accessOauthToken.get().getOauthUserId());
         if (oauthUser.isEmpty()) {
-            LOGGER.debug("OauthUser not found by id='{}'", accessOauthToken.get().getOauthUserId());
+            log.debug("OauthUser not found by id='{}'", accessOauthToken.get().getOauthUserId());
             accessLogService.create(
                     AccessLog.builder()
                             .withRequestId(getRequestId())
@@ -169,7 +161,7 @@ public class UserInfoController extends BaseController {
         }
 
         if (!oauthUser.get().isEnabled()) {
-            LOGGER.debug("OauthUser user disabled. id='{}'", oauthUser.get().getId());
+            log.debug("OauthUser user disabled. id='{}'", oauthUser.get().getId());
             accessLogService.create(
                     AccessLog.builder()
                             .withRequestId(getRequestId())
@@ -182,9 +174,9 @@ public class UserInfoController extends BaseController {
             throw new Oauth2Exception(MSG_UNAUTHORIZED_REQUEST);
         }
 
-        final Optional<OauthClient> oauthClient = oauthClientDao.getById(accessOauthToken.get().getClientId());
+        val oauthClient = oauthClientDao.getById(accessOauthToken.get().getClientId());
         if (oauthClient.isEmpty()) {
-            LOGGER.debug("OauthClient not found by id='{}'", accessOauthToken.get().getClientId());
+            log.debug("OauthClient not found by id='{}'", accessOauthToken.get().getClientId());
             accessLogService.create(
                     AccessLog.builder()
                             .withRequestId(getRequestId())
@@ -198,7 +190,7 @@ public class UserInfoController extends BaseController {
         }
 
         if (!oauthClient.get().isEnabled()) {
-            LOGGER.debug("OauthClient is disabled. id='{}'", oauthClient.get().getId());
+            log.debug("OauthClient is disabled. id='{}'", oauthClient.get().getId());
             accessLogService.create(
                     AccessLog.builder()
                             .withRequestId(getRequestId())
@@ -215,7 +207,7 @@ public class UserInfoController extends BaseController {
         try {
             metadata = objectMapper.readValue(oauthUser.get().getMetadata(), Map.class);
         } catch (JsonProcessingException e) {
-            LOGGER.debug("Unable to parse metadata for OauthUser user_id='{}'", oauthUser.get().getId());
+            log.debug("Unable to parse metadata for OauthUser user_id='{}'", oauthUser.get().getId());
         }
 
         accessLogService.create(
@@ -227,7 +219,7 @@ public class UserInfoController extends BaseController {
                 "User info request finished"
         );
 
-        return ImmutableMap.of(
+        return Map.of(
                 "id", oauthUser.get().getId(),
                 OAUTH2_ATTR_USERNAME, oauthUser.get().getUsername(),
                 OAUTH2_ATTR_ORGANIZATION_ID, oauthUser.get().getOrganizationId(),

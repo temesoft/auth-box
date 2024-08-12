@@ -6,15 +6,14 @@ import com.authbox.base.exception.BadRequestException;
 import com.authbox.base.model.AccessLog;
 import com.authbox.base.model.Organization;
 import com.authbox.base.service.AccessLogService;
-import com.authbox.server.config.RequestWrapperFilterConfiguration;
+import com.authbox.server.filter.RequestWrapperFilter;
 import com.authbox.server.service.ParsingValidationService;
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.validator.routines.InetAddressValidator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import jakarta.servlet.http.HttpServletRequest;
 import java.net.URI;
 import java.util.Optional;
 
@@ -23,9 +22,8 @@ import static com.authbox.server.util.RequestUtils.getRequestId;
 import static com.authbox.server.util.RequestUtils.getTimeSinceRequest;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+@Slf4j
 public abstract class BaseController {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(BaseController.class);
 
     @Autowired
     protected AppProperties appProperties;
@@ -47,7 +45,7 @@ public abstract class BaseController {
             && !validator.isValidInet6Address(host)) {
             host = host.replace("." + appProperties.getDomain(), "");
         }
-        MDC.put(RequestWrapperFilterConfiguration.REQUEST_DOMAIN_PREFIX_MDC_KEY, host);
+        MDC.put(RequestWrapperFilter.REQUEST_DOMAIN_PREFIX_MDC_KEY, host);
         return getByDomainPrefix(host);
     }
 
@@ -59,7 +57,7 @@ public abstract class BaseController {
             organization = organizationDao.getByDomainPrefix(organizationDomainPrefix);
         }
         if (organization.isEmpty() || !organization.get().isEnabled()) {
-            LOGGER.debug("Organization not found by domain_prefix='{}' or disabled", organizationDomainPrefix);
+            log.debug("Organization not found by domain_prefix='{}' or disabled", organizationDomainPrefix);
             accessLogService.create(
                     AccessLog.builder()
                             .withRequestId(getRequestId())
@@ -69,7 +67,7 @@ public abstract class BaseController {
             );
             throw new BadRequestException("Domain prefix unknown: " + organizationDomainPrefix);
         }
-        MDC.put(RequestWrapperFilterConfiguration.REQUEST_ORGANIZATION_MDC_KEY, organization.get().getId());
+        MDC.put(RequestWrapperFilter.REQUEST_ORGANIZATION_MDC_KEY, organization.get().getId());
         return organization.get();
     }
 }

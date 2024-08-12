@@ -4,8 +4,8 @@ import org.slf4j.MDC;
 
 import java.time.Duration;
 
-import static com.authbox.server.config.RequestWrapperFilterConfiguration.REQUEST_ID_MDC_KEY;
-import static com.authbox.server.config.RequestWrapperFilterConfiguration.REQUEST_START_REQUEST_TIME_MDC_KEY;
+import static com.authbox.server.filter.RequestWrapperFilter.REQUEST_ID_MDC_KEY;
+import static com.authbox.server.filter.RequestWrapperFilter.REQUEST_START_REQUEST_TIME_MDC_KEY;
 
 public class RequestUtils {
 

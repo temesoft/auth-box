@@ -11,6 +11,7 @@ import com.authbox.base.model.OauthUser;
 import com.authbox.base.model.Organization;
 import com.authbox.server.service.TokenEndpointProcessor;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,9 +50,9 @@ public class AuthorizationCodeGrantTypeTokenEndpointProcessor extends TokenEndpo
                         .withOrganizationId(organization.getId()),
                 "Parsing and validating Oauth2 client"
         );
-        final OauthClient oauthClient = parsingValidationService.getOauthClient(req, organization);
+        val oauthClient = parsingValidationService.getOauthClient(req, organization);
 
-        final String code = req.getParameter(OAUTH2_ATTR_CODE);
+        val code = req.getParameter(OAUTH2_ATTR_CODE);
         if (isEmpty(code)) {
             log.debug("Authorization code is missing or empty");
             accessLogService.create(
@@ -66,8 +67,8 @@ public class AuthorizationCodeGrantTypeTokenEndpointProcessor extends TokenEndpo
             throw new BadRequestException(MSG_INVALID_REQUEST);
         }
 
-        final String hash = sha256(code);
-        final Optional<OauthToken> oauthToken = oauthTokenDao.getByHash(hash);
+        val hash = sha256(code);
+        val oauthToken = oauthTokenDao.getByHash(hash);
         if (oauthToken.isEmpty()) {
             log.debug("Authorization code='{}', hash='{}' was not found", code, hash);
             accessLogService.create(
@@ -83,7 +84,8 @@ public class AuthorizationCodeGrantTypeTokenEndpointProcessor extends TokenEndpo
         }
 
         if (!oauthToken.get().getTokenType().equals(AUTHORIZATION_CODE)) {
-            log.debug("Provided token is not ACCESS_TOKEN. type='{}' token='{}' / hash='{}'", oauthToken.get().getTokenType(), code, hash);
+            log.debug("Provided token is not ACCESS_TOKEN. type='{}' token='{}' / hash='{}'",
+                    oauthToken.get().getTokenType(), code, hash);
             accessLogService.create(
                     AccessLog.builder()
                             .withRequestId(getRequestId())
@@ -91,7 +93,8 @@ public class AuthorizationCodeGrantTypeTokenEndpointProcessor extends TokenEndpo
                             .withOrganizationId(organization.getId())
                             .withClientId(oauthClient.getId())
                             .withError(MSG_INVALID_TOKEN),
-                    "Provided token is not ACCESS_TOKEN. type='%s' token='%s' / hash='%s'", oauthToken.get().getTokenType().name(), code, hash
+                    "Provided token is not ACCESS_TOKEN. type='%s' token='%s' / hash='%s'",
+                    oauthToken.get().getTokenType().name(), code, hash
             );
             throw new Oauth2Exception(MSG_INVALID_TOKEN);
         }
@@ -110,7 +113,7 @@ public class AuthorizationCodeGrantTypeTokenEndpointProcessor extends TokenEndpo
             throw new Oauth2Exception(MSG_INVALID_TOKEN);
         }
 
-        final Instant now = Instant.now(defaultClock);
+        val now = Instant.now(defaultClock);
         if (now.isAfter(oauthToken.get().getExpiration())) {
             log.debug("Authorization code expired code='{}', hash='{}'", code, hash);
             accessLogService.create(
@@ -138,7 +141,7 @@ public class AuthorizationCodeGrantTypeTokenEndpointProcessor extends TokenEndpo
             );
             throw new Oauth2Exception(MSG_UNAUTHORIZED_REQUEST);
         }
-        final Optional<OauthUser> oauthUser = oauthUserDao.getById(oauthToken.get().getOauthUserId());
+        val oauthUser = oauthUserDao.getById(oauthToken.get().getOauthUserId());
         if (oauthUser.isEmpty()) {
             log.debug("Authorization code user not found by id='{}'", oauthToken.get().getOauthUserId());
             accessLogService.create(

@@ -5,6 +5,9 @@ import com.authbox.base.model.AccessLog;
 import com.authbox.base.model.OauthClient;
 import com.authbox.base.model.OauthScope;
 import com.authbox.base.service.AccessLogService;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,15 +22,11 @@ import static com.authbox.server.util.RequestUtils.getRequestId;
 import static com.authbox.server.util.RequestUtils.getTimeSinceRequest;
 import static org.springframework.util.ObjectUtils.isEmpty;
 
+@AllArgsConstructor
+@Slf4j
 public class ScopeServiceImpl implements ScopeService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ScopeServiceImpl.class);
-
     private final AccessLogService accessLogService;
-
-    public ScopeServiceImpl(final AccessLogService accessLogService) {
-        this.accessLogService = accessLogService;
-    }
 
     @Override
     public String getScopeStringBasedOnRequestedAndAllowed(final String scopeStr, final OauthClient oauthClient) {
@@ -36,9 +35,9 @@ public class ScopeServiceImpl implements ScopeService {
 
     @Override
     public List<OauthScope> getScopeListBasedOnRequestedAndAllowed(final String scopeStr, final OauthClient oauthClient) {
-        final Optional<List<String>> requestedScopes = getScopes(scopeStr);
+        val requestedScopes = getScopes(scopeStr);
         if (requestedScopes.isPresent() && !validateScopes(requestedScopes.get(), oauthClient.getScopes())) {
-            LOGGER.debug("Requested scope='{}' is not found in OauthClient scopes=[{}]",
+            log.debug("Requested scope='{}' is not found in OauthClient scopes=[{}]",
                     String.join(SPACE, requestedScopes.get()), oauthScopeListToSpaceDelimitedString(oauthClient.getScopes()));
             accessLogService.create(
                     AccessLog.builder()

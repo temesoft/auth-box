@@ -4,6 +4,7 @@ import com.authbox.base.model.ErrorResponse;
 import com.authbox.base.model.OauthTokenResponse;
 import com.authbox.server.Application;
 import com.authbox.server.TestConstants;
+import lombok.val;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -11,7 +12,6 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -39,18 +39,18 @@ public class Oauth2TokenControllerWithPasswordTest {
 
     @Test
     public void testCreateOauth2Token_Success_UsingAuthHeader() {
-        final HttpHeaders headers = new HttpHeaders();
+        val headers = new HttpHeaders();
         headers.setContentType(APPLICATION_FORM_URLENCODED);
         headers.setBasicAuth(TestConstants.VALID_CLIENT_ID, TestConstants.VALID_CLIENT_SECRET);
-        final MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        val params = new LinkedMultiValueMap<String, String>();
         params.add("grant_type", password.name());
         params.add("username", TestConstants.VALID_USERNAME);
         params.add("password", TestConstants.VALID_PASSWORD);
         params.add("scope", "some/scope another/scope");
-        final HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
-        final ResponseEntity<OauthTokenResponse> responseEntity = restTemplate.postForEntity(OAUTH_PREFIX + "/token", request, OauthTokenResponse.class);
+        val request = new HttpEntity<MultiValueMap<String, String>>(params, headers);
+        val responseEntity = restTemplate.postForEntity(OAUTH_PREFIX + "/token", request, OauthTokenResponse.class);
         if (responseEntity.getStatusCode().is2xxSuccessful()) {
-            final OauthTokenResponse response = responseEntity.getBody();
+            val response = responseEntity.getBody();
             assertThat(response).isNotNull();
             assertThat(response.accessToken).isNotBlank();
             assertThat(response.tokenType).isEqualTo("bearer");
@@ -64,19 +64,19 @@ public class Oauth2TokenControllerWithPasswordTest {
 
     @Test
     public void testCreateOauth2Token_Success_UsingParams() {
-        final HttpHeaders headers = new HttpHeaders();
+        val headers = new HttpHeaders();
         headers.setContentType(APPLICATION_FORM_URLENCODED);
-        final MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        val params = new LinkedMultiValueMap<String, String>();
         params.add("grant_type", password.name());
         params.add("username", TestConstants.VALID_USERNAME);
         params.add("password", TestConstants.VALID_PASSWORD);
         params.add("scope", "some/scope another/scope");
         params.add("client_id", TestConstants.VALID_CLIENT_ID);
         params.add("client_secret", TestConstants.VALID_CLIENT_SECRET);
-        final HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
-        final ResponseEntity<OauthTokenResponse> responseEntity = restTemplate.postForEntity(OAUTH_PREFIX + "/token", request, OauthTokenResponse.class);
+        val request = new HttpEntity<MultiValueMap<String, String>>(params, headers);
+        val responseEntity = restTemplate.postForEntity(OAUTH_PREFIX + "/token", request, OauthTokenResponse.class);
         if (responseEntity.getStatusCode().is2xxSuccessful()) {
-            final OauthTokenResponse response = responseEntity.getBody();
+            val response = responseEntity.getBody();
             assertThat(response).isNotNull();
             assertThat(response.accessToken).isNotBlank();
             assertThat(response.tokenType).isEqualTo("bearer");
@@ -90,19 +90,19 @@ public class Oauth2TokenControllerWithPasswordTest {
 
     @Test
     public void testCreateOauth2Token_Success_LessScope() {
-        final HttpHeaders headers = new HttpHeaders();
+        val headers = new HttpHeaders();
         headers.setContentType(APPLICATION_FORM_URLENCODED);
-        final MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        val params = new LinkedMultiValueMap<String, String>();
         params.add("grant_type", password.name());
         params.add("username", TestConstants.VALID_USERNAME);
         params.add("password", TestConstants.VALID_PASSWORD);
         params.add("scope", "some/scope");
         params.add("client_id", TestConstants.VALID_CLIENT_ID);
         params.add("client_secret", TestConstants.VALID_CLIENT_SECRET);
-        final HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
-        final ResponseEntity<OauthTokenResponse> responseEntity = restTemplate.postForEntity(OAUTH_PREFIX + "/token", request, OauthTokenResponse.class);
+        val request = new HttpEntity<MultiValueMap<String, String>>(params, headers);
+        val responseEntity = restTemplate.postForEntity(OAUTH_PREFIX + "/token", request, OauthTokenResponse.class);
         if (responseEntity.getStatusCode().is2xxSuccessful()) {
-            final OauthTokenResponse response = responseEntity.getBody();
+            val response = responseEntity.getBody();
             assertThat(response).isNotNull();
             assertThat(response.accessToken).isNotBlank();
             assertThat(response.tokenType).isEqualTo("bearer");
@@ -116,18 +116,18 @@ public class Oauth2TokenControllerWithPasswordTest {
 
     @Test
     public void testCreateOauth2Token_Success_NoScopeSpecified() {
-        final HttpHeaders headers = new HttpHeaders();
+        val headers = new HttpHeaders();
         headers.setContentType(APPLICATION_FORM_URLENCODED);
-        final MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        val params = new LinkedMultiValueMap<String, String>();
         params.add("grant_type", password.name());
         params.add("username", TestConstants.VALID_USERNAME);
         params.add("password", TestConstants.VALID_PASSWORD);
         params.add("client_id", TestConstants.VALID_CLIENT_ID);
         params.add("client_secret", TestConstants.VALID_CLIENT_SECRET);
-        final HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
-        final ResponseEntity<OauthTokenResponse> responseEntity = restTemplate.postForEntity(OAUTH_PREFIX + "/token", request, OauthTokenResponse.class);
+        val request = new HttpEntity<MultiValueMap<String, String>>(params, headers);
+        val responseEntity = restTemplate.postForEntity(OAUTH_PREFIX + "/token", request, OauthTokenResponse.class);
         if (responseEntity.getStatusCode().is2xxSuccessful()) {
-            final OauthTokenResponse response = responseEntity.getBody();
+            val response = responseEntity.getBody();
             assertThat(response).isNotNull();
             assertThat(response.accessToken).isNotBlank();
             assertThat(response.tokenType).isEqualTo("bearer");
@@ -141,19 +141,19 @@ public class Oauth2TokenControllerWithPasswordTest {
 
     @Test
     public void testCreateOauth2Token_Failure_BadUsername() {
-        final HttpHeaders headers = new HttpHeaders();
+        val headers = new HttpHeaders();
         headers.setContentType(APPLICATION_FORM_URLENCODED);
-        final MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        val params = new LinkedMultiValueMap<String, String>();
         params.add("grant_type", password.name());
         params.add("username", "bad-username");
         params.add("password", TestConstants.VALID_PASSWORD);
         params.add("scope", "some/scope");
         params.add("client_id", TestConstants.VALID_CLIENT_ID);
         params.add("client_secret", TestConstants.VALID_CLIENT_SECRET);
-        final HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
-        final ResponseEntity<ErrorResponse> responseEntity = restTemplate.postForEntity(OAUTH_PREFIX + "/token", request, ErrorResponse.class);
+        val request = new HttpEntity<MultiValueMap<String, String>>(params, headers);
+        val responseEntity = restTemplate.postForEntity(OAUTH_PREFIX + "/token", request, ErrorResponse.class);
         if (responseEntity.getStatusCode().is4xxClientError()) {
-            final ErrorResponse response = responseEntity.getBody();
+            val response = responseEntity.getBody();
             assertThat(response).isNotNull();
             assertThat(response.timestamp).isNotNull();
             assertThat(response).isEqualTo(new ErrorResponse(response.timestamp, 400, "Bad Request", MSG_INVALID_REQUEST, "/oauth/token"));
@@ -164,19 +164,19 @@ public class Oauth2TokenControllerWithPasswordTest {
 
     @Test
     public void testCreateOauth2Token_Failure_BadPassword() {
-        final HttpHeaders headers = new HttpHeaders();
+        val headers = new HttpHeaders();
         headers.setContentType(APPLICATION_FORM_URLENCODED);
-        final MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        val params = new LinkedMultiValueMap<String, String>();
         params.add("grant_type", password.name());
         params.add("username", TestConstants.VALID_USERNAME);
         params.add("password", "bad-password");
         params.add("scope", "some/scope");
         params.add("client_id", TestConstants.VALID_CLIENT_ID);
         params.add("client_secret", TestConstants.VALID_CLIENT_SECRET);
-        final HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
-        final ResponseEntity<ErrorResponse> responseEntity = restTemplate.postForEntity(OAUTH_PREFIX + "/token", request, ErrorResponse.class);
+        val request = new HttpEntity<MultiValueMap<String, String>>(params, headers);
+        val responseEntity = restTemplate.postForEntity(OAUTH_PREFIX + "/token", request, ErrorResponse.class);
         if (responseEntity.getStatusCode().is4xxClientError()) {
-            final ErrorResponse response = responseEntity.getBody();
+            val response = responseEntity.getBody();
             assertThat(response).isNotNull();
             assertThat(response.timestamp).isNotNull();
             assertThat(response).isEqualTo(new ErrorResponse(response.timestamp, 400, "Bad Request", MSG_INVALID_REQUEST, "/oauth/token"));
@@ -187,19 +187,19 @@ public class Oauth2TokenControllerWithPasswordTest {
 
     @Test
     public void testCreateOauth2Token_Failure_BadScope() {
-        final HttpHeaders headers = new HttpHeaders();
+        val headers = new HttpHeaders();
         headers.setContentType(APPLICATION_FORM_URLENCODED);
-        final MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        val params = new LinkedMultiValueMap<String, String>();
         params.add("grant_type", password.name());
         params.add("username", TestConstants.VALID_USERNAME);
         params.add("password", TestConstants.VALID_PASSWORD);
         params.add("scope", "scope/NotOnAllowList");
         params.add("client_id", TestConstants.VALID_CLIENT_ID);
         params.add("client_secret", TestConstants.VALID_CLIENT_SECRET);
-        final HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
-        final ResponseEntity<ErrorResponse> responseEntity = restTemplate.postForEntity(OAUTH_PREFIX + "/token", request, ErrorResponse.class);
+        val request = new HttpEntity<MultiValueMap<String, String>>(params, headers);
+        val responseEntity = restTemplate.postForEntity(OAUTH_PREFIX + "/token", request, ErrorResponse.class);
         if (responseEntity.getStatusCode().is4xxClientError()) {
-            final ErrorResponse response = responseEntity.getBody();
+            val response = responseEntity.getBody();
             assertThat(response).isNotNull();
             assertThat(response.timestamp).isNotNull();
             assertThat(response).isEqualTo(new ErrorResponse(response.timestamp, 400, "Bad Request", MSG_INVALID_SCOPE, "/oauth/token"));
@@ -210,19 +210,19 @@ public class Oauth2TokenControllerWithPasswordTest {
 
     @Test
     public void testCreateOauth2Token_Failure_BadClientId() {
-        final HttpHeaders headers = new HttpHeaders();
+        val headers = new HttpHeaders();
         headers.setContentType(APPLICATION_FORM_URLENCODED);
-        final MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        val params = new LinkedMultiValueMap<String, String>();
         params.add("grant_type", password.name());
         params.add("username", TestConstants.VALID_USERNAME);
         params.add("password", TestConstants.VALID_PASSWORD);
         params.add("scope", "some/scope");
         params.add("client_id", "bad-client-id");
         params.add("client_secret", TestConstants.VALID_CLIENT_SECRET);
-        final HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
-        final ResponseEntity<ErrorResponse> responseEntity = restTemplate.postForEntity(OAUTH_PREFIX + "/token", request, ErrorResponse.class);
+        val request = new HttpEntity<MultiValueMap<String, String>>(params, headers);
+        val responseEntity = restTemplate.postForEntity(OAUTH_PREFIX + "/token", request, ErrorResponse.class);
         if (responseEntity.getStatusCode().is4xxClientError()) {
-            final ErrorResponse response = responseEntity.getBody();
+            val response = responseEntity.getBody();
             assertThat(response).isNotNull();
             assertThat(response.timestamp).isNotNull();
             assertThat(response).isEqualTo(new ErrorResponse(response.timestamp, 400, "Bad Request", MSG_INVALID_REQUEST, "/oauth/token"));
@@ -233,19 +233,19 @@ public class Oauth2TokenControllerWithPasswordTest {
 
     @Test
     public void testCreateOauth2Token_Failure_BadClientSecret() {
-        final HttpHeaders headers = new HttpHeaders();
+        val headers = new HttpHeaders();
         headers.setContentType(APPLICATION_FORM_URLENCODED);
-        final MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        val params = new LinkedMultiValueMap<String, String>();
         params.add("grant_type", password.name());
         params.add("username", TestConstants.VALID_USERNAME);
         params.add("password", TestConstants.VALID_PASSWORD);
         params.add("scope", "some/scope");
         params.add("client_id", TestConstants.VALID_CLIENT_ID);
         params.add("client_secret", "this-is-a-wrong-secret");
-        final HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
-        final ResponseEntity<ErrorResponse> responseEntity = restTemplate.postForEntity(OAUTH_PREFIX + "/token", request, ErrorResponse.class);
+        val request = new HttpEntity<MultiValueMap<String, String>>(params, headers);
+        val responseEntity = restTemplate.postForEntity(OAUTH_PREFIX + "/token", request, ErrorResponse.class);
         if (responseEntity.getStatusCode().is4xxClientError()) {
-            final ErrorResponse response = responseEntity.getBody();
+            val response = responseEntity.getBody();
             assertThat(response).isNotNull();
             assertThat(response.timestamp).isNotNull();
             assertThat(response).isEqualTo(new ErrorResponse(response.timestamp, 400, "Bad Request", MSG_INVALID_REQUEST, "/oauth/token"));
@@ -256,18 +256,18 @@ public class Oauth2TokenControllerWithPasswordTest {
 
     @Test
     public void testCreateOauth2Token_Failure_NoClientSecret() {
-        final HttpHeaders headers = new HttpHeaders();
+        val headers = new HttpHeaders();
         headers.setContentType(APPLICATION_FORM_URLENCODED);
-        final MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        val params = new LinkedMultiValueMap<String, String>();
         params.add("grant_type", password.name());
         params.add("username", TestConstants.VALID_USERNAME);
         params.add("password", TestConstants.VALID_PASSWORD);
         params.add("scope", "some/scope");
         params.add("client_id", TestConstants.VALID_CLIENT_ID);
-        final HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
-        final ResponseEntity<ErrorResponse> responseEntity = restTemplate.postForEntity(OAUTH_PREFIX + "/token", request, ErrorResponse.class);
+        val request = new HttpEntity<MultiValueMap<String, String>>(params, headers);
+        val responseEntity = restTemplate.postForEntity(OAUTH_PREFIX + "/token", request, ErrorResponse.class);
         if (responseEntity.getStatusCode().is4xxClientError()) {
-            final ErrorResponse response = responseEntity.getBody();
+            val response = responseEntity.getBody();
             assertThat(response).isNotNull();
             assertThat(response.timestamp).isNotNull();
             assertThat(response).isEqualTo(new ErrorResponse(response.timestamp, 400, "Bad Request", MSG_INVALID_REQUEST, "/oauth/token"));
@@ -278,18 +278,18 @@ public class Oauth2TokenControllerWithPasswordTest {
 
     @Test
     public void testCreateOauth2Token_Failure_NoClientId() {
-        final HttpHeaders headers = new HttpHeaders();
+        val headers = new HttpHeaders();
         headers.setContentType(APPLICATION_FORM_URLENCODED);
-        final MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        val params = new LinkedMultiValueMap<String, String>();
         params.add("grant_type", password.name());
         params.add("username", TestConstants.VALID_USERNAME);
         params.add("password", TestConstants.VALID_PASSWORD);
         params.add("scope", "some/scope");
         params.add("client_secret", TestConstants.VALID_CLIENT_SECRET);
-        final HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
-        final ResponseEntity<ErrorResponse> responseEntity = restTemplate.postForEntity(OAUTH_PREFIX + "/token", request, ErrorResponse.class);
+        val request = new HttpEntity<MultiValueMap<String, String>>(params, headers);
+        val responseEntity = restTemplate.postForEntity(OAUTH_PREFIX + "/token", request, ErrorResponse.class);
         if (responseEntity.getStatusCode().is4xxClientError()) {
-            final ErrorResponse response = responseEntity.getBody();
+            val response = responseEntity.getBody();
             assertThat(response).isNotNull();
             assertThat(response.timestamp).isNotNull();
             assertThat(response).isEqualTo(new ErrorResponse(response.timestamp, 400, "Bad Request", MSG_INVALID_REQUEST, "/oauth/token"));
@@ -300,19 +300,19 @@ public class Oauth2TokenControllerWithPasswordTest {
 
     @Test
     public void testCreateOauth2Token_Failure_BadDomainPrefix() {
-        final HttpHeaders headers = new HttpHeaders();
+        val headers = new HttpHeaders();
         headers.setContentType(APPLICATION_FORM_URLENCODED);
         headers.setBasicAuth(TestConstants.VALID_CLIENT_ID, TestConstants.VALID_CLIENT_SECRET);
-        final MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        val params = new LinkedMultiValueMap<String, String>();
         params.add("grant_type", password.name());
         params.add("username", TestConstants.VALID_USERNAME);
         params.add("password", TestConstants.VALID_PASSWORD);
         params.add("scope", "some/scope another/scope");
-        final HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
-        final ResponseEntity<ErrorResponse> responseEntity = restTemplate.postForEntity(
+        val request = new HttpEntity<MultiValueMap<String, String>>(params, headers);
+        val responseEntity = restTemplate.postForEntity(
                 "http://127.0.0.1:" + port + OAUTH_PREFIX + "/token", request, ErrorResponse.class);
         if (responseEntity.getStatusCode().is4xxClientError()) {
-            final ErrorResponse response = responseEntity.getBody();
+            val response = responseEntity.getBody();
             assertThat(response).isNotNull();
             assertThat(response.timestamp).isNotNull();
             assertThat(response).isEqualTo(new ErrorResponse(response.timestamp, 400, "Bad Request", "Domain prefix unknown: 127.0.0.1", "/oauth/token"));

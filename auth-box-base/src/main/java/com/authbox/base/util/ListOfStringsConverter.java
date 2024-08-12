@@ -16,6 +16,6 @@ public class ListOfStringsConverter implements AttributeConverter<List<String>, 
 
     @Override
     public List<String> convertToEntityAttribute(final String s) {
-        return CSV_SPLITTER.splitToList(s).stream().collect(Collectors.toUnmodifiableList());
+        return CSV_SPLITTER.splitToList(s).stream().toList();
     }
 }

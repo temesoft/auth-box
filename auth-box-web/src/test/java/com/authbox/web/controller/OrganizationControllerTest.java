@@ -4,12 +4,13 @@ import com.authbox.base.dao.OrganizationDao;
 import com.authbox.base.exception.BadRequestException;
 import com.authbox.base.model.Organization;
 import com.google.common.collect.ImmutableMap;
+import lombok.val;
 import org.junit.jupiter.api.Test;
-import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.server.resource.authentication.BearerTokenAuthentication;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.Clock;
 import java.util.AbstractMap.SimpleEntry;
@@ -31,19 +32,21 @@ public class OrganizationControllerTest {
 
     @Test
     public void testOrganizationController_checkAvailableDomainPrefix() {
-        final OrganizationDao organizationDao = mock(OrganizationDao.class);
-        final Organization organization = new Organization(ORG_ID, now(), "Test Org", "test", "", true, "", now());
+        val organizationDao = mock(OrganizationDao.class);
+        val organization = new Organization(ORG_ID, now(), "Test Org", "test", "", true, "", now());
         when(organizationDao.getById(ORG_ID)).thenReturn(Optional.of(organization));
         when(organizationDao.getByDomainPrefix(any(String.class))).thenReturn(Optional.empty());
         when(organizationDao.getByDomainPrefix("something")).thenReturn(Optional.of(organization));
-        final OrganizationController controller = new OrganizationController(organizationDao, Clock.systemUTC());
-        controller.setOrganizationDao(organizationDao);
+        val controller = new OrganizationController(organizationDao, Clock.systemUTC());
 
-        final SecurityContext securityContext = mock(SecurityContext.class);
-        final BearerTokenAuthentication authentication = mock(BearerTokenAuthentication.class);
+        // Need to set the OrganizationDao in base class of OrganizationController - BaseController
+        ReflectionTestUtils.setField(controller, BaseController.class, "organizationDao", organizationDao, OrganizationDao.class);
+
+        val securityContext = mock(SecurityContext.class);
+        val authentication = mock(BearerTokenAuthentication.class);
         when(securityContext.getAuthentication()).thenReturn(authentication);
         when(authentication.getTokenAttributes()).thenReturn(ImmutableMap.of(OAUTH2_ATTR_ORGANIZATION_ID, ORG_ID));
-        try (MockedStatic<SecurityContextHolder> mockedStatic = Mockito.mockStatic(SecurityContextHolder.class)) {
+        try (val mockedStatic = Mockito.mockStatic(SecurityContextHolder.class)) {
             mockedStatic.when(SecurityContextHolder::getContext).thenReturn(securityContext);
             assertThat(controller.checkAvailableDomainPrefix("something")).contains(new SimpleEntry<>("exists", true));
             assertThat(controller.checkAvailableDomainPrefix("other")).contains(new SimpleEntry<>("exists", false));

@@ -8,6 +8,8 @@ import com.authbox.base.model.Organization;
 import com.authbox.base.service.AccessLogService;
 import com.authbox.server.service.ScopeService;
 import com.authbox.server.service.TokenEndpointProcessor;
+import lombok.AllArgsConstructor;
+import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,13 +23,11 @@ import static com.authbox.base.util.NetUtils.getUserAgent;
 import static com.authbox.server.util.RequestUtils.getRequestId;
 import static com.authbox.server.util.RequestUtils.getTimeSinceRequest;
 
+@AllArgsConstructor
 public class ClientCredentialsGrantTypeTokenEndpointProcessor extends TokenEndpointProcessor {
 
-    @Autowired
-    protected ScopeService scopeService;
-
-    @Autowired
-    protected AccessLogService accessLogService;
+    private final ScopeService scopeService;
+    private final AccessLogService accessLogService;
 
     @Override
     @Transactional
@@ -39,9 +39,9 @@ public class ClientCredentialsGrantTypeTokenEndpointProcessor extends TokenEndpo
                         .withOrganizationId(organization.getId()),
                 "Parsing and validating Oauth2 client"
         );
-        final OauthClient oauthClient = parsingValidationService.getOauthClient(req, organization);
 
-        final String scope = scopeService.getScopeStringBasedOnRequestedAndAllowed(req.getParameter(OAUTH2_ATTR_SCOPE), oauthClient);
+        val oauthClient = parsingValidationService.getOauthClient(req, organization);
+        val scope = scopeService.getScopeStringBasedOnRequestedAndAllowed(req.getParameter(OAUTH2_ATTR_SCOPE), oauthClient);
 
         if (oauthClient.getTokenFormat().equals(JWT)) {
             accessLogService.create(
@@ -52,7 +52,14 @@ public class ClientCredentialsGrantTypeTokenEndpointProcessor extends TokenEndpo
                             .withClientId(oauthClient.getId()),
                     "Generating JWT access token"
             );
-            return createJwtAccessToken(organization, oauthClient, scope, getProcessingGrantType(), null, getIp(req), getUserAgent(req), null);
+            return createJwtAccessToken(organization,
+                    oauthClient,
+                    scope,
+                    getProcessingGrantType(),
+                    null,
+                    getIp(req),
+                    getUserAgent(req),
+                    null);
         } else {
             accessLogService.create(
                     AccessLog.builder()
@@ -62,7 +69,14 @@ public class ClientCredentialsGrantTypeTokenEndpointProcessor extends TokenEndpo
                             .withClientId(oauthClient.getId()),
                     "Generating standard access token"
             );
-            return createStandardAccessToken(organization, oauthClient, scope, getProcessingGrantType(), null, getIp(req), getUserAgent(req), null);
+            return createStandardAccessToken(organization,
+                    oauthClient,
+                    scope,
+                    getProcessingGrantType(),
+                    null,
+                    getIp(req),
+                    getUserAgent(req),
+                    null);
         }
     }
 

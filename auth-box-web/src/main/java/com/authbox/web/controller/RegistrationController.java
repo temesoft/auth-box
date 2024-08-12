@@ -8,15 +8,14 @@ import com.authbox.base.model.OauthClientScope;
 import com.authbox.base.model.OauthScope;
 import com.authbox.base.model.OauthUser;
 import com.authbox.base.model.Organization;
-import com.authbox.base.model.RsaKeyPair;
 import com.authbox.base.model.TokenFormat;
 import com.authbox.base.model.User;
 import com.authbox.base.util.CertificateKeysUtils;
 import com.authbox.web.model.CreateAccountWithOrganizationRequest;
 import com.authbox.web.model.UserRole;
 import com.google.common.collect.ImmutableList;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.AllArgsConstructor;
+import lombok.val;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -35,19 +34,12 @@ import static org.springframework.util.ObjectUtils.isEmpty;
 
 @RestController
 @RequestMapping("/registration")
+@AllArgsConstructor
 public class RegistrationController extends BaseController {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(RegistrationController.class);
 
     private final Clock defaultClock;
     private final PasswordEncoder passwordEncoder;
     private final AppProperties appProperties;
-
-    public RegistrationController(final Clock defaultClock, final PasswordEncoder passwordEncoder, final AppProperties appProperties) {
-        this.defaultClock = defaultClock;
-        this.passwordEncoder = passwordEncoder;
-        this.appProperties = appProperties;
-    }
 
     @PostMapping
     public User createAccountWithOrganization(@RequestBody final CreateAccountWithOrganizationRequest request) {
@@ -76,12 +68,12 @@ public class RegistrationController extends BaseController {
             throw new BadRequestException("Organization name can not be empty");
         }
 
-        final String userId = randomUUID().toString();
-        final String organizationId = randomUUID().toString();
-        final Instant now = Instant.now(defaultClock);
+        val userId = randomUUID().toString();
+        val organizationId = randomUUID().toString();
+        val now = Instant.now(defaultClock);
         OrganizationController.validateDomainPrefix(organizationDao, request.domainPrefix, organizationId);
 
-        final RsaKeyPair rsaKeyPair = CertificateKeysUtils.generateRsaKeyPair();
+        val rsaKeyPair = CertificateKeysUtils.generateRsaKeyPair();
 
         organizationDao.insert(
                 new Organization(
@@ -112,7 +104,7 @@ public class RegistrationController extends BaseController {
                 )
         );
 
-        final String scopeId = randomUUID().toString();
+        val scopeId = randomUUID().toString();
         oauthScopeDao.insert(
                 new OauthScope(
                         scopeId,
@@ -123,7 +115,7 @@ public class RegistrationController extends BaseController {
                 )
         );
 
-        final String clientId = randomUUID().toString();
+        val clientId = randomUUID().toString();
         oauthClientDao.insert(
                 new OauthClient(
                         clientId,
@@ -154,7 +146,7 @@ public class RegistrationController extends BaseController {
                 )
         );
 
-        final String clientId2 = randomUUID().toString();
+        val clientId2 = randomUUID().toString();
         oauthClientDao.insert(
                 new OauthClient(
                         clientId2,

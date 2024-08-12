@@ -6,13 +6,13 @@ import com.authbox.base.exception.EntityNotFoundException;
 import com.authbox.base.model.OauthClient;
 import com.authbox.base.model.OauthClientScope;
 import com.authbox.base.model.OauthScope;
-import com.authbox.base.model.Organization;
-import com.authbox.base.model.RsaKeyPair;
 import com.authbox.base.model.TokenFormat;
 import com.authbox.base.util.CertificateKeysUtils;
 import com.authbox.web.config.Constants;
 import com.authbox.web.model.DeleteClientsRequest;
 import jakarta.transaction.Transactional;
+import lombok.AllArgsConstructor;
+import lombok.val;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.util.io.pem.PemWriter;
@@ -33,15 +33,11 @@ import java.io.StringWriter;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
-import java.security.PublicKey;
 import java.security.Security;
 import java.security.interfaces.RSAPrivateCrtKey;
 import java.security.spec.InvalidKeySpecException;
-import java.security.spec.RSAPublicKeySpec;
 import java.time.Clock;
 import java.time.Instant;
-import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Supplier;
 
@@ -50,36 +46,34 @@ import static com.authbox.base.model.GrantType.refresh_token;
 import static com.authbox.base.util.CertificateKeysUtils.generatePrivateKey;
 import static com.authbox.base.util.CertificateKeysUtils.generatePublicKey;
 import static com.authbox.base.util.HashUtils.sha256;
-import static java.util.stream.Collectors.toUnmodifiableList;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.springframework.util.ObjectUtils.isEmpty;
 
 @RestController
 @RequestMapping(Constants.API_PREFIX + "/oauth2-client")
+@AllArgsConstructor
 public class Oauth2ClientsController extends BaseController {
 
-    private final Clock defaultClock;
-
-    public Oauth2ClientsController(final Clock defaultClock) {
-        this.defaultClock = defaultClock;
+    static {
         Security.addProvider(new BouncyCastleProvider());
     }
+
+    private final Clock defaultClock;
 
     @GetMapping
     @PreAuthorize("isAuthenticated()")
     public Page<OauthClient> getOauth2Clients(@RequestParam(value = "pageSize", defaultValue = "10") final int pageSize,
                                               @RequestParam(value = "currentPage", defaultValue = "0") final int currentPage) {
-        final Organization organization = getOrganization();
+        val organization = getOrganization();
         return oauthClientDao.listByOrganizationId(organization.getId(), PageRequest.of(currentPage, pageSize));
     }
 
     @GetMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
     public OauthClient getOauth2ClientById(@PathVariable("id") final String id) {
-        final Organization organization = getOrganization();
-
-        final Optional<OauthClient> oauthClient = oauthClientDao.getById(id);
+        val organization = getOrganization();
+        val oauthClient = oauthClientDao.getById(id);
         if (oauthClient.isEmpty()) {
             throw new EntityNotFoundException("Client not found by id: " + id);
         }
@@ -96,9 +90,8 @@ public class Oauth2ClientsController extends BaseController {
     @Transactional
     public OauthClient updateOauth2ClientById(@PathVariable("id") final String clientId,
                                               @RequestBody final OauthClient updatedOauthClient) throws NoSuchAlgorithmException, InvalidKeySpecException, IOException {
-        final Organization organization = getOrganization();
-
-        final Optional<OauthClient> oauthClient = oauthClientDao.getById(clientId);
+        val organization = getOrganization();
+        val oauthClient = oauthClientDao.getById(clientId);
         if (oauthClient.isEmpty()) {
             throw new EntityNotFoundException("Client not found by id: " + clientId);
         }
@@ -107,7 +100,7 @@ public class Oauth2ClientsController extends BaseController {
             throw new AccessDeniedException();
         }
 
-        final Instant now = Instant.now(defaultClock);
+        val now = Instant.now(defaultClock);
         if (isNotBlank(updatedOauthClient.getPrivateKey())
             && !updatedOauthClient.getPrivateKey().equals(oauthClient.get().getPrivateKey())) {
             final PrivateKey privateKey;
@@ -117,16 +110,16 @@ public class Oauth2ClientsController extends BaseController {
                 throw new BadRequestException(e.getMessage());
             }
 
-            final RSAPrivateCrtKey privateCrtKey = (RSAPrivateCrtKey) privateKey;
-            final RSAPublicKeySpec publicKeySpec = new java.security.spec.RSAPublicKeySpec(privateCrtKey.getModulus(), privateCrtKey.getPublicExponent());
-            final KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-            final PublicKey publicKey = keyFactory.generatePublic(publicKeySpec);
-            final StringWriter writer = new StringWriter();
-            final PemWriter pemWriter = new PemWriter(writer);
+            val privateCrtKey = (RSAPrivateCrtKey) privateKey;
+            val publicKeySpec = new java.security.spec.RSAPublicKeySpec(privateCrtKey.getModulus(), privateCrtKey.getPublicExponent());
+            val keyFactory = KeyFactory.getInstance("RSA");
+            val publicKey = keyFactory.generatePublic(publicKeySpec);
+            val writer = new StringWriter();
+            val pemWriter = new PemWriter(writer);
             pemWriter.writeObject(new PemObject("RSA PUBLIC KEY", publicKey.getEncoded()));
             pemWriter.flush();
             pemWriter.close();
-            final String publicKeyPem = writer.toString();
+            val publicKeyPem = writer.toString();
 
             oauthClientDao.update(
                     new OauthClient(
@@ -149,7 +142,6 @@ public class Oauth2ClientsController extends BaseController {
                     )
             );
         } else {
-
             oauthClientDao.update(
                     new OauthClient(
                             clientId,
@@ -172,10 +164,10 @@ public class Oauth2ClientsController extends BaseController {
             );
         }
 
-        final List<String> originalOauthScopeIdList = oauthClient.get().getScopes()
+        val originalOauthScopeIdList = oauthClient.get().getScopes()
                 .stream()
                 .map(OauthScope::getId)
-                .collect(toUnmodifiableList());
+                .toList();
 
         if (updatedOauthClient.getScopeIds() != null) {
             // See if there are new scopes that needs to be created
@@ -208,7 +200,7 @@ public class Oauth2ClientsController extends BaseController {
     @PostMapping
     @PreAuthorize("isAuthenticated()")
     public OauthClient createOauth2Client(@RequestBody final OauthClient updatedOauthClient) {
-        final Organization organization = getOrganization();
+        val organization = getOrganization();
 
         if (isEmpty(updatedOauthClient.getDescription())) {
             throw new BadRequestException("Client description can not be empty");
@@ -232,10 +224,9 @@ public class Oauth2ClientsController extends BaseController {
             throw new BadRequestException("Refresh token expiration can not be empty");
         }
 
-        final RsaKeyPair rsaKeyPair = CertificateKeysUtils.generateRsaKeyPair();
-
-        final Instant now = Instant.now(defaultClock);
-        final OauthClient result = new OauthClient(
+        val rsaKeyPair = CertificateKeysUtils.generateRsaKeyPair();
+        val now = Instant.now(defaultClock);
+        val result = new OauthClient(
                 UUID.randomUUID().toString(),
                 now,
                 updatedOauthClient.getDescription(),
@@ -274,14 +265,14 @@ public class Oauth2ClientsController extends BaseController {
     @DeleteMapping
     @PreAuthorize("isAuthenticated()")
     public void deleteClients(@RequestBody final DeleteClientsRequest deleteClientsRequest) {
-        final Organization organization = getOrganization();
+        val organization = getOrganization();
 
         if (isEmpty(deleteClientsRequest.clientIds)) {
             throw new BadRequestException("Client IDs can not be empty");
         }
 
         deleteClientsRequest.clientIds.stream().parallel().forEach(clientId -> {
-            final Optional<OauthClient> oauthClient = oauthClientDao.getById(clientId);
+            val oauthClient = oauthClientDao.getById(clientId);
             if (oauthClient.isEmpty()) {
                 throw new EntityNotFoundException("Client not found by id: " + clientId);
             }
@@ -290,7 +281,7 @@ public class Oauth2ClientsController extends BaseController {
                 throw new AccessDeniedException();
             }
             oauthClientDao.deleteById(oauthClient.get().getId());
-            final List<OauthClientScope> oauthClientScopes = oauthClientScopeDao.listByClientId(oauthClient.get().getId());
+            val oauthClientScopes = oauthClientScopeDao.listByClientId(oauthClient.get().getId());
             oauthClientScopes.stream().parallel().forEach(oauthClientScope -> oauthClientScopeDao.deleteById(oauthClientScope.getId()));
         });
     }
@@ -298,8 +289,8 @@ public class Oauth2ClientsController extends BaseController {
     @PostMapping("/{id}/create-new-keys")
     @PreAuthorize("hasAuthority('SCOPE_organization/write') OR isAuthenticated()")
     public OauthClient createNewKeys(@PathVariable("id") final String clientId) {
-        final Organization organization = getOrganization();
-        final Optional<OauthClient> oauthClient = oauthClientDao.getById(clientId);
+        val organization = getOrganization();
+        val oauthClient = oauthClientDao.getById(clientId);
         if (oauthClient.isEmpty()) {
             throw new EntityNotFoundException("Client not found by id: " + clientId);
         }
@@ -308,7 +299,7 @@ public class Oauth2ClientsController extends BaseController {
             throw new AccessDeniedException();
         }
 
-        final RsaKeyPair rsaKeyPair = CertificateKeysUtils.generateRsaKeyPair();
+        val rsaKeyPair = CertificateKeysUtils.generateRsaKeyPair();
 
         oauthClientDao.update(
                 new OauthClient(
@@ -340,20 +331,16 @@ public class Oauth2ClientsController extends BaseController {
             @PathVariable("id") final String clientId,
             @RequestParam("publicKey") final String publicKeyString,
             @RequestParam("privateKey") final String privateKeyString) {
-        final Organization organization = getOrganization();
+        val organization = getOrganization();
 
         try {
             generatePrivateKey(privateKeyString.trim());
-        } catch (IllegalArgumentException e) {
-            throw new BadRequestException(e.getMessage());
-        }
-        try {
             generatePublicKey(publicKeyString.trim());
         } catch (IllegalArgumentException e) {
             throw new BadRequestException(e.getMessage());
         }
 
-        final Optional<OauthClient> oauthClient = oauthClientDao.getById(clientId);
+        val oauthClient = oauthClientDao.getById(clientId);
         if (oauthClient.isEmpty()) {
             throw new EntityNotFoundException("Client not found by id: " + clientId);
         }

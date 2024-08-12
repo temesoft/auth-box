@@ -2,15 +2,13 @@ package com.authbox.web.controller;
 
 import com.authbox.base.dao.AccessLogDao;
 import com.authbox.base.model.AccessLog;
-import com.authbox.base.model.Organization;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.google.common.collect.ImmutableMap;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -21,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.Duration;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import static com.authbox.base.dao.AccessLogDaoImpl.LIST_CRITERIA_ORGANIZATION_ID;
@@ -30,9 +29,8 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 
 @RestController
 @RequestMapping(API_PREFIX + "/access-log")
+@Slf4j
 public class AccessLogController extends BaseController {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(AccessLogController.class);
 
     private final AccessLogDao accessLogDao;
     private final LoadingCache<String, JsonNode> cache;
@@ -52,7 +50,7 @@ public class AccessLogController extends BaseController {
                                if (!ipStackEnabled || isBlank(ipStackUrl)) {
                                    return objectMapper.createObjectNode();
                                }
-                               LOGGER.debug("Making request for IP details for: {}", ip);
+                               log.debug("Making request for IP details for: {}", ip);
                                return restTemplate.getForObject(ipStackUrl.replaceAll("\\{ip}", ip), JsonNode.class);
                            }
                        }
@@ -61,9 +59,9 @@ public class AccessLogController extends BaseController {
 
     @GetMapping("/{requestId}")
     public Page<AccessLog> getAccessLogByRequestId(@PathVariable("requestId") final String requestId) {
-        final Organization organization = getOrganization();
+        val organization = getOrganization();
         return accessLogDao.listBy(
-                ImmutableMap.of(
+                Map.of(
                         LIST_CRITERIA_ORGANIZATION_ID, organization.getId(),
                         LIST_CRITERIA_REQUEST_ID, requestId
                 ),

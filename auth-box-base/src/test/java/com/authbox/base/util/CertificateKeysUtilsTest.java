@@ -1,6 +1,7 @@
 package com.authbox.base.util;
 
 import com.authbox.base.model.RsaKeyPair;
+import lombok.val;
 import org.junit.jupiter.api.Test;
 
 import java.security.PrivateKey;
@@ -12,7 +13,7 @@ public class CertificateKeysUtilsTest {
 
     @Test
     public void testGenerateRsaKeyPair() {
-        final RsaKeyPair rsaKeyPair = CertificateKeysUtils.generateRsaKeyPair();
+        val rsaKeyPair = CertificateKeysUtils.generateRsaKeyPair();
         assertThat(rsaKeyPair).isNotNull();
         assertThat(rsaKeyPair.privateKeyPem).isNotEmpty();
         assertThat(rsaKeyPair.publicKeyPem).isNotEmpty();
@@ -20,8 +21,8 @@ public class CertificateKeysUtilsTest {
 
     @Test
     public void testGeneratePrivateKey() {
-        final RsaKeyPair rsaKeyPair = CertificateKeysUtils.generateRsaKeyPair();
-        final PrivateKey privateKey = CertificateKeysUtils.generatePrivateKey(rsaKeyPair.privateKeyPem);
+        val rsaKeyPair = CertificateKeysUtils.generateRsaKeyPair();
+        val privateKey = CertificateKeysUtils.generatePrivateKey(rsaKeyPair.privateKeyPem);
         assertThat(privateKey).isNotNull();
         assertThat(privateKey.getAlgorithm()).isEqualTo("RSA");
         assertThat(privateKey.getFormat()).isEqualTo("PKCS#8");
@@ -29,8 +30,8 @@ public class CertificateKeysUtilsTest {
 
     @Test
     public void testGeneratePublicKey() {
-        final RsaKeyPair rsaKeyPair = CertificateKeysUtils.generateRsaKeyPair();
-        final PublicKey publicKey = CertificateKeysUtils.generatePublicKey(rsaKeyPair.publicKeyPem);
+        val rsaKeyPair = CertificateKeysUtils.generateRsaKeyPair();
+        val publicKey = CertificateKeysUtils.generatePublicKey(rsaKeyPair.publicKeyPem);
         assertThat(publicKey).isNotNull();
         assertThat(publicKey.getAlgorithm()).isEqualTo("RSA");
         assertThat(publicKey.getFormat()).isEqualTo("X.509");

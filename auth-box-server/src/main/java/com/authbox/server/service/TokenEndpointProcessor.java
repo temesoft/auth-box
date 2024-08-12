@@ -14,12 +14,12 @@ import com.authbox.base.service.AccessLogService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Stopwatch;
-import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import jakarta.annotation.Nullable;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -54,22 +54,16 @@ public abstract class TokenEndpointProcessor {
 
     @Autowired
     protected Clock defaultClock;
-
     @Autowired
     protected OauthTokenDao oauthTokenDao;
-
     @Autowired
     protected OauthUserDao oauthUserDao;
-
     @Autowired
     protected PasswordEncoder passwordEncoder;
-
     @Autowired
     protected ObjectMapper objectMapper;
-
     @Autowired
     protected ParsingValidationService parsingValidationService;
-
     @Autowired
     protected AccessLogService accessLogService;
 
@@ -85,9 +79,9 @@ public abstract class TokenEndpointProcessor {
                                                       final String ip,
                                                       final String userAgent,
                                                       @Nullable final String parentTokenId) {
-        final Instant now = Instant.now(defaultClock);
-        final Instant expiration = Instant.now(defaultClock).plusSeconds(oauthClient.getExpiration().toSeconds());
-        final Stopwatch stopwatch = Stopwatch.createStarted();
+        val now = Instant.now(defaultClock);
+        val expiration = Instant.now(defaultClock).plusSeconds(oauthClient.getExpiration().toSeconds());
+        val stopwatch = Stopwatch.createStarted();
         log.debug("Prepare keys for JWT token");
         accessLogService.create(
                 AccessLog.builder()
@@ -114,7 +108,7 @@ public abstract class TokenEndpointProcessor {
             throw new BadRequestException(e.getMessage());
         }
 
-        final Optional<String> refreshToken = createRefreshTokenIfNeeded(grantType, oauthClient, scope, oauthUser, ip, userAgent);
+        val refreshToken = createRefreshTokenIfNeeded(grantType, oauthClient, scope, oauthUser, ip, userAgent);
         log.debug("Sign JWT token");
         accessLogService.create(
                 AccessLog.builder()
@@ -124,7 +118,7 @@ public abstract class TokenEndpointProcessor {
                         .withClientId(oauthClient.getId()),
                 "Signing JWT access token using private key"
         );
-        final JwtBuilder jwsBuilder = Jwts.builder()
+        val jwsBuilder = Jwts.builder()
                 .issuer(organization.getId())
                 .subject(oauthClient.getId())
                 .claim(OAUTH2_ATTR_SCOPE, scope)
@@ -145,11 +139,11 @@ public abstract class TokenEndpointProcessor {
             jwsBuilder.claim(OAUTH2_ATTR_METADATA, metadata);
         }
 
-        final String jwt = jwsBuilder.compact();
+        val jwt = jwsBuilder.compact();
         log.debug("JWT token created in: {}", stopwatch.stop());
 
-        final String oauthTokenId = UUID.randomUUID().toString();
-        final OauthToken oauthToken = new OauthToken(
+        val oauthTokenId = UUID.randomUUID().toString();
+        val oauthToken = new OauthToken(
                 oauthTokenId,
                 now,
                 sha256(jwt),
@@ -198,14 +192,12 @@ public abstract class TokenEndpointProcessor {
                                                            final String ip,
                                                            final String userAgent,
                                                            @Nullable final String parentTokenId) {
-        final Instant now = Instant.now(defaultClock);
-        final Instant expiration = now.plusSeconds(oauthClient.getExpiration().toSeconds());
-
-        final Optional<String> refreshToken = createRefreshTokenIfNeeded(grantType, oauthClient, scope, oauthUser, ip, userAgent);
-
-        final String accessToken = sha256(UUID.randomUUID().toString());
-        final String oauthTokenId = UUID.randomUUID().toString();
-        final OauthToken oauthToken = new OauthToken(
+        val now = Instant.now(defaultClock);
+        val expiration = now.plusSeconds(oauthClient.getExpiration().toSeconds());
+        val refreshToken = createRefreshTokenIfNeeded(grantType, oauthClient, scope, oauthUser, ip, userAgent);
+        val accessToken = sha256(UUID.randomUUID().toString());
+        val oauthTokenId = UUID.randomUUID().toString();
+        val oauthToken = new OauthToken(
                 oauthTokenId,
                 now,
                 sha256(accessToken),
@@ -255,10 +247,10 @@ public abstract class TokenEndpointProcessor {
             return Optional.empty();
         }
         if (grantType == authorization_code || grantType == password) {
-            final Instant now = Instant.now(defaultClock);
-            final Instant expiration = Instant.now(defaultClock).plusSeconds(oauthClient.getRefreshExpiration().toSeconds());
-            final String token = sha256(UUID.randomUUID().toString());
-            final OauthToken refreshToken = new OauthToken(
+            val now = Instant.now(defaultClock);
+            val expiration = Instant.now(defaultClock).plusSeconds(oauthClient.getRefreshExpiration().toSeconds());
+            val token = sha256(UUID.randomUUID().toString());
+            val refreshToken = new OauthToken(
                     UUID.randomUUID().toString(),
                     now,
                     sha256(token),

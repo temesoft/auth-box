@@ -1,8 +1,8 @@
 package com.authbox.web.config;
 
 import com.authbox.web.config.security.SecurityConfiguration;
+import lombok.val;
 import org.junit.jupiter.api.Test;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -13,8 +13,8 @@ public class SecurityConfigurationTest {
 
     @Test
     public void testStandardPasswordHashing() {
-        final SecurityConfiguration configuration = new SecurityConfiguration();
-        final PasswordEncoder passwordEncoder = configuration.passwordEncoder();
+        val configuration = new SecurityConfiguration();
+        val passwordEncoder = configuration.passwordEncoder();
         assertThat(passwordEncoder).isNotNull();
         assertThat(passwordEncoder.encode(PASSWORD_TEXT)).isNotBlank().hasSize(60).startsWith("$"); // BCrypt format
         assertThat(passwordEncoder.matches(PASSWORD_TEXT, PASSWORD_HASH)).isTrue(); // encoded password and known hash should match

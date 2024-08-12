@@ -4,14 +4,15 @@ import com.authbox.base.exception.AccessDeniedException;
 import com.authbox.base.exception.BadRequestException;
 import com.authbox.base.exception.EntityNotFoundException;
 import com.authbox.base.model.OauthUser;
-import com.authbox.base.model.Organization;
 import com.authbox.base.model.UpdateOauthUserRequest;
 import com.authbox.base.util.HashUtils;
 import com.authbox.web.model.DeleteUsersRequest;
 import com.authbox.web.model.PasswordChangeRequest;
 import com.authbox.web.service.QrCodeGeneratorService;
 import com.google.zxing.WriterException;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import lombok.val;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -24,11 +25,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import jakarta.transaction.Transactional;
 import java.awt.image.BufferedImage;
 import java.time.Clock;
 import java.time.Instant;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Supplier;
 
@@ -48,15 +47,14 @@ public class Oauth2UsersController extends BaseController {
     @GetMapping
     public Page<OauthUser> getOauth2Users(@RequestParam(value = "pageSize", defaultValue = "10") final int pageSize,
                                           @RequestParam(value = "currentPage", defaultValue = "0") final int currentPage) {
-        final Organization organization = getOrganization();
+        val organization = getOrganization();
         return oauthUserDao.listByOrganizationId(organization.getId(), PageRequest.of(currentPage, pageSize));
     }
 
     @GetMapping("/{id}")
     public OauthUser getOauth2UserById(@PathVariable("id") final String id) {
-        final Organization organization = getOrganization();
-
-        final Optional<OauthUser> oauthUser = oauthUserDao.getById(id);
+        val organization = getOrganization();
+        val oauthUser = oauthUserDao.getById(id);
         if (oauthUser.isEmpty()) {
             throw new EntityNotFoundException("User not found by id: " + id);
         }
@@ -71,8 +69,8 @@ public class Oauth2UsersController extends BaseController {
     @PostMapping("/{id}/password-reset")
     public OauthUser updatePassword(@PathVariable("id") final String userId,
                                     @RequestBody final PasswordChangeRequest passwordChangeRequest) {
-        final Organization organization = getOrganization();
-        final Optional<OauthUser> oauthUser = oauthUserDao.getById(userId);
+        val organization = getOrganization();
+        val oauthUser = oauthUserDao.getById(userId);
         if (oauthUser.isEmpty()) {
             throw new EntityNotFoundException("User not found by id: " + userId);
         }
@@ -105,8 +103,8 @@ public class Oauth2UsersController extends BaseController {
 
     @GetMapping(value = "/{id}/2fa-qr-code", produces = IMAGE_PNG_VALUE)
     public BufferedImage generate2FaQrCodeImage(@PathVariable("id") final String userId) throws WriterException {
-        final Organization organization = getOrganization();
-        final Optional<OauthUser> oauthUser = oauthUserDao.getById(userId);
+        val organization = getOrganization();
+        val oauthUser = oauthUserDao.getById(userId);
         if (oauthUser.isEmpty()) {
             throw new EntityNotFoundException("User not found by id: " + userId);
         }
@@ -115,13 +113,13 @@ public class Oauth2UsersController extends BaseController {
             throw new AccessDeniedException();
         }
 
-        final String qrCodeUrl = "otpauth://totp/"
-                                 + organization.getName()
-                                 + " ("
-                                 + oauthUser.get().getUsername()
-                                 + ")?secret="
-                                 + oauthUser.get().getSecret()
-                                 + "&issuer=auth-box";
+        val qrCodeUrl = "otpauth://totp/"
+                        + organization.getName()
+                        + " ("
+                        + oauthUser.get().getUsername()
+                        + ")?secret="
+                        + oauthUser.get().getSecret()
+                        + "&issuer=auth-box";
 
         return qrCodeGeneratorService.generateQrCode(qrCodeUrl);
     }
@@ -130,9 +128,9 @@ public class Oauth2UsersController extends BaseController {
     @Transactional
     public OauthUser updateOauth2UserById(@PathVariable("id") final String userId,
                                           @RequestBody final UpdateOauthUserRequest updatedOauthUser) {
-        final Organization organization = getOrganization();
+        val organization = getOrganization();
 
-        final Optional<OauthUser> oauthUser = oauthUserDao.getById(userId);
+        val oauthUser = oauthUserDao.getById(userId);
         if (oauthUser.isEmpty()) {
             throw new EntityNotFoundException("User not found by id: " + userId);
         }
@@ -149,7 +147,7 @@ public class Oauth2UsersController extends BaseController {
             }
         }
 
-        final Instant now = Instant.now(defaultClock);
+        val now = Instant.now(defaultClock);
 
         if (updatedOauthUser.isEnabled() != oauthUser.get().isEnabled()) {
             oauthUserDao.update(
@@ -180,7 +178,7 @@ public class Oauth2UsersController extends BaseController {
 
     @PostMapping
     public OauthUser createOauth2User(@RequestBody final UpdateOauthUserRequest newOauthUser) {
-        final Organization organization = getOrganization();
+        val organization = getOrganization();
 
         if (isEmpty(newOauthUser.getUsername())) {
             throw new BadRequestException("Username can not be empty");
@@ -198,10 +196,10 @@ public class Oauth2UsersController extends BaseController {
             password = passwordEncoder.encode(newOauthUser.getPassword().trim());
         }
 
-        final String id = UUID.randomUUID().toString();
-        final Instant now = Instant.now(defaultClock);
+        val id = UUID.randomUUID().toString();
+        val now = Instant.now(defaultClock);
 
-        final OauthUser result = new OauthUser(
+        val result = new OauthUser(
                 id,
                 now,
                 newOauthUser.getUsername().trim(),
@@ -221,14 +219,14 @@ public class Oauth2UsersController extends BaseController {
 
     @DeleteMapping
     public void deleteUsers(@RequestBody final DeleteUsersRequest deleteUsersRequest) {
-        final Organization organization = getOrganization();
+        val organization = getOrganization();
 
         if (isEmpty(deleteUsersRequest.userIds)) {
             throw new BadRequestException("User IDs can not be empty");
         }
 
         deleteUsersRequest.userIds.stream().parallel().forEach(userId -> {
-            final Optional<OauthUser> oauthUser = oauthUserDao.getById(userId);
+            val oauthUser = oauthUserDao.getById(userId);
             if (oauthUser.isEmpty()) {
                 throw new EntityNotFoundException("User not found by id: " + userId);
             }

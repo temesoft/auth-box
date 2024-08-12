@@ -6,7 +6,7 @@ import com.authbox.server.Application;
 import com.authbox.server.TestConstants;
 import com.google.common.collect.ImmutableMap;
 import jakarta.annotation.Nullable;
-import org.apache.hc.core5.http.NameValuePair;
+import lombok.val;
 import org.apache.hc.core5.net.URLEncodedUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,8 +20,6 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
-import java.net.URI;
-import java.util.List;
 import java.util.Map;
 
 import static com.authbox.base.config.Constants.OAUTH_PREFIX;
@@ -50,7 +48,7 @@ public class Oauth2TokenControllerWithAuthorizationCodeTest {
 
     @Test
     public void testCreateOauth2Token_Success_GetAuthorizePageBack() {
-        final ResponseEntity<String> responseEntity = restTemplate.getForEntity(
+        val responseEntity = restTemplate.getForEntity(
                 OAUTH_PREFIX + "/authorize"
                 + "?client_id=" + TestConstants.VALID_CLIENT_ID
                 + "&redirect_uri=" + TestConstants.VALID_REDIRECT_URL
@@ -59,7 +57,7 @@ public class Oauth2TokenControllerWithAuthorizationCodeTest {
                 String.class
         );
         if (responseEntity.getStatusCode().is2xxSuccessful()) {
-            final String response = responseEntity.getBody();
+            val response = responseEntity.getBody();
             assertThat(response)
                     .isNotEmpty()
                     .contains("<title>Authorize</title>")
@@ -72,33 +70,33 @@ public class Oauth2TokenControllerWithAuthorizationCodeTest {
     @Test
     public void testCreateOauth2Token_Success_PostAuthorize() {
         // First, send username & password
-        var responseEntity = postPasswordAuthorization(null, String.class);
+        val responseEntity = postPasswordAuthorization(null, String.class);
         if (responseEntity.getStatusCode().is2xxSuccessful()) {
-            final String response = responseEntity.getBody();
+            val response = responseEntity.getBody();
             assertThat(response)
                     .isNotEmpty()
                     .contains("<title>Authorize scopes</title>")
                     .doesNotContain("text-danger"); // no errors
-            final String cookie = responseEntity.getHeaders().getFirst(HEADER_SET_COOKIE);
+            val cookie = responseEntity.getHeaders().getFirst(HEADER_SET_COOKIE);
 
             // Second, scope selection
-            var responseEntity2 = postScopeAuthorizationSelection(cookie, null);
+            val responseEntity2 = postScopeAuthorizationSelection(cookie, null);
             if (responseEntity2.getStatusCode().is3xxRedirection()) {
-                final URI location = responseEntity2.getHeaders().getLocation();
+                val location = responseEntity2.getHeaders().getLocation();
                 assertThat(location).isNotNull();
                 assertThat(location.toString()).startsWith(TestConstants.VALID_REDIRECT_URL);
-                final List<NameValuePair> uriQuery = URLEncodedUtils.parse(location, UTF_8);
+                val uriQuery = URLEncodedUtils.parse(location, UTF_8);
                 assertThat(uriQuery).hasSize(2);
                 assertThat(uriQuery.get(0).getName()).isEqualTo("code");
                 assertThat(uriQuery.get(0).getValue()).hasSize(64);
                 assertThat(uriQuery.get(1).getName()).isEqualTo("state");
                 assertThat(uriQuery.get(1).getValue()).isEqualTo("1234567890");
-                final String authorizationCode = uriQuery.get(0).getValue();
+                val authorizationCode = uriQuery.get(0).getValue();
 
                 // Third, authorization code for access token exchange
-                var responseEntity3 = postAuthorizationCodeTokenExchange(authorizationCode, ImmutableMap.of());
+                val responseEntity3 = postAuthorizationCodeTokenExchange(authorizationCode, ImmutableMap.of());
                 if (responseEntity3.getStatusCode().is2xxSuccessful()) {
-                    final OauthTokenResponse response3 = responseEntity3.getBody();
+                    val response3 = responseEntity3.getBody();
                     assertThat(response3).isNotNull();
                     assertThat(response3.accessToken).isNotBlank();
                     assertThat(response3.tokenType).isEqualTo("bearer");
@@ -119,33 +117,33 @@ public class Oauth2TokenControllerWithAuthorizationCodeTest {
     @Test
     public void testCreateOauth2Token_Success_LessScope() {
         // First, send username & password
-        var responseEntity = postPasswordAuthorization(ImmutableMap.of("scope", "some/scope"), String.class);
+        val responseEntity = postPasswordAuthorization(ImmutableMap.of("scope", "some/scope"), String.class);
         if (responseEntity.getStatusCode().is2xxSuccessful()) {
-            final String response = responseEntity.getBody();
+            val response = responseEntity.getBody();
             assertThat(response)
                     .isNotEmpty()
                     .contains("<title>Authorize scopes</title>")
                     .doesNotContain("text-danger"); // no errors
-            final String cookie = responseEntity.getHeaders().getFirst(HEADER_SET_COOKIE);
+            val cookie = responseEntity.getHeaders().getFirst(HEADER_SET_COOKIE);
 
             // Second, scope selection
-            var responseEntity2 = postScopeAuthorizationSelection(cookie, ImmutableMap.of("scope", "some/scope"));
+            val responseEntity2 = postScopeAuthorizationSelection(cookie, ImmutableMap.of("scope", "some/scope"));
             if (responseEntity2.getStatusCode().is3xxRedirection()) {
-                final URI location = responseEntity2.getHeaders().getLocation();
+                val location = responseEntity2.getHeaders().getLocation();
                 assertThat(location).isNotNull();
                 assertThat(location.toString()).startsWith(TestConstants.VALID_REDIRECT_URL);
-                final List<NameValuePair> uriQuery = URLEncodedUtils.parse(location, UTF_8);
+                val uriQuery = URLEncodedUtils.parse(location, UTF_8);
                 assertThat(uriQuery).hasSize(2);
                 assertThat(uriQuery.get(0).getName()).isEqualTo("code");
                 assertThat(uriQuery.get(0).getValue()).hasSize(64);
                 assertThat(uriQuery.get(1).getName()).isEqualTo("state");
                 assertThat(uriQuery.get(1).getValue()).isEqualTo("1234567890");
-                final String authorizationCode = uriQuery.get(0).getValue();
+                val authorizationCode = uriQuery.get(0).getValue();
 
                 // Third, authorization code for access token exchange
-                var responseEntity3 = postAuthorizationCodeTokenExchange(authorizationCode, ImmutableMap.of("scope", "some/scope"));
+                val responseEntity3 = postAuthorizationCodeTokenExchange(authorizationCode, ImmutableMap.of("scope", "some/scope"));
                 if (responseEntity3.getStatusCode().is2xxSuccessful()) {
-                    final OauthTokenResponse response3 = responseEntity3.getBody();
+                    val response3 = responseEntity3.getBody();
                     assertThat(response3).isNotNull();
                     assertThat(response3.accessToken).isNotBlank();
                     assertThat(response3.tokenType).isEqualTo("bearer");
@@ -166,7 +164,7 @@ public class Oauth2TokenControllerWithAuthorizationCodeTest {
     @Test
     public void testCreateOauth2Token_Failure_NoScopeRequested() {
         // Send username & password without scope
-        var responseEntity = postPasswordAuthorization(ImmutableMap.of("scope", ""), String.class);
+        val responseEntity = postPasswordAuthorization(ImmutableMap.of("scope", ""), String.class);
         if (responseEntity.getStatusCode().is4xxClientError()) {
             assertThat(responseEntity).isNotNull();
         } else {
@@ -176,7 +174,7 @@ public class Oauth2TokenControllerWithAuthorizationCodeTest {
 
     @Test
     public void testCreateOauth2Token_Failure_BadDomainPrefix() {
-        final ResponseEntity<ErrorResponse> responseEntity = restTemplate.getForEntity(
+        val responseEntity = restTemplate.getForEntity(
                 "http://127.0.0.1:" + port + OAUTH_PREFIX + "/authorize"
                 + "?client_id=" + TestConstants.VALID_CLIENT_ID
                 + "&redirect_uri=" + TestConstants.VALID_REDIRECT_URL
@@ -185,7 +183,7 @@ public class Oauth2TokenControllerWithAuthorizationCodeTest {
                 ErrorResponse.class
         );
         if (responseEntity.getStatusCode().is4xxClientError()) {
-            final ErrorResponse response = responseEntity.getBody();
+            val response = responseEntity.getBody();
             assertThat(response).isNotNull();
             assertThat(response.timestamp).isNotNull();
             assertThat(response).isEqualTo(new ErrorResponse(response.timestamp, 400, "Bad Request", "Domain prefix unknown: 127.0.0.1", "/oauth/authorize"));
@@ -195,9 +193,9 @@ public class Oauth2TokenControllerWithAuthorizationCodeTest {
     }
 
     private <T> ResponseEntity<T> postPasswordAuthorization(@Nullable final Map<String, String> paramsOverride, Class<T> clazz) {
-        final HttpHeaders headers = new HttpHeaders();
+        val headers = new HttpHeaders();
         headers.setContentType(APPLICATION_FORM_URLENCODED);
-        final MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        val params = new LinkedMultiValueMap<String, String>();
         params.add("grant_type", password.name());
         params.add("username", TestConstants.VALID_USERNAME);
         params.add("password", TestConstants.VALID_PASSWORD);
@@ -214,15 +212,15 @@ public class Oauth2TokenControllerWithAuthorizationCodeTest {
                 }
             });
         }
-        final HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
+        val request = new HttpEntity<MultiValueMap<String, String>>(params, headers);
         return restTemplate.postForEntity(OAUTH_PREFIX + "/authorize", request, clazz);
     }
 
     private ResponseEntity<String> postScopeAuthorizationSelection(final String cookie, @Nullable final Map<String, String> paramsOverride) {
-        final HttpHeaders headers = new HttpHeaders();
+        val headers = new HttpHeaders();
         headers.setContentType(APPLICATION_FORM_URLENCODED);
         headers.set("Cookie", cookie);
-        final MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        val params = new LinkedMultiValueMap<String, String>();
         params.add("grant_type", password.name());
         params.add("client_id", TestConstants.VALID_CLIENT_ID);
         params.add("redirect_uri", TestConstants.VALID_REDIRECT_URL);
@@ -237,14 +235,14 @@ public class Oauth2TokenControllerWithAuthorizationCodeTest {
                 }
             });
         }
-        final HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
+        val request = new HttpEntity<MultiValueMap<String, String>>(params, headers);
         return restTemplate.postForEntity(OAUTH_PREFIX + "/authorize/finish", request, String.class);
     }
 
     private ResponseEntity<OauthTokenResponse> postAuthorizationCodeTokenExchange(final String authorizationCode, @Nullable final Map<String, String> paramsOverride) {
-        final HttpHeaders headers = new HttpHeaders();
+        val headers = new HttpHeaders();
         headers.setContentType(APPLICATION_FORM_URLENCODED);
-        final MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        val params = new LinkedMultiValueMap<String, String>();
         params.add("grant_type", authorization_code.name());
         params.add("code", authorizationCode);
         params.add("client_id", TestConstants.VALID_CLIENT_ID);
@@ -257,7 +255,7 @@ public class Oauth2TokenControllerWithAuthorizationCodeTest {
                 }
             });
         }
-        final HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
+        val request = new HttpEntity<MultiValueMap<String, String>>(params, headers);
         return restTemplate.postForEntity(OAUTH_PREFIX + "/token", request, OauthTokenResponse.class);
     }
 }

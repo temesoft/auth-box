@@ -13,5 +13,4 @@ public class DeleteAccountsRequest {
     public DeleteAccountsRequest(@JsonProperty("accountIds") final List<String> accountIds) {
         this.accountIds = accountIds;
     }
-
 }

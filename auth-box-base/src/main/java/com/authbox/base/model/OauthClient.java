@@ -131,7 +131,7 @@ public class OauthClient implements Serializable, Interceptor {
 
     static class DurationJsonDeserializer extends JsonDeserializer<Duration> {
         @Override
-        public Duration deserialize(final JsonParser jsonParser, final DeserializationContext deserializationContext) throws IOException, JsonProcessingException {
+        public Duration deserialize(final JsonParser jsonParser, final DeserializationContext deserializationContext) throws IOException {
             return Duration.parse("PT" + jsonParser.getValueAsString());
         }
     }

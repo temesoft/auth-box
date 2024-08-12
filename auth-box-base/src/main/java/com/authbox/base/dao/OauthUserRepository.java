@@ -9,7 +9,6 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
 import java.time.Instant;
-import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -22,6 +21,6 @@ public interface OauthUserRepository extends CrudRepository<OauthUser, String> {
 
     @Modifying
     @Query("update OauthUser o set o.username = :username, o.password = :password, o.enabled = :enabled, o.metadata = :metadata, o.using2Fa = :using2Fa, o.lastUpdated = :lastUpdated WHERE o.id = :id")
-    void update(final String id, final String username, final String password, final boolean enabled, final String metadata, final boolean using2Fa, final Instant lastUpdated);
+    void update(String id, String username, String password, boolean enabled, String metadata, boolean using2Fa, Instant lastUpdated);
 
 }

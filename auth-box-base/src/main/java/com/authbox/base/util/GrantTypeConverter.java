@@ -18,6 +18,6 @@ public class GrantTypeConverter implements AttributeConverter<List<GrantType>, S
 
     @Override
     public List<GrantType> convertToEntityAttribute(final String s) {
-        return CSV_SPLITTER.splitToList(s).stream().map(GrantType::valueOf).collect(Collectors.toUnmodifiableList());
+        return CSV_SPLITTER.splitToList(s).stream().map(GrantType::valueOf).toList();
     }
 }

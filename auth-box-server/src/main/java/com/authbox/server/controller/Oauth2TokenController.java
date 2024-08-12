@@ -11,6 +11,7 @@ import com.authbox.server.service.TokenEndpointProcessor;
 import io.micrometer.core.annotation.Timed;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -54,7 +55,7 @@ public class Oauth2TokenController extends BaseController {
                 "Starting Oauth2 token generation (grant_type: '%s')",
                 grantTypeStr
         );
-        final Organization organization = getOrganization(req);
+        val organization = getOrganization(req);
 
         if (!GrantType.contains(grantTypeStr)) {
             accessLogService.create(
@@ -68,8 +69,8 @@ public class Oauth2TokenController extends BaseController {
             throw new Oauth2Exception(MSG_INVALID_GRANT_TYPE);
         }
 
-        final GrantType grantType = GrantType.valueOf(grantTypeStr);
-        final Optional<TokenEndpointProcessor> tokenEndpointProcessor = tokenEndpointProcessors
+        val grantType = GrantType.valueOf(grantTypeStr);
+        val tokenEndpointProcessor = tokenEndpointProcessors
                 .stream()
                 .filter(processor -> grantType.equals(processor.getProcessingGrantType()))
                 .findFirst();
@@ -93,13 +94,13 @@ public class Oauth2TokenController extends BaseController {
                         .withDuration(getTimeSinceRequest()),
                 "Starting Oauth2 token introspection"
         );
-        final Organization organization = getOrganization(req);
+        val organization = getOrganization(req);
         Optional<String> accessToken = Optional.ofNullable(token);
         if (accessToken.isEmpty()) {
             accessToken = Optional.ofNullable(req.getParameter("token"));
         }
         if (accessToken.isEmpty()) {
-            final String authHeader = req.getHeader(HEADER_AUTHORIZATION);
+            val authHeader = req.getHeader(HEADER_AUTHORIZATION);
             if (!isEmpty(authHeader)) {
                 accessToken = Optional.of(authHeader.replace(HEADER_AUTHORIZATION_PREFIX_BEARER, ""));
             }
@@ -125,7 +126,7 @@ public class Oauth2TokenController extends BaseController {
                             .withOrganizationId(organization.getId()),
                     "Parsing and validating Oauth2 client"
             );
-            final OauthClient oauthClient = parsingValidationService.getOauthClient(req, organization);
+            val oauthClient = parsingValidationService.getOauthClient(req, organization);
             return tokenDetailsService.getAccessTokenDetails(organization, accessToken.get(), oauthClient);
         } else {
             return tokenDetailsService.getAccessTokenDetails(organization, accessToken.get(), null);

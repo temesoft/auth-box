@@ -4,6 +4,7 @@ import com.authbox.base.config.AppProperties;
 import com.authbox.base.dao.AccessLogDao;
 import com.authbox.base.model.AccessLog;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+import lombok.val;
 import org.junit.jupiter.api.Test;
 
 import java.time.Clock;
@@ -20,9 +21,16 @@ public class AccessLogServiceTest {
 
     @Test
     public void testAccessLogQueueProcessing() {
-        final AccessLogDao logDao = mock(AccessLogDao.class);
-        final AccessLogThreadCache accessLogThreadCache = new AccessLogThreadCache();
-        final AccessLogServiceImpl service = new AccessLogServiceImpl(new AppProperties(), new SimpleMeterRegistry(), Clock.systemUTC(), Oauth2Server, logDao, accessLogThreadCache);
+        val logDao = mock(AccessLogDao.class);
+        val accessLogThreadCache = new AccessLogThreadCache();
+        val service = new AccessLogServiceImpl(
+                new AppProperties(),
+                new SimpleMeterRegistry(),
+                Clock.systemUTC(),
+                Oauth2Server,
+                logDao,
+                accessLogThreadCache
+        );
         service.create(AccessLog.builder(), "Test message");
         service.processCachedAccessLogs();
         await().atMost(Duration.ofSeconds(2)).until(() -> service.getQueue().isEmpty());

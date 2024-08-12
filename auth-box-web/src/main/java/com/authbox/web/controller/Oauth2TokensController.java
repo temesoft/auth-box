@@ -2,12 +2,11 @@ package com.authbox.web.controller;
 
 import com.authbox.base.exception.AccessDeniedException;
 import com.authbox.base.exception.EntityNotFoundException;
-import com.authbox.base.model.OauthClient;
 import com.authbox.base.model.OauthToken;
-import com.authbox.base.model.OauthUser;
-import com.authbox.base.model.Organization;
 import com.authbox.web.config.Constants;
 import com.authbox.web.model.DeleteTokensRequest;
+import lombok.AllArgsConstructor;
+import lombok.val;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -26,21 +25,18 @@ import static com.authbox.base.util.HashUtils.sha256;
 
 @RestController
 @RequestMapping(Constants.API_PREFIX + "/oauth2-token")
+@AllArgsConstructor
 public class Oauth2TokensController extends BaseController {
 
     private final Clock defaultClock;
-
-    public Oauth2TokensController(final Clock defaultClock) {
-        this.defaultClock = defaultClock;
-    }
 
     @GetMapping("/client/{clientId}")
     @PreAuthorize("isAuthenticated()")
     public Page<OauthToken> getOauth2TokensByClientId(@PathVariable("clientId") final String clientId,
                                                       @RequestParam(value = "pageSize", defaultValue = "10") final int pageSize,
                                                       @RequestParam(value = "currentPage", defaultValue = "0") final int currentPage) {
-        final Organization organization = getOrganization();
-        final Optional<OauthClient> oauthClient = oauthClientDao.getById(clientId);
+        val organization = getOrganization();
+        val oauthClient = oauthClientDao.getById(clientId);
         if (oauthClient.isEmpty()) {
             throw new EntityNotFoundException("Oauth client not found by id: " + clientId);
         }
@@ -55,8 +51,8 @@ public class Oauth2TokensController extends BaseController {
     public Page<OauthToken> getOauth2TokensByUserId(@PathVariable("userId") final String userId,
                                                     @RequestParam(value = "pageSize", defaultValue = "10") final int pageSize,
                                                     @RequestParam(value = "currentPage", defaultValue = "0") final int currentPage) {
-        final Organization organization = getOrganization();
-        final Optional<OauthUser> oauthUser = oauthUserDao.getById(userId);
+        val organization = getOrganization();
+        val oauthUser = oauthUserDao.getById(userId);
         if (oauthUser.isEmpty()) {
             throw new EntityNotFoundException("Oauth user not found by id: " + userId);
         }
@@ -70,15 +66,15 @@ public class Oauth2TokensController extends BaseController {
     @PreAuthorize("isAuthenticated()")
     public Page<OauthToken> listOauth2Token(@RequestParam(value = "pageSize", defaultValue = "10") final int pageSize,
                                             @RequestParam(value = "currentPage", defaultValue = "0") final int currentPage) {
-        final Organization organization = getOrganization();
+        val organization = getOrganization();
         return oauthTokenDao.listByOrganizationId(organization.getId(), PageRequest.of(currentPage, pageSize));
     }
 
     @GetMapping("/hash/{hash}")
     @PreAuthorize("isAuthenticated()")
     public OauthToken getOauth2TokenByHash(@PathVariable("hash") final String hash) {
-        final Organization organization = getOrganization();
-        final Optional<OauthToken> oauthToken = oauthTokenDao.getByHash(hash);
+        val organization = getOrganization();
+        val oauthToken = oauthTokenDao.getByHash(hash);
         if (oauthToken.isEmpty()) {
             throw new EntityNotFoundException("Oauth token not found by hash: " + hash);
         }
@@ -91,9 +87,9 @@ public class Oauth2TokensController extends BaseController {
     @GetMapping("/token/{token}")
     @PreAuthorize("isAuthenticated()")
     public OauthToken getOauth2TokenByToken(@PathVariable("token") final String token) {
-        final Organization organization = getOrganization();
-        final String hash = sha256(token);
-        final Optional<OauthToken> oauthToken = oauthTokenDao.getByHash(hash);
+        val organization = getOrganization();
+        val hash = sha256(token);
+        val oauthToken = oauthTokenDao.getByHash(hash);
         if (oauthToken.isEmpty()) {
             throw new EntityNotFoundException("Oauth token not found by token value: " + token);
         }
@@ -106,8 +102,8 @@ public class Oauth2TokensController extends BaseController {
     @GetMapping("/id/{id}")
     @PreAuthorize("isAuthenticated()")
     public OauthToken getOauth2TokenById(@PathVariable("id") final String id) {
-        final Organization organization = getOrganization();
-        final Optional<OauthToken> oauthToken = oauthTokenDao.getById(id);
+        val organization = getOrganization();
+        val oauthToken = oauthTokenDao.getById(id);
         if (oauthToken.isEmpty()) {
             throw new EntityNotFoundException("Oauth token not found by id: " + id);
         }
@@ -120,7 +116,7 @@ public class Oauth2TokensController extends BaseController {
     @DeleteMapping
     @PreAuthorize("isAuthenticated()")
     public void deleteOauth2Tokens(@RequestBody final DeleteTokensRequest deleteTokensRequest) {
-        final Organization organization = getOrganization();
+        val organization = getOrganization();
         deleteTokensRequest.tokenIds.stream().parallel().forEach(id -> {
             final Optional<OauthToken> oauthToken = oauthTokenDao.getById(id);
             if (oauthToken.isEmpty()) {

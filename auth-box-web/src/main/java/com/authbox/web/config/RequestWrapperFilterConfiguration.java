@@ -39,7 +39,7 @@ public class RequestWrapperFilterConfiguration {
 
     @Bean
     @ConditionalOnProperty("request.logging.enabled")
-    public FilterRegistrationBean<RequestWrapperFilter> requestWrapperFilterRegistrationBean(
+    FilterRegistrationBean<RequestWrapperFilter> requestWrapperFilterRegistrationBean(
             @Value("${request.logging.pattern:.*}") final String uriPattern,
             @Value("${request.logging.level:INFO}") final String logLevel) {
         val registrationBean = new FilterRegistrationBean<RequestWrapperFilter>();

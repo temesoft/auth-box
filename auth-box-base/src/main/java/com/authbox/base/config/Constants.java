@@ -42,8 +42,6 @@ public class Constants {
     public static final String HEADER_AUTHORIZATION_PREFIX_BASIC = "Basic ";
     public static final String HEADER_AUTHORIZATION_PREFIX_BEARER = "Bearer ";
 
-    public static final String METRICS_ENABLED_CONFIG_PROP = "metrics.enabled";
-
     public static final String MSG_UNAUTHORIZED_REQUEST = "unauthorized request";
     public static final String MSG_INVALID_REQUEST = "invalid request";
     public static final String MSG_INVALID_GRANT_TYPE = "invalid grant_type";
@@ -51,6 +49,5 @@ public class Constants {
     public static final String MSG_INVALID_SCOPE = "invalid scope";
     public static final String MSG_ACCESS_DENIED = "access denied";
 
-    // Metric keys
     public static final String METRIC_KEY_ACCESS_LOG_SERVICE_QUEUE = "log.service.queue";
 }

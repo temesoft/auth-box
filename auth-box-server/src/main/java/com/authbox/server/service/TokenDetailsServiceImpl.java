@@ -21,16 +21,16 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.impl.DefaultClaims;
 import io.jsonwebtoken.security.SignatureException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import jakarta.annotation.Nullable;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import lombok.val;
+
 import java.security.PublicKey;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
-import java.util.Optional;
 
 import static com.authbox.base.config.Constants.MSG_INVALID_REQUEST;
 import static com.authbox.base.config.Constants.MSG_UNAUTHORIZED_REQUEST;
@@ -54,9 +54,9 @@ import static java.lang.String.join;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.springframework.util.ObjectUtils.isEmpty;
 
+@AllArgsConstructor
+@Slf4j
 public class TokenDetailsServiceImpl implements TokenDetailsService {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(TokenDetailsServiceImpl.class);
 
     private final OauthTokenDao oauthTokenDao;
     private final OauthUserDao oauthUserDao;
@@ -64,16 +64,6 @@ public class TokenDetailsServiceImpl implements TokenDetailsService {
     private final Clock defaultClock;
     private final ObjectMapper objectMapper;
     private final AccessLogService accessLogService;
-
-
-    public TokenDetailsServiceImpl(final OauthTokenDao oauthTokenDao, final OauthUserDao oauthUserDao, final OauthClientDao oauthClientDao, final Clock defaultClock, final ObjectMapper objectMapper, final AccessLogService accessLogService) {
-        this.oauthTokenDao = oauthTokenDao;
-        this.oauthUserDao = oauthUserDao;
-        this.oauthClientDao = oauthClientDao;
-        this.defaultClock = defaultClock;
-        this.objectMapper = objectMapper;
-        this.accessLogService = accessLogService;
-    }
 
     @Override
     public Map<String, Object> getAccessTokenDetails(final Organization organization, final String accessToken, @Nullable final OauthClient providedClient) {
@@ -84,10 +74,10 @@ public class TokenDetailsServiceImpl implements TokenDetailsService {
                         .withOrganizationId(organization.getId()),
                 "Validating Oauth2 access token details"
         );
-        final String hash = sha256(accessToken);
-        final Optional<OauthToken> oauthToken = oauthTokenDao.getByHash(hash);
+        val hash = sha256(accessToken);
+        val oauthToken = oauthTokenDao.getByHash(hash);
         if (oauthToken.isEmpty()) {
-            LOGGER.debug("Unable to find OauthToken by access_token='{}', hash='{}'", accessToken, hash);
+            log.debug("Unable to find OauthToken by access_token='{}', hash='{}'", accessToken, hash);
             accessLogService.create(
                     AccessLog.builder()
                             .withRequestId(getRequestId())
@@ -99,7 +89,7 @@ public class TokenDetailsServiceImpl implements TokenDetailsService {
             throw new Oauth2Exception(MSG_UNAUTHORIZED_REQUEST);
         }
         if (oauthToken.get().getTokenType() != ACCESS_TOKEN) {
-            LOGGER.debug("OauthToken is not ACCESS_TOKEN type. access_token='{}', hash='{}'", accessToken, hash);
+            log.debug("OauthToken is not ACCESS_TOKEN type. access_token='{}', hash='{}'", accessToken, hash);
             accessLogService.create(
                     AccessLog.builder()
                             .withRequestId(getRequestId())
@@ -112,7 +102,7 @@ public class TokenDetailsServiceImpl implements TokenDetailsService {
             throw new Oauth2Exception(MSG_UNAUTHORIZED_REQUEST);
         }
         if (!organization.getId().equals(oauthToken.get().getOrganizationId())) {
-            LOGGER.debug("OauthToken organization_id='{}' does not match OauthClient specified organization_id='{}'",
+            log.debug("OauthToken organization_id='{}' does not match OauthClient specified organization_id='{}'",
                     oauthToken.get().getOrganizationId(), organization.getId());
             accessLogService.create(
                     AccessLog.builder()
@@ -135,9 +125,9 @@ public class TokenDetailsServiceImpl implements TokenDetailsService {
                 "Oauth2 token validated"
         );
 
-        final Optional<OauthClient> oauthClient = oauthClientDao.getById(oauthToken.get().getClientId());
+        val oauthClient = oauthClientDao.getById(oauthToken.get().getClientId());
         if (oauthClient.isEmpty()) {
-            LOGGER.debug("Unable to find OauthClient by client_id='{}'", oauthToken.get().getClientId());
+            log.debug("Unable to find OauthClient by client_id='{}'", oauthToken.get().getClientId());
             accessLogService.create(
                     AccessLog.builder()
                             .withRequestId(getRequestId())
@@ -149,7 +139,7 @@ public class TokenDetailsServiceImpl implements TokenDetailsService {
             throw new Oauth2Exception(MSG_UNAUTHORIZED_REQUEST);
         }
         if (!oauthClient.get().isEnabled()) {
-            LOGGER.debug("OauthClient is disabled. client_id='{}'", oauthToken.get().getClientId());
+            log.debug("OauthClient is disabled. client_id='{}'", oauthToken.get().getClientId());
             accessLogService.create(
                     AccessLog.builder()
                             .withRequestId(getRequestId())
@@ -163,7 +153,7 @@ public class TokenDetailsServiceImpl implements TokenDetailsService {
         }
 
         if (providedClient != null && !providedClient.getId().equals(oauthToken.get().getClientId())) {
-            LOGGER.debug("OauthClient provided (client_id: {}) does not correspond to OauthClient associated with provided token (client_id: {})", providedClient.getId(), oauthToken.get().getClientId());
+            log.debug("OauthClient provided (client_id: {}) does not correspond to OauthClient associated with provided token (client_id: {})", providedClient.getId(), oauthToken.get().getClientId());
             accessLogService.create(
                     AccessLog.builder()
                             .withRequestId(getRequestId())
@@ -177,7 +167,7 @@ public class TokenDetailsServiceImpl implements TokenDetailsService {
         }
 
         if (!organization.getId().equals(oauthClient.get().getOrganizationId())) {
-            LOGGER.debug("OauthClient organization_id='{}' does not match OauthClient specified organization_id='{}'",
+            log.debug("OauthClient organization_id='{}' does not match OauthClient specified organization_id='{}'",
                     oauthToken.get().getOrganizationId(), organization.getId());
             accessLogService.create(
                     AccessLog.builder()
@@ -203,7 +193,7 @@ public class TokenDetailsServiceImpl implements TokenDetailsService {
 
     private Map<String, Object> getJwtAccessTokenDetails(final OauthClient oauthClient, final OauthToken oauthToken, final String accessToken) {
         if (isEmpty(oauthClient.getPublicKey())) {
-            LOGGER.debug("Client with oauth_client_id='{}' does not have public key to validate JWT token.", oauthClient.getId());
+            log.debug("Client with oauth_client_id='{}' does not have public key to validate JWT token.", oauthClient.getId());
             accessLogService.create(
                     AccessLog.builder()
                             .withRequestId(getRequestId())
@@ -233,7 +223,7 @@ public class TokenDetailsServiceImpl implements TokenDetailsService {
             throw new BadRequestException(e.getMessage());
         }
 
-        final ImmutableMap.Builder<String, Object> result = ImmutableMap.builder();
+        val result = ImmutableMap.<String, Object>builder();
         final Jws<Claims> jws;
         try {
             jws = Jwts.parser()
@@ -241,7 +231,7 @@ public class TokenDetailsServiceImpl implements TokenDetailsService {
                     .build()
                     .parseSignedClaims(accessToken);
         } catch (MalformedJwtException e) {
-            LOGGER.debug("Unable to parse JWT token: {}", e.getMessage());
+            log.debug("Unable to parse JWT token: {}", e.getMessage());
             accessLogService.create(
                     AccessLog.builder()
                             .withRequestId(getRequestId())
@@ -266,7 +256,7 @@ public class TokenDetailsServiceImpl implements TokenDetailsService {
             );
             return result.put(OAUTH2_ATTR_ACTIVE, false).build();
         } catch (SignatureException e) {
-            LOGGER.debug("Unable to verify JWT signature: {}", e.getMessage());
+            log.debug("Unable to verify JWT signature: {}", e.getMessage());
             accessLogService.create(
                     AccessLog.builder()
                             .withRequestId(getRequestId())
@@ -290,18 +280,18 @@ public class TokenDetailsServiceImpl implements TokenDetailsService {
                 "Successfully validated JWT token and signature"
         );
 
-        final DefaultClaims defaultClaims = (DefaultClaims) jws.getPayload();
-        final Instant now = Instant.now(defaultClock);
-
+        val defaultClaims = (DefaultClaims) jws.getPayload();
+        val now = Instant.now(defaultClock);
         result.put(OAUTH2_ATTR_ACTIVE, true);
         result.put(OAUTH2_ATTR_EXPIRES_IN, Duration.between(now, defaultClaims.getExpiration().toInstant()).toSeconds());
         result.put(OAUTH2_ATTR_EXPIRES, defaultClaims.getExpiration().getTime() / 1000);
         result.put(OAUTH2_ATTR_SCOPE, defaultClaims.get(OAUTH2_ATTR_SCOPE));
-        final String organizationId = (String) defaultClaims.get(OAUTH2_ATTR_ORGANIZATION_ID);
+        val organizationId = (String) defaultClaims.get(OAUTH2_ATTR_ORGANIZATION_ID);
         result.put(OAUTH2_ATTR_ORGANIZATION_ID, organizationId);
 
         if (!oauthToken.getOrganizationId().equals(organizationId)) {
-            LOGGER.debug("OauthToken organization_id='{}' does not match domain prefix specified organization_id='{}'", oauthToken.getId(), organizationId);
+            log.debug("OauthToken organization_id='{}' does not match domain prefix specified organization_id='{}'",
+                    oauthToken.getId(), organizationId);
             accessLogService.create(
                     AccessLog.builder()
                             .withRequestId(getRequestId())
@@ -309,15 +299,16 @@ public class TokenDetailsServiceImpl implements TokenDetailsService {
                             .withOrganizationId(oauthClient.getOrganizationId())
                             .withClientId(oauthClient.getId())
                             .withError(MSG_UNAUTHORIZED_REQUEST),
-                    "Oauth2 token organization id='{}' does not match domain prefix specified organization id='{}'", oauthToken.getId(), organizationId
+                    "Oauth2 token organization id='{}' does not match domain prefix specified organization id='{}'",
+                    oauthToken.getId(), organizationId
             );
             throw new Oauth2Exception(MSG_UNAUTHORIZED_REQUEST);
         }
 
         if (defaultClaims.get(OAUTH2_ATTR_USER_ID) != null) {
-            final String userId = defaultClaims.get(OAUTH2_ATTR_USER_ID).toString();
+            val userId = defaultClaims.get(OAUTH2_ATTR_USER_ID).toString();
             result.put(OAUTH2_ATTR_USER_ID, userId);
-            final OauthUser oauthUser = getUserById(userId, oauthClient);
+            val oauthUser = getUserById(userId, oauthClient);
             result.put(OAUTH2_ATTR_USERNAME, oauthUser.getUsername());
             try {
                 result.put(OAUTH2_ATTR_METADATA, objectMapper.readValue(oauthUser.getMetadata(), Map.class));
@@ -329,9 +320,9 @@ public class TokenDetailsServiceImpl implements TokenDetailsService {
     }
 
     private OauthUser getUserById(final String userId, final OauthClient oauthClient) {
-        final Optional<OauthUser> oauthUser = oauthUserDao.getById(userId);
+        val oauthUser = oauthUserDao.getById(userId);
         if (oauthUser.isEmpty()) {
-            LOGGER.debug("OauthUser not found by id='{}'", userId);
+            log.debug("OauthUser not found by id='{}'", userId);
             accessLogService.create(
                     AccessLog.builder()
                             .withRequestId(getRequestId())
@@ -344,7 +335,7 @@ public class TokenDetailsServiceImpl implements TokenDetailsService {
             throw new Oauth2Exception(MSG_UNAUTHORIZED_REQUEST);
         }
         if (!oauthUser.get().isEnabled()) {
-            LOGGER.debug("OauthUser user disabled. id='{}'", oauthUser.get().getId());
+            log.debug("OauthUser user disabled. id='{}'", oauthUser.get().getId());
             accessLogService.create(
                     AccessLog.builder()
                             .withRequestId(getRequestId())
@@ -360,8 +351,8 @@ public class TokenDetailsServiceImpl implements TokenDetailsService {
     }
 
     private Map<String, Object> getStandardAccessTokenDetails(final OauthToken oauthToken, final OauthClient oauthClient) {
-        final ImmutableMap.Builder<String, Object> result = ImmutableMap.builder();
-        final Instant now = Instant.now(defaultClock);
+        val result = ImmutableMap.<String, Object>builder();
+        val now = Instant.now(defaultClock);
         if (now.isAfter(oauthToken.getExpiration())) {
             return result.put(OAUTH2_ATTR_ACTIVE, false).build();
         }

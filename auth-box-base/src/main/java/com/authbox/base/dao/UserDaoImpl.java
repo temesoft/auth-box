@@ -2,8 +2,8 @@ package com.authbox.base.dao;
 
 import com.authbox.base.config.CacheNamesConfiguration;
 import com.authbox.base.model.User;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -15,33 +15,29 @@ import java.time.Instant;
 import java.util.Optional;
 
 @CacheConfig(cacheNames = CacheNamesConfiguration.CACHE_USER)
+@AllArgsConstructor
+@Slf4j
 public class UserDaoImpl implements UserDao {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(UserDaoImpl.class);
 
     private final UserRepository userRepository;
 
-    public UserDaoImpl(final UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
-
     @Override
     public void insert(final User user) {
-        LOGGER.debug("Inserting: {}", user);
+        log.debug("Inserting: {}", user);
         userRepository.save(user);
     }
 
     @Override
     @Cacheable(key = "#id", sync = true)
     public Optional<User> getById(final String id) {
-        LOGGER.debug("Fetching by id='{}'", id);
+        log.debug("Fetching by id='{}'", id);
         return userRepository.findById(id);
     }
 
     @Override
     @Cacheable(key = "#username", sync = true)
     public Optional<User> getByUsername(final String username) {
-        LOGGER.debug("Fetching  by username='{}'", username);
+        log.debug("Fetching  by username='{}'", username);
         return userRepository.findByUsername(username);
     }
 
@@ -56,7 +52,7 @@ public class UserDaoImpl implements UserDao {
             @CacheEvict(key = "#user.username")
     })
     public void delete(final User user) {
-        LOGGER.debug("Removing token by id='{}'", user.getId());
+        log.debug("Removing token by id='{}'", user.getId());
         userRepository.deleteById(user.getId());
     }
 
@@ -65,8 +61,13 @@ public class UserDaoImpl implements UserDao {
             @CacheEvict(key = "#id"),
             @CacheEvict(key = "#username")
     })
-    public void update(final String userId, final String username, final String name, final String password, final boolean enabled, final Instant lastUpdated) {
-        LOGGER.debug("Fetching id='{}', username='{}'", userId, username);
+    public void update(final String userId,
+                       final String username,
+                       final String name,
+                       final String password,
+                       final boolean enabled,
+                       final Instant lastUpdated) {
+        log.debug("Fetching id='{}', username='{}'", userId, username);
         userRepository.update(userId, username, name, password, enabled, lastUpdated);
     }
 }

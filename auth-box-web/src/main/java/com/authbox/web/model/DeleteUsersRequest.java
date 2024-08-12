@@ -13,5 +13,4 @@ public class DeleteUsersRequest {
     public DeleteUsersRequest(@JsonProperty("userIds") final List<String> userIds) {
         this.userIds = userIds;
     }
-
 }

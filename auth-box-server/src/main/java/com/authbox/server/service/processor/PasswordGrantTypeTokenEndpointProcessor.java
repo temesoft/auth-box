@@ -3,21 +3,16 @@ package com.authbox.server.service.processor;
 import com.authbox.base.exception.BadRequestException;
 import com.authbox.base.model.AccessLog;
 import com.authbox.base.model.GrantType;
-import com.authbox.base.model.OauthClient;
 import com.authbox.base.model.OauthTokenResponse;
-import com.authbox.base.model.OauthUser;
 import com.authbox.base.model.Organization;
 import com.authbox.server.service.ScopeService;
 import com.authbox.server.service.TokenEndpointProcessor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.util.Pair;
-
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
-import java.util.Optional;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 
 import static com.authbox.base.config.Constants.MSG_INVALID_REQUEST;
 import static com.authbox.base.config.Constants.OAUTH2_ATTR_PASSWORD;
@@ -29,12 +24,11 @@ import static com.authbox.base.util.NetUtils.getUserAgent;
 import static com.authbox.server.util.RequestUtils.getRequestId;
 import static com.authbox.server.util.RequestUtils.getTimeSinceRequest;
 
+@AllArgsConstructor
+@Slf4j
 public class PasswordGrantTypeTokenEndpointProcessor extends TokenEndpointProcessor {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(PasswordGrantTypeTokenEndpointProcessor.class);
-
-    @Autowired
-    private ScopeService scopeService;
+    private final ScopeService scopeService;
 
     @Override
     @Transactional
@@ -46,13 +40,13 @@ public class PasswordGrantTypeTokenEndpointProcessor extends TokenEndpointProces
                         .withOrganizationId(organization.getId()),
                 "Parsing and validating Oauth2 client"
         );
-        final OauthClient oauthClient = parsingValidationService.getOauthClient(req, organization);
+        val oauthClient = parsingValidationService.getOauthClient(req, organization);
 
-        final String scope = scopeService.getScopeStringBasedOnRequestedAndAllowed(req.getParameter(OAUTH2_ATTR_SCOPE), oauthClient);
+        val scope = scopeService.getScopeStringBasedOnRequestedAndAllowed(req.getParameter(OAUTH2_ATTR_SCOPE), oauthClient);
 
-        final Optional<Pair<String, String>> oauthUserCredentials = parsingValidationService.getCredentialsFromParameters(req, OAUTH2_ATTR_USERNAME, OAUTH2_ATTR_PASSWORD);
+        val oauthUserCredentials = parsingValidationService.getCredentialsFromParameters(req, OAUTH2_ATTR_USERNAME, OAUTH2_ATTR_PASSWORD);
         if (oauthUserCredentials.isEmpty()) {
-            LOGGER.debug("Request does not contain username and/or password");
+            log.debug("Request does not contain username and/or password");
             accessLogService.create(
                     AccessLog.builder()
                             .withRequestId(getRequestId())
@@ -64,9 +58,9 @@ public class PasswordGrantTypeTokenEndpointProcessor extends TokenEndpointProces
             );
             throw new BadRequestException(MSG_INVALID_REQUEST);
         }
-        final Optional<OauthUser> oauthUser = oauthUserDao.getByUsernameAndOrganizationId(oauthUserCredentials.get().getFirst(), organization.getId());
+        val oauthUser = oauthUserDao.getByUsernameAndOrganizationId(oauthUserCredentials.get().getFirst(), organization.getId());
         if (oauthUser.isEmpty()) {
-            LOGGER.debug("OauthUser not found by username='{}' and organization_id='{}'", oauthUserCredentials.get().getFirst(), organization.getId());
+            log.debug("OauthUser not found by username='{}' and organization_id='{}'", oauthUserCredentials.get().getFirst(), organization.getId());
             accessLogService.create(
                     AccessLog.builder()
                             .withRequestId(getRequestId())
@@ -74,13 +68,15 @@ public class PasswordGrantTypeTokenEndpointProcessor extends TokenEndpointProces
                             .withClientId(oauthClient.getId())
                             .withError(MSG_INVALID_REQUEST)
                             .withOrganizationId(organization.getId()),
-                    "Oauth2 user not found by username='%s' and organization id='%s'", oauthUserCredentials.get().getFirst(), organization.getId()
+                    "Oauth2 user not found by username='%s' and organization id='%s'",
+                    oauthUserCredentials.get().getFirst(), organization.getId()
             );
             throw new BadRequestException(MSG_INVALID_REQUEST);
         }
 
         if (!organization.getId().equals(oauthUser.get().getOrganizationId())) {
-            LOGGER.debug("OauthUser organization_id='{}' does not match request organization_id='{}'", oauthUser.get().getOrganizationId(), organization.getId());
+            log.debug("OauthUser organization_id='{}' does not match request organization_id='{}'",
+                    oauthUser.get().getOrganizationId(), organization.getId());
             accessLogService.create(
                     AccessLog.builder()
                             .withRequestId(getRequestId())
@@ -88,13 +84,14 @@ public class PasswordGrantTypeTokenEndpointProcessor extends TokenEndpointProces
                             .withClientId(oauthClient.getId())
                             .withError(MSG_INVALID_REQUEST)
                             .withOrganizationId(organization.getId()),
-                    "Oauth2 user organization id='%s' does not match request organization id='%s'", oauthUser.get().getOrganizationId(), organization.getId()
+                    "Oauth2 user organization id='%s' does not match request organization id='%s'",
+                    oauthUser.get().getOrganizationId(), organization.getId()
             );
             throw new BadRequestException(MSG_INVALID_REQUEST);
         }
 
         if (!passwordEncoder.matches(oauthUserCredentials.get().getSecond(), oauthUser.get().getPassword())) {
-            LOGGER.debug("OauthUser password does not match request password");
+            log.debug("OauthUser password does not match request password");
             accessLogService.create(
                     AccessLog.builder()
                             .withRequestId(getRequestId())
@@ -108,9 +105,23 @@ public class PasswordGrantTypeTokenEndpointProcessor extends TokenEndpointProces
         }
 
         if (oauthClient.getTokenFormat().equals(JWT)) {
-            return createJwtAccessToken(organization, oauthClient, scope, getProcessingGrantType(), oauthUser.get(), getIp(req), getUserAgent(req), null);
+            return createJwtAccessToken(organization,
+                    oauthClient,
+                    scope,
+                    getProcessingGrantType(),
+                    oauthUser.get(),
+                    getIp(req),
+                    getUserAgent(req),
+                    null);
         } else {
-            return createStandardAccessToken(organization, oauthClient, scope, getProcessingGrantType(), oauthUser.get(), getIp(req), getUserAgent(req), null);
+            return createStandardAccessToken(organization,
+                    oauthClient,
+                    scope,
+                    getProcessingGrantType(),
+                    oauthUser.get(),
+                    getIp(req),
+                    getUserAgent(req),
+                    null);
         }
     }
 

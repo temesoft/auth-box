@@ -4,6 +4,7 @@ import com.authbox.base.model.ErrorResponse;
 import com.authbox.server.Application;
 import com.authbox.server.TestConstants;
 import com.fasterxml.jackson.databind.JsonNode;
+import lombok.val;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -12,7 +13,6 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -45,12 +45,12 @@ public class Oauth2TokenControllerTest {
 
     @Test
     public void testGetDetailsOauth2Token_Success_Parameter() {
-        final ResponseEntity<JsonNode> responseEntity = restTemplate.postForEntity(
+        val responseEntity = restTemplate.postForEntity(
                 OAUTH_PREFIX + "/introspection?access_token=" + TestConstants.VALID_TOKEN + "&client_id=" + TestConstants.VALID_CLIENT_ID + "&client_secret=" + TestConstants.VALID_CLIENT_SECRET,
                 "",
                 JsonNode.class);
         if (responseEntity.getStatusCode().is2xxSuccessful()) {
-            final JsonNode response = responseEntity.getBody();
+            val response = responseEntity.getBody();
             assertThat(response).isNotNull();
             assertThat(response.get(OAUTH2_ATTR_ACTIVE).booleanValue()).isEqualTo(true);
             assertThat(response.get(OAUTH2_ATTR_EXPIRES_IN).longValue()).isGreaterThan(2057786133L);
@@ -67,17 +67,17 @@ public class Oauth2TokenControllerTest {
 
     @Test
     public void testGetDetailsOauth2Token_Success_ClientHeaders() {
-        final HttpHeaders headers = new HttpHeaders();
+        val headers = new HttpHeaders();
         headers.setBasicAuth(TestConstants.VALID_CLIENT_ID, TestConstants.VALID_CLIENT_SECRET);
-        final MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-        final HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
-        final ResponseEntity<JsonNode> responseEntity = restTemplate.exchange(
+        val params = new LinkedMultiValueMap<String, String>();
+        val request = new HttpEntity<MultiValueMap<String, String>>(params, headers);
+        val responseEntity = restTemplate.exchange(
                 OAUTH_PREFIX + "/introspection?access_token=" + TestConstants.VALID_TOKEN,
                 HttpMethod.POST,
                 request,
                 JsonNode.class);
         if (responseEntity.getStatusCode().is2xxSuccessful()) {
-            final JsonNode response = responseEntity.getBody();
+            val response = responseEntity.getBody();
             assertThat(response).isNotNull();
             assertThat(response.get(OAUTH2_ATTR_ACTIVE).booleanValue()).isEqualTo(true);
             assertThat(response.get(OAUTH2_ATTR_EXPIRES_IN).longValue()).isGreaterThan(2057786133L);
@@ -94,17 +94,17 @@ public class Oauth2TokenControllerTest {
 
     @Test
     public void testGetDetailsOauth2Token_Success_AuthHeader() {
-        final HttpHeaders headers = new HttpHeaders();
+        val headers = new HttpHeaders();
         headers.setBearerAuth(TestConstants.VALID_TOKEN);
-        final MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-        final HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
-        final ResponseEntity<JsonNode> responseEntity = restTemplate.exchange(
+        val params = new LinkedMultiValueMap<String, String>();
+        val request = new HttpEntity<MultiValueMap<String, String>>(params, headers);
+        val responseEntity = restTemplate.exchange(
                 OAUTH_PREFIX + "/introspection?client_id=" + TestConstants.VALID_CLIENT_ID + "&client_secret=" + TestConstants.VALID_CLIENT_SECRET,
                 HttpMethod.POST,
                 request,
                 JsonNode.class);
         if (responseEntity.getStatusCode().is2xxSuccessful()) {
-            final JsonNode response = responseEntity.getBody();
+            val response = responseEntity.getBody();
             assertThat(response).isNotNull();
             assertThat(response.get(OAUTH2_ATTR_ACTIVE).booleanValue()).isEqualTo(true);
             assertThat(response.get(OAUTH2_ATTR_EXPIRES_IN).longValue()).isGreaterThan(2057786133L);
@@ -121,12 +121,12 @@ public class Oauth2TokenControllerTest {
 
     @Test
     public void testGetDetailsOauth2Token_Expired() {
-        final ResponseEntity<JsonNode> responseEntity = restTemplate.postForEntity(
+        val responseEntity = restTemplate.postForEntity(
                 OAUTH_PREFIX + "/introspection?access_token=" + TestConstants.EXPIRED_TOKEN + "&client_id=" + TestConstants.VALID_CLIENT_ID + "&client_secret=" + TestConstants.VALID_CLIENT_SECRET,
                 "",
                 JsonNode.class);
         if (responseEntity.getStatusCode().is2xxSuccessful()) {
-            final JsonNode response = responseEntity.getBody();
+            val response = responseEntity.getBody();
             assertThat(response).isNotNull();
             assertThat(response.get(OAUTH2_ATTR_ACTIVE).booleanValue()).isEqualTo(false);
             assertThat(response.get(OAUTH2_ATTR_EXPIRES_IN)).isNull();
@@ -143,12 +143,12 @@ public class Oauth2TokenControllerTest {
 
     @Test
     public void testGetDetailsOauth2Token_BadToken() {
-        final ResponseEntity<ErrorResponse> responseEntity = restTemplate.postForEntity(
+        val responseEntity = restTemplate.postForEntity(
                 OAUTH_PREFIX + "/introspection?access_token=bad-token&client_id=" + TestConstants.VALID_CLIENT_ID + "&client_secret=" + TestConstants.VALID_CLIENT_SECRET,
                 "",
                 ErrorResponse.class);
         if (responseEntity.getStatusCode().is4xxClientError()) {
-            final ErrorResponse response = responseEntity.getBody();
+            val response = responseEntity.getBody();
             assertThat(response).isNotNull();
             assertThat(response.timestamp).isNotNull();
             assertThat(response.error).isEqualTo("Unauthorized");
@@ -162,12 +162,12 @@ public class Oauth2TokenControllerTest {
 
     @Test
     public void testGetDetailsOauth2Token_NoToken() {
-        final ResponseEntity<ErrorResponse> responseEntity = restTemplate.postForEntity(
+        val responseEntity = restTemplate.postForEntity(
                 OAUTH_PREFIX + "/introspection?client_id=" + TestConstants.VALID_CLIENT_ID + "&client_secret=" + TestConstants.VALID_CLIENT_SECRET,
                 "",
                 ErrorResponse.class);
         if (responseEntity.getStatusCode().is4xxClientError()) {
-            final ErrorResponse response = responseEntity.getBody();
+            val response = responseEntity.getBody();
             assertThat(response).isNotNull();
             assertThat(response.timestamp).isNotNull();
             assertThat(response.error).isEqualTo("Unauthorized");
@@ -181,13 +181,13 @@ public class Oauth2TokenControllerTest {
 
     @Test
     public void testGetDetailsOauth2Token_BadDomainPrefix() {
-        final ResponseEntity<ErrorResponse> responseEntity = restTemplate.postForEntity(
+        val responseEntity = restTemplate.postForEntity(
                 "http://127.0.0.1:" + port + OAUTH_PREFIX + "/introspection?access_token=" + TestConstants.VALID_TOKEN
                 + "&client_id=" + TestConstants.VALID_CLIENT_ID + "&client_secret=" + TestConstants.VALID_CLIENT_SECRET,
                 "",
                 ErrorResponse.class);
         if (responseEntity.getStatusCode().is4xxClientError()) {
-            final ErrorResponse response = responseEntity.getBody();
+            val response = responseEntity.getBody();
             assertThat(response).isNotNull();
             assertThat(response.timestamp).isNotNull();
             assertThat(response.error).isEqualTo("Bad Request");

@@ -1,6 +1,7 @@
 package com.authbox.base.util;
 
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.val;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -9,12 +10,15 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  */
 public class NetUtils {
 
+    private NetUtils() {
+    }
+
     /**
      * Returns IP address of the client,
      * when using proxy to receive request and X-Forwarded-For is available returns correct IP address
      */
     public static String getIp(final HttpServletRequest req) {
-        final String ip = req.getHeader("X-Forwarded-For");
+        val ip = req.getHeader("X-Forwarded-For");
         if (isNotBlank(ip)) {
             return ip.split(",")[0];
         }

@@ -1,6 +1,5 @@
 package com.authbox.base.config;
 
-import com.google.common.collect.ImmutableList;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,9 +19,7 @@ public class CacheNamesConfiguration {
     @Bean
     @ConditionalOnMissingBean
     List<CacheName> cacheNames() {
-        return ImmutableList.<CacheName>builder()
-                .add(CacheName.values())
-                .build();
+        return List.of(CacheName.values());
     }
 
     public enum CacheName {
