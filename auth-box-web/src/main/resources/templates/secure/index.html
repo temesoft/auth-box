@@ -18,7 +18,12 @@
 <body data-ng-controller="mainController">
 
 <nav class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0">
-    <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="#">AuthBox</a>
+    <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="#">
+        <span data-ng-if="loggedInOrganization.logoUrl != null && loggedInOrganization.logoUrl != ''">
+            <img data-ng-src="{{loggedInOrganization.logoUrl}}" width="30" height="30" class="center" alt="Logo"
+                 style="background-color:white; border-radius: 2px; border: 2px solid #222; margin-right:6px" />
+        </span>
+        AuthBox</a>
     <span class="w-100 p-3 text-right text-muted ng-cloak">
         Organization: <span class="text-white">{{loggedInOrganization.name}}</span>
         &nbsp; User: <span class="text-white">{{loggedInAccount.name}}</span>
@@ -92,34 +97,14 @@
                             <i class="fas fa-stream"></i> Request Log
                         </a>
                     </li>
-<!--                    <li class="nav-item ng-cloak">-->
-<!--                        <hr/>-->
-<!--                        <a class="nav-link text-bold" target="newWindow">-->
-<!--                            <span data-feather="layers"></span>-->
-<!--                            Oauth2 server API-->
-<!--                            <br/>-->
-<!--                            <small>-->
-<!--                            <a class="nav-link text-bold" data-ng-if="appProperties.domain.length != 0" href="{{appProperties.protocol}}://{{loggedInOrganization.domainPrefix}}.{{appProperties.domain}}:{{appProperties.port}}/swagger-ui/index.html"-->
-<!--                                > - &nbsp; {{appProperties.protocol}}://{{loggedInOrganization.domainPrefix}}.{{appProperties.domain}}:{{appProperties.port}}</a>-->
-<!--                            <a class="nav-link text-bold" data-ng-if="appProperties.domain.length == 0" href="{{appProperties.protocol}}://{{loggedInOrganization.domainPrefix}}:{{appProperties.port}}/swagger-ui/index.html"-->
-<!--                                > - &nbsp; {{appProperties.protocol}}://{{loggedInOrganization.domainPrefix}}:{{appProperties.port}}</a>-->
-<!--                            </small>-->
-<!--                        </a>-->
-<!--                    </li>-->
-<!--                    <li class="nav-item ng-cloak">-->
-<!--                        <hr/>-->
-<!--                        <a class="nav-link text-bold" href="https://www.oauth2.cloud/swagger-ui/index.html" target="newWindow">-->
-<!--                            <span data-feather="layers"></span>-->
-<!--                            Oauth2 management API-->
-<!--                            <br/>-->
-<!--                            <small>-->
-<!--                            <a class="nav-link text-bold" data-ng-if="appProperties.domain.length != 0" href="{{appProperties.protocol}}://{{loggedInOrganization.domainPrefix}}.{{appProperties.domain}}:{{appProperties.port}}/swagger-ui/index.html"-->
-<!--                                > - &nbsp; {{appProperties.protocol}}://{{appProperties.domain}}:{{appProperties.port}}</a>-->
-<!--                            <a class="nav-link text-bold" data-ng-if="appProperties.domain.length == 0" href="{{appProperties.protocol}}://{{loggedInOrganization.domainPrefix}}:{{appProperties.port}}/swagger-ui/index.html"-->
-<!--                                > - &nbsp; {{appProperties.protocol}}://{{loggedInOrganization.domainPrefix}}:{{appProperties.port}}</a>-->
-<!--                            </small>-->
-<!--                        </a>-->
-<!--                    </li>-->
+                    <li class="nav-item ng-cloak">
+                        <hr/>
+                        <a class="nav-link text-bold" href="{{appProperties.protocol}}://{{loggedInOrganization.domainPrefix}}.{{appProperties.domain}}/swagger-ui/index.html"
+                            target="newWindowAPI">
+                            <span data-feather="access-log"></span>
+                            <i class="fas fa-server"></i> Oauth2 server API
+                        </a>
+                    </li>
                 </ul>
             </div>
         </nav>
@@ -147,7 +132,6 @@
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-<!--                <h5 class="modal-title" id="exampleModalLongTitle">Confirmation</h5>-->
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
