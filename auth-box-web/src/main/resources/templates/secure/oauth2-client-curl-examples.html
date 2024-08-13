@@ -86,16 +86,14 @@
         <div class="col-md-12 table-responsive">
             <table class="table table-striped table-sm">
                 <tr>
-                    <th>Client id</th>
-                    <th>Client description</th>
+                    <th>Client details</th>
                     <th>Allowed grant types</th>
                 </tr>
                 <tr data-ng-repeat="oauth2Client in oauth2Clients.content">
                     <td>
-                        <a class="btn btn-link" data-ng-click="location.url('/oauth2-client-curl-examples/' + oauth2Client.id)">{{oauth2Client.id | secret}}</a>
-                    </td>
-                    <td>
-                        <a class="btn btn-link" data-ng-click="location.url('/oauth2-client-curl-examples/' + oauth2Client.id)">{{oauth2Client.description}}</a>
+                        <a style="font-family:monospace;" href="javascript:" data-ng-click="location.url('/oauth2-client-curl-examples/' + oauth2Client.id)">{{oauth2Client.id}}</a>
+                        <br/>
+                        {{oauth2Client.description}}
                     </td>
                     <td>
                         <h6>

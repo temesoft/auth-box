@@ -30,7 +30,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
-import static java.util.UUID.randomUUID;
+import static com.authbox.base.util.IdUtils.createId;
 import static org.springframework.util.ObjectUtils.isEmpty;
 
 @RestController
@@ -127,11 +127,11 @@ public class AccountController extends BaseController {
         if (userDao.getByUsername(request.username.trim()).isPresent()) {
             throw new BadRequestException("This username is taken, please select another user");
         }
-        val userId = randomUUID().toString();
+        val userId = createId();
         val now = Instant.now(defaultClock);
 
         val password = (isEmpty(request.password) ?
-                passwordEncoder.encode(randomUUID().toString())
+                passwordEncoder.encode(createId())
                 : passwordEncoder.encode(request.password.trim()));
 
         userDao.insert(
@@ -182,7 +182,7 @@ public class AccountController extends BaseController {
         }
 
         val password = (isEmpty(updatedUser.getPassword()) ?
-                passwordEncoder.encode(randomUUID().toString())
+                passwordEncoder.encode(createId())
                 : passwordEncoder.encode(updatedUser.getPassword().trim()));
 
         userDao.update(

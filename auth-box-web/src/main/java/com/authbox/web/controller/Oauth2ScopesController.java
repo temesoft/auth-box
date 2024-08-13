@@ -1,17 +1,13 @@
 package com.authbox.web.controller;
 
-import com.authbox.base.exception.AccessDeniedException;
-import com.authbox.base.exception.BadRequestException;
-import com.authbox.base.exception.EntityNotFoundException;
-import com.authbox.base.model.OauthScope;
 import com.authbox.web.config.Constants;
 import com.authbox.web.model.CreateScopeRequest;
 import com.authbox.web.model.DeleteScopesRequest;
+import com.authbox.web.service.Oauth2ScopesService;
+import com.authbox.web.service.Oauth2ScopesService.OauthScopeDto;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
-import lombok.val;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,159 +17,48 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.Clock;
-import java.time.Instant;
-import java.util.Optional;
-import java.util.UUID;
-
-import static org.springframework.util.ObjectUtils.isEmpty;
-
 @RestController
 @RequestMapping(Constants.API_PREFIX + "/oauth2-scope")
 @AllArgsConstructor
 public class Oauth2ScopesController extends BaseController {
 
-    private final Clock defaultClock;
+    private final Oauth2ScopesService oauth2ScopesService;
 
     @GetMapping
     @PreAuthorize("isAuthenticated()")
-    public Page<OauthScope> getOauth2Scopes(@RequestParam(value = "pageSize", defaultValue = "10") final int pageSize,
-                                            @RequestParam(value = "currentPage", defaultValue = "0") final int currentPage) {
-        val organization = getOrganization();
-        return oauthScopeDao.listByOrganizationId(organization.getId(), PageRequest.of(currentPage, pageSize));
+    public Page<OauthScopeDto> getOauth2Scopes(@RequestParam(value = "pageSize", defaultValue = "10") final int pageSize,
+                                               @RequestParam(value = "currentPage", defaultValue = "0") final int currentPage) {
+        return oauth2ScopesService.getOauth2Scopes(getOrganization(), pageSize, currentPage);
     }
 
     @GetMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
-    public OauthScope getOauth2ScopeById(final String id) {
-        val organization = getOrganization();
-        val oauthScope = oauthScopeDao.getById(id);
-        if (oauthScope.isEmpty()) {
-            throw new EntityNotFoundException("Scope not found by id: " + id);
-        }
-
-        if (!organization.getId().equals(oauthScope.get().getOrganizationId())) {
-            throw new AccessDeniedException();
-        }
-        return oauthScope.get();
+    public OauthScopeDto getOauth2ScopeById(final String id) {
+        return oauth2ScopesService.getOauth2ScopeById(getOrganization(), id);
     }
 
     @PostMapping("/count-clients")
     @PreAuthorize("isAuthenticated()")
     public long countClientsUsingScopeId(@RequestBody final DeleteScopesRequest request) {
-        val organization = getOrganization();
-
-        request.scopeIds.stream().parallel().forEach(scopeId -> {
-            val oauthScope = oauthScopeDao.getById(scopeId);
-            if (oauthScope.isEmpty()) {
-                throw new EntityNotFoundException("Scope not found by id: " + scopeId);
-            }
-
-            if (!organization.getId().equals(oauthScope.get().getOrganizationId())) {
-                throw new AccessDeniedException();
-            }
-        });
-
-        return oauthClientScopeDao.countByScopeIds(request.scopeIds);
+        return oauth2ScopesService.countClientsUsingScopeId(getOrganization(), request);
     }
 
     @PostMapping
     @PreAuthorize("isAuthenticated()")
-    public OauthScope createScope(@RequestBody final CreateScopeRequest createScopeRequest) {
-        val organization = getOrganization();
-
-        if (isEmpty(createScopeRequest.scope)) {
-            throw new BadRequestException("Scope can not be empty");
-        }
-
-        if (createScopeRequest.scope.trim().contains(Constants.SPACE)) {
-            throw new BadRequestException("Scope can not have spaces");
-        }
-
-        if (createScopeRequest.scope.trim().contains(Constants.COMMA)) {
-            throw new BadRequestException("Scope can not have commas");
-        }
-
-        if (isEmpty(createScopeRequest.description)) {
-            throw new BadRequestException("Description can not be empty");
-        }
-
-        val id = UUID.randomUUID().toString();
-
-        if (oauthScopeDao.existsByOrganizationIdAndScope(organization.getId().trim(), createScopeRequest.scope.trim())) {
-            throw new BadRequestException("Scope '" + createScopeRequest.scope.trim() + "' already exists");
-        }
-
-        val result = new OauthScope(
-                id,
-                Instant.now(defaultClock),
-                createScopeRequest.description.trim(),
-                createScopeRequest.scope.trim(),
-                organization.getId()
-        );
-        oauthScopeDao.insert(result);
-        return result;
+    public OauthScopeDto createScope(@RequestBody final CreateScopeRequest createScopeRequest) {
+        return oauth2ScopesService.createScope(getOrganization(), createScopeRequest);
     }
 
     @PostMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
-    public OauthScope updateScope(@RequestBody final OauthScope updatedOauthScope) {
-        val organization = getOrganization();
-
-        if (isEmpty(updatedOauthScope.getScope())) {
-            throw new BadRequestException("Scope can not be empty");
-        }
-
-        if (updatedOauthScope.getScope().trim().contains(Constants.SPACE)) {
-            throw new BadRequestException("Scope can not have spaces");
-        }
-
-        if (updatedOauthScope.getScope().trim().contains(Constants.COMMA)) {
-            throw new BadRequestException("Scope can not have commas");
-        }
-
-        if (isEmpty(updatedOauthScope.getDescription())) {
-            throw new BadRequestException("Description can not be empty");
-        }
-
-        val existingOauthScope = oauthScopeDao.getById(updatedOauthScope.getId());
-        if (existingOauthScope.isEmpty()) {
-            throw new EntityNotFoundException("Scope not found by id: " + updatedOauthScope.getId());
-        }
-
-        // check if scope name changed, verify is scope with same name does not exist already
-        if (!updatedOauthScope.getScope().equals(existingOauthScope.get().getScope())) {
-            if (oauthScopeDao.existsByOrganizationIdAndScope(organization.getId().trim(), updatedOauthScope.getScope().trim())) {
-                throw new BadRequestException("Scope '" + updatedOauthScope.getScope().trim() + "' already exists");
-            }
-        }
-        oauthScopeDao.update(updatedOauthScope.getId(), updatedOauthScope.getScope().trim(), updatedOauthScope.getDescription().trim());
-        return oauthScopeDao.getById(updatedOauthScope.getId()).orElseThrow(() -> new EntityNotFoundException("Scope not found by id: " + updatedOauthScope.getId()));
+    public OauthScopeDto updateScope(@RequestBody final OauthScopeDto updatedOauthScope) {
+        return oauth2ScopesService.updateScope(getOrganization(), updatedOauthScope);
     }
 
     @DeleteMapping
     @PreAuthorize("isAuthenticated()")
     @Transactional
     public void deleteScope(@RequestBody final DeleteScopesRequest deleteScopesRequest) {
-        val organization = getOrganization();
-
-        if (isEmpty(deleteScopesRequest.scopeIds)) {
-            throw new BadRequestException("Scope can not be empty");
-        }
-
-        deleteScopesRequest.scopeIds
-                .forEach(scopeId -> {
-                    final Optional<OauthScope> oauthScope = oauthScopeDao.getById(scopeId);
-                    if (oauthScope.isEmpty()) {
-                        throw new EntityNotFoundException("Scope not found by id: " + scopeId);
-                    }
-
-                    if (!organization.getId().equals(oauthScope.get().getOrganizationId())) {
-                        throw new AccessDeniedException();
-                    }
-
-                    oauthClientScopeDao.deleteByScopeId(scopeId);
-                    oauthScopeDao.deleteById(scopeId);
-                });
+        oauth2ScopesService.deleteScope(getOrganization(), deleteScopesRequest);
     }
 }

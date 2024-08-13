@@ -84,7 +84,7 @@ public class BaseController {
             val userId = ((User) authentication.getPrincipal()).getId();
             return userDao.getById(userId).orElseThrow(() -> new BadRequestException("User not found by id: " + userId));
         } else {
-            throw new BadRequestException("User details available only through https://oauth2.cloud");
+            throw new BadRequestException("User details not available");
         }
     }
 

@@ -9,6 +9,10 @@ import com.authbox.base.model.Organization;
 import com.authbox.server.service.TokenDetailsService;
 import com.authbox.server.service.TokenEndpointProcessor;
 import io.micrometer.core.annotation.Timed;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.val;
@@ -28,7 +32,11 @@ import static com.authbox.base.config.Constants.HEADER_AUTHORIZATION_PREFIX_BEAR
 import static com.authbox.base.config.Constants.MSG_INVALID_GRANT_TYPE;
 import static com.authbox.base.config.Constants.MSG_UNAUTHORIZED_REQUEST;
 import static com.authbox.base.config.Constants.OAUTH2_ATTR_ACCESS_TOKEN;
+import static com.authbox.base.config.Constants.OAUTH2_ATTR_CODE;
 import static com.authbox.base.config.Constants.OAUTH2_ATTR_GRANT_TYPE;
+import static com.authbox.base.config.Constants.OAUTH2_ATTR_PASSWORD;
+import static com.authbox.base.config.Constants.OAUTH2_ATTR_SCOPE;
+import static com.authbox.base.config.Constants.OAUTH2_ATTR_USERNAME;
 import static com.authbox.base.config.Constants.OAUTH_PREFIX;
 import static com.authbox.server.util.RequestUtils.getRequestId;
 import static com.authbox.server.util.RequestUtils.getTimeSinceRequest;
@@ -45,6 +53,17 @@ public class Oauth2TokenController extends BaseController {
 
     @PostMapping("/token")
     @Timed("generateToken")
+    @Parameters(
+            {
+                    @Parameter(name = OAUTH2_ATTR_GRANT_TYPE, required = true,
+                            description = "OAuth2 grant type",
+                            schema = @Schema(implementation = GrantType.class)),
+                    @Parameter(name = OAUTH2_ATTR_SCOPE,  description = "OAuth2 scopes (space separated values)"),
+                    @Parameter(name = OAUTH2_ATTR_CODE,  description = "OAuth2 authorization code"),
+                    @Parameter(name = OAUTH2_ATTR_USERNAME,  description = "Username value"),
+                    @Parameter(name = OAUTH2_ATTR_PASSWORD,  description = "Password value")
+            }
+    )
     public OauthTokenResponse generateToken(final HttpServletRequest req,
                                             final HttpServletResponse res,
                                             @RequestParam(OAUTH2_ATTR_GRANT_TYPE) final String grantTypeStr) {
@@ -85,6 +104,17 @@ public class Oauth2TokenController extends BaseController {
     @PostMapping("/introspection")
     @GetMapping("/introspection")
     @Timed("introspectToken")
+    @Parameters(
+            {
+                    @Parameter(name = OAUTH2_ATTR_GRANT_TYPE, required = true,
+                            description = "OAuth2 grant type",
+                            schema = @Schema(implementation = GrantType.class)),
+                    @Parameter(name = OAUTH2_ATTR_SCOPE,  description = "OAuth2 scopes (space separated values)"),
+                    @Parameter(name = OAUTH2_ATTR_CODE,  description = "OAuth2 authorization code"),
+                    @Parameter(name = OAUTH2_ATTR_USERNAME,  description = "Username value"),
+                    @Parameter(name = OAUTH2_ATTR_PASSWORD,  description = "Password value")
+            }
+    )
     public Map<String, Object> introspectToken(
             final HttpServletRequest req,
             @RequestParam(value = OAUTH2_ATTR_ACCESS_TOKEN, required = false) final String token) {

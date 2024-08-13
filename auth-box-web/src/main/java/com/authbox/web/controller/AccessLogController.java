@@ -33,7 +33,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 public class AccessLogController extends BaseController {
 
     private final AccessLogDao accessLogDao;
-    private final LoadingCache<String, JsonNode> cache;
+    private final LoadingCache<String, JsonNode> ipDetailsCache;
 
     public AccessLogController(final AccessLogDao accessLogDao,
                                final RestTemplate restTemplate,
@@ -41,7 +41,7 @@ public class AccessLogController extends BaseController {
                                @Value("${ipstack.url}") final String ipStackUrl,
                                @Value("${ipstack.enabled}") final boolean ipStackEnabled) {
         this.accessLogDao = accessLogDao;
-        cache = CacheBuilder.newBuilder()
+        ipDetailsCache = CacheBuilder.newBuilder()
                 .maximumSize(1000)
                 .expireAfterWrite(Duration.ofDays(10))
                 .build(new CacheLoader<>() {
@@ -71,6 +71,6 @@ public class AccessLogController extends BaseController {
 
     @GetMapping("/ip/{ip}")
     public JsonNode getIpDetails(@PathVariable("ip") final String ip) throws ExecutionException {
-        return cache.get(ip.trim());
+        return ipDetailsCache.get(ip.trim());
     }
 }

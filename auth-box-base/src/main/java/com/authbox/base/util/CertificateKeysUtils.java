@@ -16,7 +16,7 @@ import java.security.Security;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 
-import static java.util.UUID.randomUUID;
+import static com.authbox.base.util.IdUtils.createId;
 import static org.apache.commons.codec.binary.Base64.decodeBase64;
 
 @Slf4j
@@ -38,8 +38,8 @@ public final class CertificateKeysUtils {
         Path filenamePrivate = null;
         Path filenamePublic = null;
         try {
-            filenamePrivate = Path.of(TEMP_DIR + "/" + randomUUID().toString() + "_private.pem");
-            filenamePublic = Path.of(TEMP_DIR + "/" + randomUUID().toString() + "_public.pem");
+            filenamePrivate = Path.of(TEMP_DIR + "/" + createId() + "_private.pem");
+            filenamePublic = Path.of(TEMP_DIR + "/" + createId() + "_public.pem");
             ExecUtils.executeCommand("openssl genrsa -out " + filenamePrivate + " " + BITS);
             ExecUtils.executeCommand("openssl rsa -in " + filenamePrivate + " -outform PEM -pubout -out " + filenamePublic);
             return new RsaKeyPair(

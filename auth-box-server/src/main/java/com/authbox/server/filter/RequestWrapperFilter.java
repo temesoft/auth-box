@@ -9,12 +9,13 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import org.slf4j.MDC;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import static com.authbox.base.config.Constants.OAUTH_PREFIX;
-import static com.authbox.base.util.HashUtils.makeRequestId;
-import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static com.authbox.base.util.IdUtils.createId;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @AllArgsConstructor
 @Slf4j
@@ -37,11 +38,14 @@ public class RequestWrapperFilter extends OncePerRequestFilter {
         final boolean oauthCall = request.getRequestURI().startsWith(OAUTH_PREFIX);
         MDC.put(REQUEST_START_REQUEST_TIME_MDC_KEY, String.valueOf(System.currentTimeMillis()));
         try {
+            val requestIdHeader = request.getHeader(REQUEST_ID_HEADER);
             final String requestId;
-            if (!isEmpty(request.getHeader(REQUEST_ID_HEADER)) && request.getHeader(REQUEST_ID_HEADER).length() <= 36) {
-                requestId = request.getHeader(REQUEST_ID_HEADER);
+            if (isNotBlank(requestIdHeader)
+                // make sure the ID has acceptable size - UUID (size 36) or KSUID (size 27)
+                && requestIdHeader.length() <= 36) {
+                requestId = requestIdHeader;
             } else {
-                requestId = makeRequestId();
+                requestId = createId();
             }
             if (oauthCall) {
                 accessLogService.create(
@@ -54,7 +58,7 @@ public class RequestWrapperFilter extends OncePerRequestFilter {
             }
 
             MDC.put(REQUEST_ID_MDC_KEY, requestId);
-            if (!isEmpty(REQUEST_ID_HEADER)) {
+            if (isNotBlank(REQUEST_ID_HEADER)) {
                 response.addHeader(REQUEST_ID_HEADER, requestId);
             }
             MDC.put(REQUEST_IP_MDC_KEY, request.getRemoteAddr());

@@ -3,6 +3,7 @@ package com.authbox.web.controller;
 import com.authbox.base.dao.OrganizationDao;
 import com.authbox.base.exception.BadRequestException;
 import com.authbox.base.model.Organization;
+import com.authbox.web.service.OrganizationServiceImpl;
 import com.google.common.collect.ImmutableMap;
 import lombok.val;
 import org.junit.jupiter.api.Test;
@@ -15,9 +16,9 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.time.Clock;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Optional;
-import java.util.UUID;
 
 import static com.authbox.base.config.Constants.OAUTH2_ATTR_ORGANIZATION_ID;
+import static com.authbox.base.util.IdUtils.createId;
 import static java.time.Instant.now;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -27,7 +28,7 @@ import static org.mockito.Mockito.when;
 
 public class OrganizationControllerTest {
 
-    private static final String ORG_ID = UUID.randomUUID().toString();
+    private static final String ORG_ID = createId();
     private static final String DOMAIN_PREFIX_ERROR_MSG = "Domain prefix can only contain letters and numbers";
 
     @Test
@@ -37,7 +38,8 @@ public class OrganizationControllerTest {
         when(organizationDao.getById(ORG_ID)).thenReturn(Optional.of(organization));
         when(organizationDao.getByDomainPrefix(any(String.class))).thenReturn(Optional.empty());
         when(organizationDao.getByDomainPrefix("something")).thenReturn(Optional.of(organization));
-        val controller = new OrganizationController(organizationDao, Clock.systemUTC());
+        val organizationService = new OrganizationServiceImpl(Clock.systemUTC(), organizationDao);
+        val controller = new OrganizationController(organizationService);
 
         // Need to set the OrganizationDao in base class of OrganizationController - BaseController
         ReflectionTestUtils.setField(controller, BaseController.class, "organizationDao", organizationDao, OrganizationDao.class);

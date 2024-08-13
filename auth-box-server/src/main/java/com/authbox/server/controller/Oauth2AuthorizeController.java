@@ -32,7 +32,6 @@ import java.io.IOException;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
-import java.util.UUID;
 
 import static com.authbox.base.config.Constants.MSG_INVALID_REQUEST;
 import static com.authbox.base.config.Constants.OAUTH2_ATTR_2FA_CODE;
@@ -48,6 +47,7 @@ import static com.authbox.base.config.Constants.OAUTH_PREFIX;
 import static com.authbox.base.config.Constants.SPACE_SPLITTER;
 import static com.authbox.base.model.TokenType.AUTHORIZATION_CODE;
 import static com.authbox.base.util.HashUtils.sha256;
+import static com.authbox.base.util.IdUtils.createId;
 import static com.authbox.base.util.NetUtils.getIp;
 import static com.authbox.server.util.RequestUtils.getRequestId;
 import static com.authbox.server.util.RequestUtils.getTimeSinceRequest;
@@ -134,7 +134,7 @@ public class Oauth2AuthorizeController extends BaseController {
 
         val scope = scopeService.getScopeStringBasedOnRequestedAndAllowed(scopeStr, oauthClient.get());
 
-        val stateString = isEmpty(state) ? UUID.randomUUID().toString() : state;
+        val stateString = isEmpty(state) ? createId() : state;
 
         if (oauthClient.get().getRedirectUrls().stream().filter(redirectUri::startsWith).findAny().isEmpty()) {
             log.debug("OauthClient approved redirect urls={} does not match requested redirect_url='{}'",
@@ -533,7 +533,7 @@ public class Oauth2AuthorizeController extends BaseController {
             throw new BadRequestException(MSG_INVALID_REQUEST);
         }
 
-        final val scopeList = scopeService.getScopeListBasedOnRequestedAndAllowed(scopeStr, oauthClient.get());
+        val scopeList = scopeService.getScopeListBasedOnRequestedAndAllowed(scopeStr, oauthClient.get());
 
         Totp totp = new Totp(oauthUser.get().getSecret());
         if (!totp.verify(code2fa)) {
@@ -756,9 +756,9 @@ public class Oauth2AuthorizeController extends BaseController {
 
         val now = Instant.now(defaultClock);
         val expiration = Instant.now(defaultClock).plusSeconds(60);
-        val code = sha256(UUID.randomUUID().toString());
+        val code = sha256(createId());
         val oauthToken = new OauthToken(
-                UUID.randomUUID().toString(),
+                createId(),
                 now,
                 sha256(code),
                 organization.getId(),

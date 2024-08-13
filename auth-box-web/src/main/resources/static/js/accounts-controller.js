@@ -71,8 +71,6 @@ app.controller('accountsController', function organizationController($scope, $ht
 
     $scope.updateAccount = function() {
         buttonLoading($("#updateAccountBtn"));
-        alert("$scope.account.id: " + $scope.account.id);
-        alert("$scope.account.password: " + $scope.account.password);
         $http({
             method: 'POST',
             url: '/api/account/' + $scope.account.id,

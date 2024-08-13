@@ -1,5 +1,7 @@
 package com.authbox.base.model;
 
+import com.authbox.base.util.DurationJsonDeserializer;
+import com.authbox.base.util.DurationJsonSerializer;
 import com.authbox.base.util.DurationToSecondsConverter;
 import com.authbox.base.util.GrantTypeConverter;
 import com.authbox.base.util.ListOfStringsConverter;
@@ -7,7 +9,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonSerializer;
@@ -119,20 +120,6 @@ public class OauthClient implements Serializable, Interceptor {
             return scopes.stream().map(OauthScope::getId).toList();
         } else {
             return null;
-        }
-    }
-
-    static class DurationJsonSerializer extends JsonSerializer<Duration> {
-        @Override
-        public void serialize(final Duration duration, final JsonGenerator jsonGenerator, final SerializerProvider serializerProvider) throws IOException {
-            jsonGenerator.writeString(duration.toString().replaceAll("PT", "").toLowerCase());
-        }
-    }
-
-    static class DurationJsonDeserializer extends JsonDeserializer<Duration> {
-        @Override
-        public Duration deserialize(final JsonParser jsonParser, final DeserializationContext deserializationContext) throws IOException {
-            return Duration.parse("PT" + jsonParser.getValueAsString());
         }
     }
 }

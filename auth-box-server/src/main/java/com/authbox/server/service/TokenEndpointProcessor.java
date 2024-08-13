@@ -29,7 +29,6 @@ import java.time.Instant;
 import java.util.Date;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 
 import static com.authbox.base.config.Constants.OAUTH2_ATTR_METADATA;
 import static com.authbox.base.config.Constants.OAUTH2_ATTR_ORGANIZATION_ID;
@@ -43,6 +42,7 @@ import static com.authbox.base.model.TokenType.ACCESS_TOKEN;
 import static com.authbox.base.model.TokenType.REFRESH_TOKEN;
 import static com.authbox.base.util.CertificateKeysUtils.generatePrivateKey;
 import static com.authbox.base.util.HashUtils.sha256;
+import static com.authbox.base.util.IdUtils.createId;
 import static com.authbox.server.util.RequestUtils.getRequestId;
 import static com.authbox.server.util.RequestUtils.getTimeSinceRequest;
 import static org.apache.commons.lang3.ObjectUtils.isEmpty;
@@ -142,7 +142,7 @@ public abstract class TokenEndpointProcessor {
         val jwt = jwsBuilder.compact();
         log.debug("JWT token created in: {}", stopwatch.stop());
 
-        val oauthTokenId = UUID.randomUUID().toString();
+        val oauthTokenId = createId();
         val oauthToken = new OauthToken(
                 oauthTokenId,
                 now,
@@ -195,8 +195,8 @@ public abstract class TokenEndpointProcessor {
         val now = Instant.now(defaultClock);
         val expiration = now.plusSeconds(oauthClient.getExpiration().toSeconds());
         val refreshToken = createRefreshTokenIfNeeded(grantType, oauthClient, scope, oauthUser, ip, userAgent);
-        val accessToken = sha256(UUID.randomUUID().toString());
-        val oauthTokenId = UUID.randomUUID().toString();
+        val accessToken = sha256(createId());
+        val oauthTokenId = createId();
         val oauthToken = new OauthToken(
                 oauthTokenId,
                 now,
@@ -249,9 +249,9 @@ public abstract class TokenEndpointProcessor {
         if (grantType == authorization_code || grantType == password) {
             val now = Instant.now(defaultClock);
             val expiration = Instant.now(defaultClock).plusSeconds(oauthClient.getRefreshExpiration().toSeconds());
-            val token = sha256(UUID.randomUUID().toString());
+            val token = sha256(createId());
             val refreshToken = new OauthToken(
-                    UUID.randomUUID().toString(),
+                    createId(),
                     now,
                     sha256(token),
                     oauthClient.getOrganizationId(),

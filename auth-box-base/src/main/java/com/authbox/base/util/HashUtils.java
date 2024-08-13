@@ -29,8 +29,4 @@ public class HashUtils {
                 .collect(Collectors.joining());
         return result;
     }
-
-    public static String makeRequestId() {
-        return UUID.randomUUID().toString();
-    }
 }

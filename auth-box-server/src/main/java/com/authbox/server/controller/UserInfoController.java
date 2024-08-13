@@ -132,7 +132,7 @@ public class UserInfoController extends BaseController {
         }
 
         if (isEmpty(accessOauthToken.get().getOauthUserId())) {
-            log.debug("Access token='{}' / hash='{}' is not linked to a oauth user", accessToken.get(), sha256(accessToken.get()));
+            log.debug("Access token with hash='{}' is not linked to a oauth user", sha256(accessToken.get()));
             accessLogService.create(
                     AccessLog.builder()
                             .withRequestId(getRequestId())
@@ -140,7 +140,7 @@ public class UserInfoController extends BaseController {
                             .withOrganizationId(organization.getId())
                             .withClientId(accessOauthToken.get().getClientId())
                             .withError(MSG_INVALID_TOKEN),
-                    "Access token='%s' / hash='%s' is not linked to a oauth user", accessToken.get(), sha256(accessToken.get())
+                    "Access token with hash='%s' is not linked to a oauth user", sha256(accessToken.get())
             );
             throw new Oauth2Exception(MSG_INVALID_TOKEN);
         }

@@ -20,13 +20,13 @@ import org.springframework.core.Ordered;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.UUID;
 import java.util.regex.Pattern;
 
 import static ch.qos.logback.classic.Level.ERROR;
 import static ch.qos.logback.classic.Level.INFO;
 import static ch.qos.logback.classic.Level.TRACE;
 import static ch.qos.logback.classic.Level.WARN;
+import static com.authbox.base.util.IdUtils.createId;
 import static org.springframework.util.ObjectUtils.isEmpty;
 
 @Configuration
@@ -69,7 +69,7 @@ public class RequestWrapperFilterConfiguration {
                 if (!isEmpty(REQUEST_ID_HEADER) && !isEmpty(request.getHeader(REQUEST_ID_HEADER))) {
                     requestId = request.getHeader(REQUEST_ID_HEADER);
                 } else {
-                    requestId = UUID.randomUUID().toString().replace("-", "");
+                    requestId = createId();
                 }
                 MDC.put(REQUEST_ID_MDC_KEY, requestId);
                 if (!isEmpty(REQUEST_ID_HEADER)) {
