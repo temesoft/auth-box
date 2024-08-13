@@ -27,7 +27,12 @@
     <span class="w-100 p-3 text-right text-muted ng-cloak">
         Organization: <span class="text-white">{{loggedInOrganization.name}}</span>
         &nbsp; User: <span class="text-white">{{loggedInAccount.name}}</span>
-        &nbsp; Role: <span class="badge badge-warning m-1" data-ng-repeat="role in loggedInAccount.roles">{{role}}</span>&nbsp; &nbsp;
+        &nbsp; Role:
+        <span data-ng-repeat="role in loggedInAccount.roles">
+            <span class="badge badge-info m-1" data-ng-if="role.indexOf('ROLE_USER') >= 0" title="Read only access">User</span>
+            <span class="badge badge-warning m-1" data-ng-if="role.indexOf('ROLE_ADMIN') >= 0" title="Full access">Admin</span>
+            &nbsp; &nbsp;
+        </span>
     </span>
     <ul class="navbar-nav px-3">
 
@@ -102,7 +107,14 @@
                         <a class="nav-link text-bold" href="{{appProperties.protocol}}://{{loggedInOrganization.domainPrefix}}.{{appProperties.domain}}/swagger-ui/index.html"
                             target="newWindowAPI">
                             <span data-feather="access-log"></span>
-                            <i class="fas fa-info-circle"></i> Oauth2 server API
+                            <i class="fas fa-info-circle"></i> Oauth2 Server API
+                        </a>
+                    </li>
+                    <li class="nav-item ng-cloak">
+                        <a class="nav-link text-bold" href="{{appProperties.protocol}}://{{appProperties.domain}}/swagger-ui/index.html"
+                           target="newWindowAPI">
+                            <span data-feather="access-log"></span>
+                            <i class="fas fa-info-circle"></i> Management API
                         </a>
                     </li>
                 </ul>

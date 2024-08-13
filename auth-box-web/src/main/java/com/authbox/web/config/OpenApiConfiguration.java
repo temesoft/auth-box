@@ -26,7 +26,7 @@ public class OpenApiConfiguration {
     @Bean
     OpenAPI customOpenAPI() {
 
-        final String apiTitle = appProperties.getName() + " API";
+        final String apiTitle = appProperties.getName().toUpperCase() + " API";
         return new OpenAPI()
                 .addSecurityItem(new SecurityRequirement().addList(BEARER_AUTH))
                 .components(

@@ -51,7 +51,7 @@ app.controller('accountsController', function organizationController($scope, $ht
             buttonLoading($("#deleteSelectedAccountBtn"));
             $http({
                 method: 'DELETE',
-                url: '/api/account/',
+                url: '/api/account',
                 data: {'accountIds': accountIdArray},
                 headers: {
                     "Content-Type": "application/json"
@@ -61,7 +61,7 @@ app.controller('accountsController', function organizationController($scope, $ht
                     buttonReset($("#deleteSelectedAccountBtn"));
                     if ($scope.$parent.validate(response)) {
                         $scope.loadAccounts($scope.pageSize, $scope.currentPage);
-                        $scope.$parent.logSuccess("Account(s) deleted");
+                        $scope.$parent.logSuccess(accountIdArray.length + " account(s) deleted");
                     }
                 },
                 $scope.$parent.logFailure,

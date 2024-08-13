@@ -43,7 +43,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Override
     public OrganizationDto update(final Organization organization, final OrganizationDto updatedOrganization) {
         if (!organization.getId().equals(updatedOrganization.getId())) {
-            throw new BadRequestException("Invalid company id");
+            throw new BadRequestException("Invalid organization id");
         }
         validateDomainPrefix(updatedOrganization.getDomainPrefix(), organization.getId());
         if (isEmpty(updatedOrganization.getName())) {
