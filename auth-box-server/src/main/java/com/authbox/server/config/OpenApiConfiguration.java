@@ -1,6 +1,8 @@
 package com.authbox.server.config;
 
 import com.authbox.base.config.AppProperties;
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.servers.Server;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
@@ -12,6 +14,9 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @AllArgsConstructor
+// Below annotation is used to fix http vs https protocol issue when proxy does not forward X-Forwarded-Proto
+// https://stackoverflow.com/questions/70843940/springdoc-openapi-ui-how-do-i-set-the-request-to-https
+@OpenAPIDefinition(servers = {@Server(url = "/", description = "Default Server URL")})
 public class OpenApiConfiguration {
 
     private static final String BEARER_AUTH = "bearerAuth";
