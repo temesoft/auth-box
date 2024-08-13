@@ -45,6 +45,7 @@ import static com.authbox.base.util.HashUtils.sha256;
 import static com.authbox.base.util.IdUtils.createId;
 import static com.authbox.server.util.RequestUtils.getRequestId;
 import static com.authbox.server.util.RequestUtils.getTimeSinceRequest;
+import static io.jsonwebtoken.SignatureAlgorithm.RS384;
 import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
@@ -125,7 +126,7 @@ public abstract class TokenEndpointProcessor {
                 .claim(OAUTH2_ATTR_ORGANIZATION_ID, organization.getId())
                 .issuedAt(Date.from(now))
                 .expiration(Date.from(expiration))
-                .signWith(privateKey);
+                .signWith(privateKey, RS384);
         if (oauthUser != null) {
             jwsBuilder.claim(OAUTH2_ATTR_USER_ID, oauthUser.getId());
 
