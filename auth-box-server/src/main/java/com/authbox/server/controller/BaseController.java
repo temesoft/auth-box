@@ -56,16 +56,27 @@ public abstract class BaseController {
         } else {
             organization = organizationDao.getByDomainPrefix(organizationDomainPrefix);
         }
-        if (organization.isEmpty() || !organization.get().isEnabled()) {
-            log.debug("Organization not found by domain_prefix='{}' or disabled", organizationDomainPrefix);
+        if (organization.isEmpty()) {
+            log.debug("Organization not found by domain_prefix='{}'", organizationDomainPrefix);
             accessLogService.create(
                     AccessLog.builder()
                             .withRequestId(getRequestId())
                             .withDuration(getTimeSinceRequest())
                             .withError(MSG_INVALID_REQUEST),
-                    "Organization not found by domain prefix='%s' or disabled", organizationDomainPrefix
+                    "Organization not found by domain prefix='%s'", organizationDomainPrefix
             );
             throw new BadRequestException("Domain prefix unknown: " + organizationDomainPrefix);
+        }
+        if (!organization.get().isEnabled()) {
+            log.debug("Organization with domain_prefix='{}' is disabled", organizationDomainPrefix);
+            accessLogService.create(
+                    AccessLog.builder()
+                            .withRequestId(getRequestId())
+                            .withDuration(getTimeSinceRequest())
+                            .withError(MSG_INVALID_REQUEST),
+                    "Organization with prefix='%s' is disabled", organizationDomainPrefix
+            );
+            throw new BadRequestException("Domain is disabled: " + organizationDomainPrefix);
         }
         MDC.put(RequestWrapperFilter.REQUEST_ORGANIZATION_MDC_KEY, organization.get().getId());
         return organization.get();

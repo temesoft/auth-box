@@ -48,9 +48,9 @@
                     <span data-ng-if="oauth2Tokens.page.number + 1 == n" class="page-link bg-secondary white">
                         <strong class="">{{n}}</strong>
                     </span>
-                    <a data-ng-if="oauth2Tokens.number + 1 != n && routeParams.clientId" class="page-link cursor-pointer" data-ng-click="loadOauth2TokensFor('client', routeParams.clientId, oauth2Tokens.page.size, n-1)">{{n}}</a>
-                    <a data-ng-if="oauth2Tokens.number + 1 != n && routeParams.userId" class="page-link cursor-pointer" data-ng-click="loadOauth2TokensFor('user', routeParams.userId, oauth2Tokens.page.size, n-1)">{{n}}</a>
-                    <a data-ng-if="oauth2Tokens.number + 1 != n && !routeParams.clientId && !routeParams.userId" class="page-link cursor-pointer" data-ng-click="loadOauth2Tokens(oauth2Tokens.page.size, n-1)">{{n}}</a>
+                    <a data-ng-if="oauth2Tokens.page.number + 1 != n && routeParams.clientId" class="page-link cursor-pointer" data-ng-click="loadOauth2TokensFor('client', routeParams.clientId, oauth2Tokens.page.size, n-1)">{{n}}</a>
+                    <a data-ng-if="oauth2Tokens.page.number + 1 != n && routeParams.userId" class="page-link cursor-pointer" data-ng-click="loadOauth2TokensFor('user', routeParams.userId, oauth2Tokens.page.size, n-1)">{{n}}</a>
+                    <a data-ng-if="oauth2Tokens.page.number + 1 != n && !routeParams.clientId && !routeParams.userId" class="page-link cursor-pointer" data-ng-click="loadOauth2Tokens(oauth2Tokens.page.size, n-1)">{{n}}</a>
                 </li>
 
                 <li class="page-item disabled" data-ng-if="oauth2Tokens.page.number + 1 == oauth2Tokens.page.totalPages">

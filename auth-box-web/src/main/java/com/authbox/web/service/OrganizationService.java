@@ -46,7 +46,7 @@ public interface OrganizationService {
                     .name(entity.getName())
                     .domainPrefix(entity.getDomainPrefix())
                     .address(entity.getAddress())
-                    .enabled(builder().enabled)
+                    .enabled(entity.isEnabled())
                     .logoUrl(entity.getLogoUrl())
                     .lastUpdated(entity.getLastUpdated())
                     .build();

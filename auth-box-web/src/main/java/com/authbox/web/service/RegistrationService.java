@@ -38,7 +38,7 @@ public interface RegistrationService {
                     .username(entity.getUsername())
                     .name(entity.getName())
                     .roles(entity.getRoles())
-                    .enabled(builder().enabled)
+                    .enabled(entity.isEnabled())
                     .organizationId(entity.getOrganizationId())
                     .lastUpdated(entity.getLastUpdated())
                     .build();

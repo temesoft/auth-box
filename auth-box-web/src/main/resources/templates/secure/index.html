@@ -18,9 +18,9 @@
 <body data-ng-controller="mainController">
 
 <nav class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0">
-    <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="#">
+    <a class="navbar-brand col-sm-3 col-md-2 mr-0 ng-cloak" href="#">
         <span data-ng-if="loggedInOrganization.logoUrl != null && loggedInOrganization.logoUrl != ''">
-            <img data-ng-src="{{loggedInOrganization.logoUrl}}" width="30" height="30" class="center" alt="Logo"
+            <img data-ng-src="{{loggedInOrganization.logoUrl}}" width="30" height="30" class="center ng-cloak" alt="Logo"
                  style="background-color:white; border-radius: 2px; border: 2px solid #222; margin-right:6px" />
         </span>
         AuthBox</a>
