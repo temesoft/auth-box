@@ -19,6 +19,7 @@ import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.util.io.pem.PemWriter;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.io.StringWriter;
@@ -63,12 +64,14 @@ public class Oauth2ClientsServiceImpl implements Oauth2ClientsService {
     }
 
     /**
-     * Returns paginated list of OauthClientDto objects for provided organization
+     * Returns paginated list of OauthClientDto objects for provided organization (sorted by description ASC)
      */
     @Override
     public Page<OauthClientDto> getOauth2Clients(final Organization organization, final int currentPage, final int pageSize) {
-        return oauthClientDao.listByOrganizationId(organization.getId(), PageRequest.of(currentPage, pageSize))
-                .map(OauthClientDto::fromEntity);
+        return oauthClientDao.listByOrganizationId(
+                organization.getId(),
+                PageRequest.of(currentPage, pageSize, Sort.by(Sort.Direction.ASC, "description"))
+        ).map(OauthClientDto::fromEntity);
     }
 
     /**

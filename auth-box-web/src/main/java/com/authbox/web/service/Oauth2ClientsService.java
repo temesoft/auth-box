@@ -8,7 +8,11 @@ import com.authbox.base.model.OauthScope;
 import com.authbox.base.model.Organization;
 import com.authbox.base.model.TokenFormat;
 import com.authbox.base.model.UpdateOauthClientRequest;
+import com.authbox.base.util.DurationJsonDeserializer;
+import com.authbox.base.util.DurationJsonSerializer;
 import com.authbox.web.model.DeleteClientsRequest;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Builder;
 import lombok.Getter;
 import org.springframework.data.domain.Page;
@@ -27,7 +31,7 @@ public interface Oauth2ClientsService {
     OauthClientDto getOauth2ClientById(String clientId, Organization organization) throws EntityNotFoundException, AccessDeniedException;
 
     /**
-     * Returns paginated list of OauthClientDto objects for provided organization
+     * Returns paginated list of OauthClientDto objects for provided organization (sorted by description ASC)
      */
     Page<OauthClientDto> getOauth2Clients(Organization organization, int currentPage, int pageSize);
 
@@ -61,6 +65,7 @@ public interface Oauth2ClientsService {
     @Getter
     class OauthClientDto {
         private String id;
+
         private Instant createTime;
         private String description;
         private String secret;
@@ -68,7 +73,11 @@ public interface Oauth2ClientsService {
         private String organizationId;
         private boolean enabled;
         private List<String> redirectUrls;
+        @JsonDeserialize(using = DurationJsonDeserializer.class)
+        @JsonSerialize(using = DurationJsonSerializer.class)
         private Duration expiration;
+        @JsonDeserialize(using = DurationJsonDeserializer.class)
+        @JsonSerialize(using = DurationJsonSerializer.class)
         private Duration refreshExpiration;
         private TokenFormat tokenFormat;
         private String publicKey;
