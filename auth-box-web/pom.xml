@@ -22,7 +22,7 @@
         <webjars.select2.version>4.0.13</webjars.select2.version>
         <webjars.momentjs.version>2.29.4</webjars.momentjs.version>
         <webjars.angular-moment.version>1.0.0</webjars.angular-moment.version>
-        <webjars.popper.version>1.14.7</webjars.popper.version>
+        <webjars.popper.version>2.11.7</webjars.popper.version>
         <webjars.jquery-cookie.version>1.4.1-1</webjars.jquery-cookie.version>
     </properties>
 
