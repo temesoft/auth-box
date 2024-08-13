@@ -1,4 +1,4 @@
-package com.authbox.server.config;
+package com.authbox.web.config;
 
 import com.authbox.base.config.AppProperties;
 import io.swagger.v3.oas.models.Components;
@@ -15,7 +15,6 @@ import org.springframework.context.annotation.Configuration;
 public class OpenApiConfiguration {
 
     private static final String BEARER_AUTH = "bearerAuth";
-    private static final String BASIC_AUTH = "basicAuth";
 
     private final AppProperties appProperties;
 
@@ -24,7 +23,7 @@ public class OpenApiConfiguration {
 
         final String apiTitle = appProperties.getName() + " API";
         return new OpenAPI()
-                .addSecurityItem(new SecurityRequirement().addList(BEARER_AUTH).addList(BASIC_AUTH))
+                .addSecurityItem(new SecurityRequirement().addList(BEARER_AUTH))
                 .components(
                         new Components()
                                 .addSecuritySchemes(BEARER_AUTH,
@@ -32,12 +31,6 @@ public class OpenApiConfiguration {
                                                 .name(BEARER_AUTH)
                                                 .type(SecurityScheme.Type.HTTP)
                                                 .scheme("bearer")
-                                )
-                                .addSecuritySchemes(BASIC_AUTH,
-                                        new SecurityScheme()
-                                                .name(BEARER_AUTH)
-                                                .type(SecurityScheme.Type.HTTP)
-                                                .scheme("basic")
                                 )
                 )
                 .info(new Info().title(apiTitle).version(appProperties.getVersion()));
