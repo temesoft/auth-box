@@ -12,6 +12,7 @@ import com.authbox.base.exception.AccessDeniedException;
 import com.authbox.base.exception.BadRequestException;
 import com.authbox.base.model.Organization;
 import com.authbox.base.model.User;
+import com.authbox.web.model.UserDto;
 import com.google.common.collect.ImmutableMap;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -65,30 +66,19 @@ public class BaseController {
         return getOrganization(organizationId.get().toString());
     }
 
-    Organization getOrganization(final String id) {
-        val organization = organizationDao.getById(id);
-        if (organization.isEmpty()) {
-            throw new BadRequestException("Organization not found");
-        }
-        MDC.put(REQUEST_ORGANIZATION_MDC_KEY, organization.get().getId());
-        return organization.get();
-    }
-
-    /**
-     * TODO: Check
-     * Does not work for oauth2 tokens, only for logged in users, since those are User and not Oauth2User types.
-     */
-    public User getCurrentUser() {
+    public UserDto getCurrentUser() {
         val authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication instanceof AbstractAuthenticationToken && authentication.getPrincipal() instanceof User) {
             val userId = ((User) authentication.getPrincipal()).getId();
-            return userDao.getById(userId).orElseThrow(() -> new BadRequestException("User not found by id: " + userId));
+            return UserDto.fromEntity(
+                    userDao.getById(userId).orElseThrow(() -> new BadRequestException("User not found by id: " + userId))
+            );
         } else {
             throw new BadRequestException("User details not available");
         }
     }
 
-    public User getCurrentUserVerifyAdmin() {
+    public UserDto getCurrentUserVerifyAdmin() {
         val user = getCurrentUser();
         if (!user.isAdmin()) {
             throw new AccessDeniedException();
@@ -111,5 +101,14 @@ public class BaseController {
             log.error("Unknown principal provided: {}", principal);
             throw new BadRequestException("Unknown principal");
         }
+    }
+
+    private Organization getOrganization(final String id) {
+        val organization = organizationDao.getById(id);
+        if (organization.isEmpty()) {
+            throw new BadRequestException("Organization not found");
+        }
+        MDC.put(REQUEST_ORGANIZATION_MDC_KEY, organization.get().getId());
+        return organization.get();
     }
 }

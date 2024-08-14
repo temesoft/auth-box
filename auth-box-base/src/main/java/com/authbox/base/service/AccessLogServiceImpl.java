@@ -3,20 +3,26 @@ package com.authbox.base.service;
 import com.authbox.base.config.AppProperties;
 import com.authbox.base.dao.AccessLogDao;
 import com.authbox.base.model.AccessLog;
+import com.authbox.base.model.Organization;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.util.concurrent.Uninterruptibles;
 import io.micrometer.core.instrument.MeterRegistry;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.DisposableBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 
 import static com.authbox.base.config.Constants.METRIC_KEY_ACCESS_LOG_SERVICE_QUEUE;
+import static com.authbox.base.dao.AccessLogDaoImpl.LIST_CRITERIA_ORGANIZATION_ID;
+import static com.authbox.base.dao.AccessLogDaoImpl.LIST_CRITERIA_REQUEST_ID;
 import static com.authbox.base.util.IdUtils.createId;
 import static java.lang.Thread.MIN_PRIORITY;
 import static java.util.Objects.requireNonNull;
@@ -86,6 +92,17 @@ public class AccessLogServiceImpl implements AccessLogService, DisposableBean {
     public void processCachedAccessLogs() {
         QUEUE.addAll(accessLogThreadCache.getAll());
         accessLogThreadCache.cleanup();
+    }
+
+    @Override
+    public Page<AccessLogDto> getAccessLogByRequestId(final Organization organization, final String requestId) {
+        return accessLogDao.listBy(
+                Map.of(
+                        LIST_CRITERIA_ORGANIZATION_ID, organization.getId(),
+                        LIST_CRITERIA_REQUEST_ID, requestId
+                ),
+                PageRequest.of(0, 100)
+        ).map(AccessLogDto::fromEntity);
     }
 
     @VisibleForTesting

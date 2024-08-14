@@ -1,6 +1,6 @@
 package com.authbox.web.controller;
 
-import com.authbox.base.dao.AccessLogDao;
+import com.authbox.base.service.AccessLogService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.val;
 import org.junit.jupiter.api.Test;
@@ -16,7 +16,7 @@ public class AccessLogControllerTest {
     @Test
     public void testGetIpDetails() throws ExecutionException {
         val controller = new AccessLogController(
-                mock(AccessLogDao.class),
+                mock(AccessLogService.class),
                 new RestTemplate(),
                 new ObjectMapper(),
                 "http://api.ipstack.com/{ip}?access_key=2fce8179cf1e7b4e7ea750a374485b7b",

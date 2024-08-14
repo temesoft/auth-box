@@ -18,6 +18,7 @@ import com.authbox.base.model.TokenFormat;
 import com.authbox.base.model.User;
 import com.authbox.base.util.CertificateKeysUtils;
 import com.authbox.web.model.CreateAccountWithOrganizationRequest;
+import com.authbox.web.model.UserDto;
 import com.authbox.web.model.UserRole;
 import lombok.AllArgsConstructor;
 import lombok.val;
@@ -32,7 +33,6 @@ import java.util.List;
 import static com.authbox.base.util.HashUtils.makeRandomBase32;
 import static com.authbox.base.util.HashUtils.sha256;
 import static com.authbox.base.util.IdUtils.createId;
-import static java.util.UUID.randomUUID;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.springframework.util.ObjectUtils.isEmpty;
 
