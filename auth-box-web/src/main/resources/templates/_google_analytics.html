@@ -1,4 +1,4 @@
-    <google-analytics id="_google_analytics" th:fragment="_google_analytics" th:remove="tag" xmlns:sec="http://www.springframework.org/schema/mvc">
+<google-analytics id="_google_analytics" th:fragment="_google_analytics" th:remove="tag" xmlns:sec="http://www.springframework.org/schema/mvc">
     <script async th:src="'https://www.googletagmanager.com/gtag/js?id=' + ${googleAnalyticsTag}"></script>
     <script th:inline="javascript">
     /*<![CDATA[*/
@@ -9,4 +9,5 @@
       gtag('config', googleAnalyticsTag);
     /*]]>*/
     </script>
-    </google-analytics>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9287605327776519" crossorigin="anonymous"></script>
+</google-analytics>
