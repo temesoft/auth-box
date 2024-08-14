@@ -1,0 +1,12 @@
+    <google-analytics id="_google_analytics" th:fragment="_google_analytics" th:remove="tag" xmlns:sec="http://www.springframework.org/schema/mvc">
+    <script async th:src="'https://www.googletagmanager.com/gtag/js?id=' + ${googleAnalyticsTag}"></script>
+    <script th:inline="javascript">
+    /*<![CDATA[*/
+      var googleAnalyticsTag = /*[[${googleAnalyticsTag}]]*/ '';
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', googleAnalyticsTag);
+    /*]]>*/
+    </script>
+    </google-analytics>

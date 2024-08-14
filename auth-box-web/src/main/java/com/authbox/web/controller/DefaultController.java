@@ -3,6 +3,7 @@ package com.authbox.web.controller;
 import com.authbox.base.config.AppProperties;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
@@ -18,7 +19,9 @@ import java.util.Map;
 public class DefaultController extends BaseController {
 
     @Autowired
-    protected AppProperties appProperties;
+    private AppProperties appProperties;
+    @Value("${google.analytics.tag:}")
+    private String googleAnalyticsTag;
 
     @GetMapping
     @PostMapping
@@ -44,18 +47,19 @@ public class DefaultController extends BaseController {
     @GetMapping({"/secure/"})
     @PreAuthorize("isAuthenticated()")
     public ModelAndView secureIndexPage() {
-        val organization = getOrganization();
         return createModelAndView("secure/index");
     }
 
     @GetMapping("/secure/{securePageName}.html")
     @PreAuthorize("isAuthenticated()")
     public ModelAndView secureOrganization(@PathVariable("securePageName") final String securePageName) {
-        val organization = getOrganization();
         return createModelAndView("secure/" + securePageName);
     }
 
     private ModelAndView createModelAndView(final String view) {
-        return new ModelAndView(view, Map.of("appProperties", appProperties));
+        return new ModelAndView(view, Map.of(
+                "appProperties", appProperties,
+                "googleAnalyticsTag", googleAnalyticsTag
+        ));
     }
 }
