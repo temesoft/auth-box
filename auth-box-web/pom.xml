@@ -11,7 +11,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
-        <webjars.locator.version>0.42</webjars.locator.version>
+        <webjars.locator.version>0.52</webjars.locator.version>
         <webjars.bootstrap.version>4.6.0</webjars.bootstrap.version>
         <webjars.jquery.version>3.7.1</webjars.jquery.version>
         <webjars.font-awesome.version>5.15.4</webjars.font-awesome.version>
