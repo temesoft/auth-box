@@ -8,10 +8,9 @@ import com.google.common.collect.ImmutableMap;
 import jakarta.annotation.Nullable;
 import lombok.val;
 import org.apache.hc.core5.net.URLEncodedUtils;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -19,6 +18,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.NoOpResponseErrorHandler;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.Map;
 
@@ -43,17 +44,21 @@ public class Oauth2TokenControllerWithAuthorizationCodeTest {
     @LocalServerPort
     private int port;
 
-    @Autowired
-    private TestRestTemplate restTemplate;
+    private static final RestTemplate restTemplate = new RestTemplate();
+
+    @BeforeEach
+    public void setupRestTemplate() {
+        restTemplate.setErrorHandler(new NoOpResponseErrorHandler());
+    }
 
     @Test
     public void testCreateOauth2Token_Success_GetAuthorizePageBack() {
         val responseEntity = restTemplate.getForEntity(
-                OAUTH_PREFIX + "/authorize"
-                + "?client_id=" + TestConstants.VALID_CLIENT_ID
-                + "&redirect_uri=" + TestConstants.VALID_REDIRECT_URL
-                + "&response_type=code"
-                + "&scope=another/scope some/scope",
+                urlPrefix() + OAUTH_PREFIX + "/authorize"
+                        + "?client_id=" + TestConstants.VALID_CLIENT_ID
+                        + "&redirect_uri=" + TestConstants.VALID_REDIRECT_URL
+                        + "&response_type=code"
+                        + "&scope=another/scope some/scope",
                 String.class
         );
         if (responseEntity.getStatusCode().is2xxSuccessful()) {
@@ -78,6 +83,7 @@ public class Oauth2TokenControllerWithAuthorizationCodeTest {
                     .contains("<title>Authorize scopes</title>")
                     .doesNotContain("text-danger"); // no errors
             val cookie = responseEntity.getHeaders().getFirst(HEADER_SET_COOKIE);
+
 
             // Second, scope selection
             val responseEntity2 = postScopeAuthorizationSelection(cookie, null);
@@ -176,10 +182,10 @@ public class Oauth2TokenControllerWithAuthorizationCodeTest {
     public void testCreateOauth2Token_Failure_BadDomainPrefix() {
         val responseEntity = restTemplate.getForEntity(
                 "http://127.0.0.1:" + port + OAUTH_PREFIX + "/authorize"
-                + "?client_id=" + TestConstants.VALID_CLIENT_ID
-                + "&redirect_uri=" + TestConstants.VALID_REDIRECT_URL
-                + "&response_type=code"
-                + "&scope=another/scope some/scope",
+                        + "?client_id=" + TestConstants.VALID_CLIENT_ID
+                        + "&redirect_uri=" + TestConstants.VALID_REDIRECT_URL
+                        + "&response_type=code"
+                        + "&scope=another/scope some/scope",
                 ErrorResponse.class
         );
         if (responseEntity.getStatusCode().is4xxClientError()) {
@@ -213,7 +219,11 @@ public class Oauth2TokenControllerWithAuthorizationCodeTest {
             });
         }
         val request = new HttpEntity<MultiValueMap<String, String>>(params, headers);
-        return restTemplate.postForEntity(OAUTH_PREFIX + "/authorize", request, clazz);
+        return restTemplate.postForEntity(urlPrefix() + OAUTH_PREFIX + "/authorize", request, clazz);
+    }
+
+    private String urlPrefix() {
+        return "http://localhost:" + port;
     }
 
     private ResponseEntity<String> postScopeAuthorizationSelection(final String cookie, @Nullable final Map<String, String> paramsOverride) {
@@ -236,7 +246,7 @@ public class Oauth2TokenControllerWithAuthorizationCodeTest {
             });
         }
         val request = new HttpEntity<MultiValueMap<String, String>>(params, headers);
-        return restTemplate.postForEntity(OAUTH_PREFIX + "/authorize/finish", request, String.class);
+        return restTemplate.postForEntity(urlPrefix() + OAUTH_PREFIX + "/authorize/finish", request, String.class);
     }
 
     private ResponseEntity<OauthTokenResponse> postAuthorizationCodeTokenExchange(final String authorizationCode, @Nullable final Map<String, String> paramsOverride) {
@@ -256,6 +266,6 @@ public class Oauth2TokenControllerWithAuthorizationCodeTest {
             });
         }
         val request = new HttpEntity<MultiValueMap<String, String>>(params, headers);
-        return restTemplate.postForEntity(OAUTH_PREFIX + "/token", request, OauthTokenResponse.class);
+        return restTemplate.postForEntity(urlPrefix() + OAUTH_PREFIX + "/token", request, OauthTokenResponse.class);
     }
 }

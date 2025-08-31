@@ -74,7 +74,7 @@ public class Oauth2AuthorizeController extends BaseController {
     @Autowired
     protected ScopeService scopeService;
 
-    @GetMapping("/authorize")
+    @GetMapping(value = "/authorize", produces = "application/json")
     @Timed("getAuthorize")
     public ModelAndView getAuthorize(final HttpServletRequest req,
                                      @RequestParam(OAUTH2_ATTR_RESPONSE_TYPE) final AuthorizationResponseType responseType,
