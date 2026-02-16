@@ -48,6 +48,7 @@ Thumbs.db
 *.mov
 *.wmv
 
+aws/
 /*.iml
 /*/*.iml
 /*/target
