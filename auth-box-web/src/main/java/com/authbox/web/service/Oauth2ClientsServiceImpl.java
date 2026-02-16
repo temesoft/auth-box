@@ -93,7 +93,7 @@ public class Oauth2ClientsServiceImpl implements Oauth2ClientsService {
 
         val now = Instant.now(defaultClock);
         if (isNotBlank(updatedOauthClient.getPrivateKey())
-            && !updatedOauthClient.getPrivateKey().equals(oauthClient.get().getPrivateKey())) {
+                && !updatedOauthClient.getPrivateKey().equals(oauthClient.get().getPrivateKey())) {
             final PrivateKey privateKey;
             try {
                 privateKey = generatePrivateKey(updatedOauthClient.getPrivateKey());
@@ -205,7 +205,7 @@ public class Oauth2ClientsServiceImpl implements Oauth2ClientsService {
         }
 
         if (newOauthClient.getGrantTypes().contains(authorization_code)
-            && isEmpty(newOauthClient.getRedirectUrls())) {
+                && isEmpty(newOauthClient.getRedirectUrls())) {
             throw new BadRequestException("Redirect url list can not be empty when '" + authorization_code.name() + "' is selected");
         }
 
@@ -214,7 +214,7 @@ public class Oauth2ClientsServiceImpl implements Oauth2ClientsService {
         }
 
         if (newOauthClient.getGrantTypes().contains(refresh_token)
-            && isEmpty(newOauthClient.getRefreshExpiration() == null)) {
+                && isEmpty(newOauthClient.getRefreshExpiration() == null)) {
             throw new BadRequestException("Refresh token expiration can not be empty");
         }
 

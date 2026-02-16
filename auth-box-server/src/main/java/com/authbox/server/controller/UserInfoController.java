@@ -6,8 +6,6 @@ import com.authbox.base.dao.OauthUserDao;
 import com.authbox.base.exception.Oauth2Exception;
 import com.authbox.base.model.AccessLog;
 import com.authbox.server.service.ParsingValidationService;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.core.annotation.Timed;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
@@ -17,6 +15,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 import java.util.Map;
 import java.util.Optional;
@@ -206,7 +206,7 @@ public class UserInfoController extends BaseController {
         Object metadata = null;
         try {
             metadata = objectMapper.readValue(oauthUser.get().getMetadata(), Map.class);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             log.debug("Unable to parse metadata for OauthUser user_id='{}'", oauthUser.get().getId());
         }
 

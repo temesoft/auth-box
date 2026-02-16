@@ -2,19 +2,16 @@ package com.authbox.server.service.processor;
 
 import com.authbox.base.model.AccessLog;
 import com.authbox.base.model.GrantType;
-import com.authbox.base.model.OauthClient;
 import com.authbox.base.model.OauthTokenResponse;
 import com.authbox.base.model.Organization;
 import com.authbox.base.service.AccessLogService;
 import com.authbox.server.service.ScopeService;
 import com.authbox.server.service.TokenEndpointProcessor;
-import lombok.AllArgsConstructor;
-import lombok.val;
-import org.springframework.beans.factory.annotation.Autowired;
-
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
+import lombok.AllArgsConstructor;
+import lombok.val;
 
 import static com.authbox.base.config.Constants.OAUTH2_ATTR_SCOPE;
 import static com.authbox.base.model.TokenFormat.JWT;

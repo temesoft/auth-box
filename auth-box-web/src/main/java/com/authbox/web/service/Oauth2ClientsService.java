@@ -11,11 +11,11 @@ import com.authbox.base.model.UpdateOauthClientRequest;
 import com.authbox.base.util.DurationJsonDeserializer;
 import com.authbox.base.util.DurationJsonSerializer;
 import com.authbox.web.model.DeleteClientsRequest;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Builder;
 import lombok.Getter;
 import org.springframework.data.domain.Page;
+import tools.jackson.databind.annotation.JsonDeserialize;
+import tools.jackson.databind.annotation.JsonSerialize;
 
 import java.time.Duration;
 import java.time.Instant;

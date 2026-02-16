@@ -1,8 +1,8 @@
 package com.authbox.base.util;
 
 import jakarta.persistence.AttributeConverter;
+
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static com.authbox.base.config.Constants.COMMA;
 import static com.authbox.base.config.Constants.CSV_SPLITTER;

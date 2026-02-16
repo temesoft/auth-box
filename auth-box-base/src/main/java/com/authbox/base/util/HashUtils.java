@@ -3,7 +3,6 @@ package com.authbox.base.util;
 import com.google.common.hash.Hashing;
 
 import java.security.SecureRandom;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 

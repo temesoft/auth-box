@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>auth-box-web</artifactId>
-    <version>0.1.25</version>
+    <version>0.2.1</version>
     <packaging>jar</packaging>
 
     <properties>
@@ -29,7 +29,7 @@
     <parent>
         <groupId>com.authbox</groupId>
         <artifactId>auth-box</artifactId>
-        <version>0.1.25</version>
+        <version>0.2.1</version>
     </parent>
 
     <dependencies>
@@ -74,6 +74,11 @@
         <dependency>
             <groupId>org.webjars</groupId>
             <artifactId>angularjs</artifactId>
+            <version>${webjars.angularjs.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars.npm</groupId>
+            <artifactId>angular-route</artifactId>
             <version>${webjars.angularjs.version}</version>
         </dependency>
         <dependency>

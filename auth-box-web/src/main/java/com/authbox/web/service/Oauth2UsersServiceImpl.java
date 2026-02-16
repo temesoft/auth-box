@@ -106,12 +106,12 @@ public class Oauth2UsersServiceImpl implements Oauth2UsersService {
             throw new AccessDeniedException();
         }
         val qrCodeUrl = "otpauth://totp/"
-                        + organization.getName()
-                        + " ("
-                        + oauthUser.get().getUsername()
-                        + ")?secret="
-                        + oauthUser.get().getSecret()
-                        + "&issuer=auth-box";
+                + organization.getName()
+                + " ("
+                + oauthUser.get().getUsername()
+                + ")?secret="
+                + oauthUser.get().getSecret()
+                + "&issuer=auth-box";
 
         try {
             return qrCodeGeneratorService.generateQrCode(qrCodeUrl);

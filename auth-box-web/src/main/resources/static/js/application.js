@@ -169,7 +169,9 @@ app.controller('mainController', function mainController($scope, $http, toastr, 
                 // logged out, redirect to login
                 location.reload();
             } else {
-                toastr.error(response.data.message, response.data.error);
+                console.log(response);
+                var message = response.data.message != null ? response.data.message : response.data.detail;
+                toastr.error(message, response.data.error);
                 console.log(response.data.timestamp + ": " + response.data.message + " " + response.data.error);
             }
         }

@@ -41,8 +41,8 @@ public abstract class BaseController {
         String host = URI.create(req.getRequestURL().toString()).getHost();
         final InetAddressValidator validator = InetAddressValidator.getInstance();
         if (isNotBlank(appProperties.getDomain())
-            && !validator.isValidInet4Address(host)
-            && !validator.isValidInet6Address(host)) {
+                && !validator.isValidInet4Address(host)
+                && !validator.isValidInet6Address(host)) {
             host = host.replace("." + appProperties.getDomain(), "");
         }
         MDC.put(RequestWrapperFilter.REQUEST_DOMAIN_PREFIX_MDC_KEY, host);

@@ -5,6 +5,7 @@ import com.authbox.base.model.RsaKeyPair;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.util.encoders.Base64;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -17,7 +18,6 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 
 import static com.authbox.base.util.IdUtils.createId;
-import static org.apache.commons.codec.binary.Base64.decodeBase64;
 
 @Slf4j
 public final class CertificateKeysUtils {
@@ -67,7 +67,7 @@ public final class CertificateKeysUtils {
                     .replaceAll(System.lineSeparator(), "")
                     .replace("-----END PUBLIC KEY-----", "")
                     .replace("-----END RSA PUBLIC KEY-----", "");
-            val encoded = decodeBase64(publicKeyPem);
+            val encoded = Base64.decode(publicKeyPem);
             val keyFactory = KeyFactory.getInstance(ALGORITHM);
             val keySpec = new X509EncodedKeySpec(encoded);
             return keyFactory.generatePublic(keySpec);
@@ -85,7 +85,7 @@ public final class CertificateKeysUtils {
                     .replaceAll(System.lineSeparator(), "")
                     .replace("-----END PRIVATE KEY-----", "")
                     .replace("-----END RSA PRIVATE KEY-----", "");
-            val encoded = decodeBase64(privateKeyPem);
+            val encoded = Base64.decode(privateKeyPem);
             val keyFactory = KeyFactory.getInstance(ALGORITHM);
             val keySpec = new PKCS8EncodedKeySpec(encoded);
             return keyFactory.generatePrivate(keySpec);

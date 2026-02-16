@@ -1,7 +1,6 @@
 package com.authbox.web.controller;
 
 import com.authbox.base.config.AppProperties;
-import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Import;

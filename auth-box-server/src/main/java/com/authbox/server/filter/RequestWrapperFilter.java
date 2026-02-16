@@ -41,8 +41,8 @@ public class RequestWrapperFilter extends OncePerRequestFilter {
             val requestIdHeader = request.getHeader(REQUEST_ID_HEADER);
             final String requestId;
             if (isNotBlank(requestIdHeader)
-                // make sure the ID has acceptable size - UUID (size 36) or KSUID (size 27)
-                && requestIdHeader.length() <= 36) {
+                    // make sure the ID has acceptable size - UUID (size 36) or KSUID (size 27)
+                    && requestIdHeader.length() <= 36) {
                 requestId = requestIdHeader;
             } else {
                 requestId = createId();
