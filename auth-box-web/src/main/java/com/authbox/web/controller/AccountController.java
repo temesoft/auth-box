@@ -9,7 +9,6 @@ import com.authbox.web.model.UserDto;
 import com.authbox.web.service.AccountService;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
-import lombok.val;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -59,7 +58,6 @@ public class AccountController extends BaseController {
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public UserDto getAccount(@PathVariable("id") final String id) {
-        val adminUser = getCurrentUserVerifyAdmin();
         return accountService.getAccount(getCurrentUserVerifyAdmin(), id);
     }
 

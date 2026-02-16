@@ -1,5 +1,7 @@
 package com.authbox.base.util;
 
+import com.google.common.base.Splitter;
+import com.google.common.collect.Iterables;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.val;
 
@@ -20,7 +22,7 @@ public class NetUtils {
     public static String getIp(final HttpServletRequest req) {
         val ip = req.getHeader("X-Forwarded-For");
         if (isNotBlank(ip)) {
-            return ip.split(",")[0];
+            return Iterables.get(Splitter.on(',').split(ip), 0);
         }
         return req.getRemoteHost();
     }

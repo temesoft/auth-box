@@ -11,6 +11,7 @@ import java.time.Clock;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -70,7 +71,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         if (!DOMAIN_PREFIX_PATTERN.matcher(domainPrefix).matches()) {
             throw new BadRequestException("Domain prefix can only contain letters and numbers");
         }
-        if (DISALLOWED_DOMAIN_PREFIX.contains(domainPrefix.toLowerCase())) {
+        if (DISALLOWED_DOMAIN_PREFIX.contains(domainPrefix.toLowerCase(Locale.ROOT))) {
             throw new BadRequestException("Selected domain prefix is not allowed");
         }
         val existingByDomainPrefix = organizationDao.getByDomainPrefix(domainPrefix);

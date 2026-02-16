@@ -13,7 +13,6 @@ import com.authbox.base.exception.BadRequestException;
 import com.authbox.base.model.Organization;
 import com.authbox.base.model.User;
 import com.authbox.web.model.UserDto;
-import com.google.common.collect.ImmutableMap;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.slf4j.MDC;
@@ -26,6 +25,7 @@ import org.springframework.security.oauth2.server.resource.authentication.Bearer
 
 import java.security.Principal;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 import static com.authbox.base.config.Constants.OAUTH2_ATTR_ORGANIZATION_ID;
@@ -87,16 +87,16 @@ public class BaseController {
     }
 
     private Map<String, Object> getTokenAttributes(final Principal principal) {
-        if (principal instanceof BearerTokenAuthentication) {
-            return ((BearerTokenAuthentication) principal).getTokenAttributes();
-        } else if (principal instanceof AbstractAuthenticationToken) {
-            if (((AbstractAuthenticationToken) principal).getPrincipal() instanceof DefaultOAuth2User) {
-                return ((DefaultOAuth2User) ((AbstractAuthenticationToken) principal).getPrincipal()).getAttributes();
+        if (principal instanceof BearerTokenAuthentication p) {
+            return p.getTokenAttributes();
+        } else if (principal instanceof AbstractAuthenticationToken p) {
+            if (p.getPrincipal() instanceof DefaultOAuth2User t) {
+                return t.getAttributes();
+            } else if (p.getPrincipal() instanceof User user) {
+                return Map.of(OAUTH2_ATTR_ORGANIZATION_ID, Objects.requireNonNull(user).getOrganizationId());
             } else {
-                val user = (User) ((AbstractAuthenticationToken) principal).getPrincipal();
-                return ImmutableMap.of(OAUTH2_ATTR_ORGANIZATION_ID, user.getOrganizationId());
+                throw new BadRequestException("Unknown principal token");
             }
-
         } else {
             log.error("Unknown principal provided: {}", principal);
             throw new BadRequestException("Unknown principal");

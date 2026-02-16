@@ -16,6 +16,7 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -24,7 +25,6 @@ import static com.authbox.base.config.Constants.METRIC_KEY_ACCESS_LOG_SERVICE_QU
 import static com.authbox.base.dao.AccessLogDaoImpl.LIST_CRITERIA_ORGANIZATION_ID;
 import static com.authbox.base.dao.AccessLogDaoImpl.LIST_CRITERIA_REQUEST_ID;
 import static com.authbox.base.util.IdUtils.createId;
-import static java.lang.Thread.MIN_PRIORITY;
 import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.apache.commons.lang3.ArrayUtils.isEmpty;
@@ -63,7 +63,6 @@ public class AccessLogServiceImpl implements AccessLogService, DisposableBean {
 
         // Setup and start access log queue consumer thread
         queueConsumerThread = new Thread(new AccessLogQueueConsumer());
-        queueConsumerThread.setPriority(MIN_PRIORITY);
         queueConsumerThread.setName("AccessLogQueue");
         queueConsumerThread.setDaemon(true);
         queueConsumerThread.start();
@@ -119,7 +118,7 @@ public class AccessLogServiceImpl implements AccessLogService, DisposableBean {
                             QUEUE.poll(appProperties.getAccessQueueProcessingPull().toMillis(), MILLISECONDS)
                     );
                     accessLog.ifPresent(accessLogDao::insert);
-                    if (accessLog.isEmpty() && appProperties.getAccessQueueProcessingIdle() != Duration.ZERO) {
+                    if (accessLog.isEmpty() && !Objects.equals(appProperties.getAccessQueueProcessingIdle(), Duration.ZERO)) {
                         Uninterruptibles.sleepUninterruptibly(appProperties.getAccessQueueProcessingIdle());
                     }
                 }

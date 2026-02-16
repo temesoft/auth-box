@@ -4,10 +4,8 @@ import com.authbox.base.model.ErrorResponse;
 import com.authbox.base.model.OauthTokenResponse;
 import com.authbox.server.Application;
 import com.authbox.server.TestConstants;
-import com.google.common.collect.ImmutableMap;
 import jakarta.annotation.Nullable;
 import lombok.val;
-import org.apache.hc.core5.net.URLEncodedUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -20,13 +18,13 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.NoOpResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.Map;
 
 import static com.authbox.base.config.Constants.OAUTH_PREFIX;
 import static com.authbox.base.model.GrantType.authorization_code;
 import static com.authbox.base.model.GrantType.password;
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
@@ -61,121 +59,113 @@ public class Oauth2TokenControllerWithAuthorizationCodeTest {
                         + "&scope=another/scope some/scope",
                 String.class
         );
-        if (responseEntity.getStatusCode().is2xxSuccessful()) {
-            val response = responseEntity.getBody();
-            assertThat(response)
-                    .isNotEmpty()
-                    .contains("<title>Authorize</title>")
-                    .doesNotContain("text-danger"); // no errors
-        } else {
-            fail("Returned non 200");
+        if (!responseEntity.getStatusCode().is2xxSuccessful()) {
+            val unused = fail("Returned non 200");
         }
+        val response = responseEntity.getBody();
+        assertThat(response)
+                .isNotEmpty()
+                .contains("<title>Authorize</title>")
+                .doesNotContain("text-danger"); // no errors
     }
 
     @Test
     public void testCreateOauth2Token_Success_PostAuthorize() {
         // First, send username & password
-        val responseEntity = postPasswordAuthorization(null, String.class);
-        if (responseEntity.getStatusCode().is2xxSuccessful()) {
-            val response = responseEntity.getBody();
-            assertThat(response)
-                    .isNotEmpty()
-                    .contains("<title>Authorize scopes</title>")
-                    .doesNotContain("text-danger"); // no errors
-            val cookie = responseEntity.getHeaders().getFirst(HEADER_SET_COOKIE);
-
-
-            // Second, scope selection
-            val responseEntity2 = postScopeAuthorizationSelection(cookie, null);
-            if (responseEntity2.getStatusCode().is3xxRedirection()) {
-                val location = responseEntity2.getHeaders().getLocation();
-                assertThat(location).isNotNull();
-                assertThat(location.toString()).startsWith(TestConstants.VALID_REDIRECT_URL);
-                val uriQuery = URLEncodedUtils.parse(location, UTF_8);
-                assertThat(uriQuery).hasSize(2);
-                assertThat(uriQuery.get(0).getName()).isEqualTo("code");
-                assertThat(uriQuery.get(0).getValue()).hasSize(64);
-                assertThat(uriQuery.get(1).getName()).isEqualTo("state");
-                assertThat(uriQuery.get(1).getValue()).isEqualTo("1234567890");
-                val authorizationCode = uriQuery.get(0).getValue();
-
-                // Third, authorization code for access token exchange
-                val responseEntity3 = postAuthorizationCodeTokenExchange(authorizationCode, ImmutableMap.of());
-                if (responseEntity3.getStatusCode().is2xxSuccessful()) {
-                    val response3 = responseEntity3.getBody();
-                    assertThat(response3).isNotNull();
-                    assertThat(response3.accessToken).isNotBlank();
-                    assertThat(response3.tokenType).isEqualTo("bearer");
-                    assertThat(response3.expiresIn).isEqualTo(3600);
-                    assertThat(response3.refreshToken).isNotEmpty();
-                    assertThat(response3.scope).contains("some/scope").contains("another/scope");
-                } else {
-                    fail("Returned non 200");
-                }
-            } else {
-                fail("Returned non 200");
-            }
-        } else {
-            fail("Returned non 200");
+        val responseEntity = postPasswordAuthorization(null);
+        if (!responseEntity.getStatusCode().is2xxSuccessful()) {
+            val unused = fail("Returned non 200");
         }
+        val response = responseEntity.getBody();
+        assertThat(response)
+                .isNotEmpty()
+                .contains("<title>Authorize scopes</title>")
+                .doesNotContain("text-danger"); // no errors
+        val cookie = responseEntity.getHeaders().getFirst(HEADER_SET_COOKIE);
+
+
+        // Second, scope selection
+        val responseEntity2 = postScopeAuthorizationSelection(cookie, null);
+        if (!responseEntity2.getStatusCode().is3xxRedirection()) {
+            val unused = fail("Returned non 200");
+        }
+        val location = responseEntity2.getHeaders().getLocation();
+        assertThat(location).isNotNull();
+        assertThat(location.toString()).startsWith(TestConstants.VALID_REDIRECT_URL);
+        val uriQuery = UriComponentsBuilder.fromUri(location).build().getQueryParams();
+        assertThat(uriQuery).hasSize(2);
+        assertThat(uriQuery.get("code")).isNotNull();
+        assertThat(uriQuery.get("code").get(0)).isNotNull().hasSize(64);
+        assertThat(uriQuery.get("state")).isNotNull();
+        assertThat(uriQuery.get("state").get(0)).isNotNull().isEqualTo("1234567890");
+        val authorizationCode = uriQuery.get("code").get(0);
+
+        // Third, authorization code for access token exchange
+        val responseEntity3 = postAuthorizationCodeTokenExchange(authorizationCode, Map.of());
+        if (!responseEntity3.getStatusCode().is2xxSuccessful()) {
+            val unused = fail("Returned non 200");
+        }
+        val response3 = responseEntity3.getBody();
+        assertThat(response3).isNotNull();
+        assertThat(response3.accessToken).isNotBlank();
+        assertThat(response3.tokenType).isEqualTo("bearer");
+        assertThat(response3.expiresIn).isEqualTo(3600);
+        assertThat(response3.refreshToken).isNotEmpty();
+        assertThat(response3.scope).contains("some/scope").contains("another/scope");
     }
 
     @Test
     public void testCreateOauth2Token_Success_LessScope() {
         // First, send username & password
-        val responseEntity = postPasswordAuthorization(ImmutableMap.of("scope", "some/scope"), String.class);
-        if (responseEntity.getStatusCode().is2xxSuccessful()) {
-            val response = responseEntity.getBody();
-            assertThat(response)
-                    .isNotEmpty()
-                    .contains("<title>Authorize scopes</title>")
-                    .doesNotContain("text-danger"); // no errors
-            val cookie = responseEntity.getHeaders().getFirst(HEADER_SET_COOKIE);
-
-            // Second, scope selection
-            val responseEntity2 = postScopeAuthorizationSelection(cookie, ImmutableMap.of("scope", "some/scope"));
-            if (responseEntity2.getStatusCode().is3xxRedirection()) {
-                val location = responseEntity2.getHeaders().getLocation();
-                assertThat(location).isNotNull();
-                assertThat(location.toString()).startsWith(TestConstants.VALID_REDIRECT_URL);
-                val uriQuery = URLEncodedUtils.parse(location, UTF_8);
-                assertThat(uriQuery).hasSize(2);
-                assertThat(uriQuery.get(0).getName()).isEqualTo("code");
-                assertThat(uriQuery.get(0).getValue()).hasSize(64);
-                assertThat(uriQuery.get(1).getName()).isEqualTo("state");
-                assertThat(uriQuery.get(1).getValue()).isEqualTo("1234567890");
-                val authorizationCode = uriQuery.get(0).getValue();
-
-                // Third, authorization code for access token exchange
-                val responseEntity3 = postAuthorizationCodeTokenExchange(authorizationCode, ImmutableMap.of("scope", "some/scope"));
-                if (responseEntity3.getStatusCode().is2xxSuccessful()) {
-                    val response3 = responseEntity3.getBody();
-                    assertThat(response3).isNotNull();
-                    assertThat(response3.accessToken).isNotBlank();
-                    assertThat(response3.tokenType).isEqualTo("bearer");
-                    assertThat(response3.expiresIn).isEqualTo(3600);
-                    assertThat(response3.refreshToken).isNotEmpty();
-                    assertThat(response3.scope).isEqualTo("some/scope");
-                } else {
-                    fail("Returned non 200");
-                }
-            } else {
-                fail("Returned non 200");
-            }
-        } else {
-            fail("Returned non 200");
+        val responseEntity = postPasswordAuthorization(Map.of("scope", "some/scope"));
+        if (!responseEntity.getStatusCode().is2xxSuccessful()) {
+            val unused = fail("Returned non 200");
         }
+        val response = responseEntity.getBody();
+        assertThat(response)
+                .isNotEmpty()
+                .contains("<title>Authorize scopes</title>")
+                .doesNotContain("text-danger"); // no errors
+        val cookie = responseEntity.getHeaders().getFirst(HEADER_SET_COOKIE);
+
+        // Second, scope selection
+        val responseEntity2 = postScopeAuthorizationSelection(cookie, Map.of("scope", "some/scope"));
+        if (!responseEntity2.getStatusCode().is3xxRedirection()) {
+            val unused = fail("Returned non 200");
+        }
+        val location = responseEntity2.getHeaders().getLocation();
+        assertThat(location).isNotNull();
+        assertThat(location.toString()).startsWith(TestConstants.VALID_REDIRECT_URL);
+        val uriQuery = UriComponentsBuilder.fromUri(location).build().getQueryParams();
+        assertThat(uriQuery).hasSize(2);
+        assertThat(uriQuery.get("code")).isNotNull();
+        assertThat(uriQuery.get("code").get(0)).isNotNull().hasSize(64);
+        assertThat(uriQuery.get("state")).isNotNull();
+        assertThat(uriQuery.get("state").get(0)).isNotNull().isEqualTo("1234567890");
+        val authorizationCode = uriQuery.get("code").get(0);
+
+        // Third, authorization code for access token exchange
+        val responseEntity3 = postAuthorizationCodeTokenExchange(authorizationCode, Map.of("scope", "some/scope"));
+        if (!responseEntity3.getStatusCode().is2xxSuccessful()) {
+            val unused = fail("Returned non 200");
+        }
+        val response3 = responseEntity3.getBody();
+        assertThat(response3).isNotNull();
+        assertThat(response3.accessToken).isNotBlank();
+        assertThat(response3.tokenType).isEqualTo("bearer");
+        assertThat(response3.expiresIn).isEqualTo(3600);
+        assertThat(response3.refreshToken).isNotEmpty();
+        assertThat(response3.scope).isEqualTo("some/scope");
     }
 
     @Test
     public void testCreateOauth2Token_Failure_NoScopeRequested() {
         // Send username & password without scope
-        val responseEntity = postPasswordAuthorization(ImmutableMap.of("scope", ""), String.class);
-        if (responseEntity.getStatusCode().is4xxClientError()) {
-            assertThat(responseEntity).isNotNull();
-        } else {
-            fail("Returned non 4xx error");
+        val responseEntity = postPasswordAuthorization(Map.of("scope", ""));
+        if (!responseEntity.getStatusCode().is4xxClientError()) {
+            val unused = fail("Returned non 4xx error");
         }
+        assertThat(responseEntity).isNotNull();
     }
 
     @Test
@@ -188,17 +178,24 @@ public class Oauth2TokenControllerWithAuthorizationCodeTest {
                         + "&scope=another/scope some/scope",
                 ErrorResponse.class
         );
-        if (responseEntity.getStatusCode().is4xxClientError()) {
-            val response = responseEntity.getBody();
-            assertThat(response).isNotNull();
-            assertThat(response.timestamp).isNotNull();
-            assertThat(response).isEqualTo(new ErrorResponse(response.timestamp, 400, "Bad Request", "Domain prefix unknown: 127.0.0.1", "/oauth/authorize"));
-        } else {
-            fail("Returned non 4xx error");
+        if (!responseEntity.getStatusCode().is4xxClientError()) {
+            val unused = fail("Returned non 4xx error");
         }
+        val response = responseEntity.getBody();
+        assertThat(response).isNotNull();
+        assertThat(response.timestamp).isNotNull();
+        assertThat(response).isEqualTo(
+                new ErrorResponse(
+                        response.timestamp,
+                        400,
+                        "Bad Request",
+                        "Domain prefix unknown: 127.0.0.1",
+                        "/oauth/authorize"
+                )
+        );
     }
 
-    private <T> ResponseEntity<T> postPasswordAuthorization(@Nullable final Map<String, String> paramsOverride, Class<T> clazz) {
+    private ResponseEntity<String> postPasswordAuthorization(@Nullable final Map<String, String> paramsOverride) {
         val headers = new HttpHeaders();
         headers.setContentType(APPLICATION_FORM_URLENCODED);
         val params = new LinkedMultiValueMap<String, String>();
@@ -219,14 +216,15 @@ public class Oauth2TokenControllerWithAuthorizationCodeTest {
             });
         }
         val request = new HttpEntity<MultiValueMap<String, String>>(params, headers);
-        return restTemplate.postForEntity(urlPrefix() + OAUTH_PREFIX + "/authorize", request, clazz);
+        return restTemplate.postForEntity(urlPrefix() + OAUTH_PREFIX + "/authorize", request, String.class);
     }
 
     private String urlPrefix() {
         return "http://localhost:" + port;
     }
 
-    private ResponseEntity<String> postScopeAuthorizationSelection(final String cookie, @Nullable final Map<String, String> paramsOverride) {
+    private ResponseEntity<String> postScopeAuthorizationSelection(final String cookie,
+                                                                   @Nullable final Map<String, String> paramsOverride) {
         val headers = new HttpHeaders();
         headers.setContentType(APPLICATION_FORM_URLENCODED);
         headers.set("Cookie", cookie);
@@ -249,7 +247,9 @@ public class Oauth2TokenControllerWithAuthorizationCodeTest {
         return restTemplate.postForEntity(urlPrefix() + OAUTH_PREFIX + "/authorize/finish", request, String.class);
     }
 
-    private ResponseEntity<OauthTokenResponse> postAuthorizationCodeTokenExchange(final String authorizationCode, @Nullable final Map<String, String> paramsOverride) {
+    private ResponseEntity<OauthTokenResponse> postAuthorizationCodeTokenExchange(
+            final String authorizationCode,
+            @Nullable final Map<String, String> paramsOverride) {
         val headers = new HttpHeaders();
         headers.setContentType(APPLICATION_FORM_URLENCODED);
         val params = new LinkedMultiValueMap<String, String>();

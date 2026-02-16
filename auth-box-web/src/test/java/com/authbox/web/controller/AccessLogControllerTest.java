@@ -24,11 +24,11 @@ public class AccessLogControllerTest {
         val json = controller.getIpDetails("142.250.191.46");
         assertThat(json).isNotNull();
         assertThat(json.get("country_code")).isNotNull();
-        assertThat(json.get("country_code").textValue()).isEqualTo("US");
+        assertThat(json.get("country_code").stringValue()).isEqualTo("US");
         assertThat(json.get("latitude")).isNotNull();
-        assertThat(json.get("latitude").doubleValue()).isNotNull();
+        assertThat(json.get("latitude").doubleValue()).isNotZero();
         assertThat(json.get("longitude")).isNotNull();
-        assertThat(json.get("longitude").doubleValue()).isNotNull();
+        assertThat(json.get("longitude").doubleValue()).isNotZero();
         assertThat(json.get("location")).isNotNull();
         assertThat(json.get("location").get("country_flag_emoji")).isNotNull();
     }

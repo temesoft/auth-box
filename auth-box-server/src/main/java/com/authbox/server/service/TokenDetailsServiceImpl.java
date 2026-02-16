@@ -191,6 +191,7 @@ public class TokenDetailsServiceImpl implements TokenDetailsService {
         }
     }
 
+    @SuppressWarnings("JavaUtilDate") // java.util.Date is used inside io.jsonwebtoken.impl.DefaultClaims
     private Map<String, Object> getJwtAccessTokenDetails(final OauthClient oauthClient, final OauthToken oauthToken, final String accessToken) {
         if (isEmpty(oauthClient.getPublicKey())) {
             log.debug("Client with oauth_client_id='{}' does not have public key to validate JWT token.", oauthClient.getId());

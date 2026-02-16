@@ -6,6 +6,7 @@ import tools.jackson.databind.DeserializationContext;
 import tools.jackson.databind.ValueDeserializer;
 
 import java.time.Duration;
+import java.util.Locale;
 
 public class DurationJsonDeserializer extends ValueDeserializer<Duration> {
 
@@ -15,7 +16,7 @@ public class DurationJsonDeserializer extends ValueDeserializer<Duration> {
         if (value == null || value.isBlank()) {
             return null;
         }
-        val isoValue = value.toUpperCase().startsWith("P") ? value : "PT" + value;
+        val isoValue = value.toUpperCase(Locale.ROOT).startsWith("P") ? value : "PT" + value;
         return Duration.parse(isoValue);
     }
 }
