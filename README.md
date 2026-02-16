@@ -216,19 +216,30 @@ The portal exposes a full REST API in addition to the UI.
 ### Client Credentials Grant
 
 ```bash
-curl -X POST http://localhost:9999/oauth/token   -u client-id:client-secret   -d grant_type=client_credentials   -d scope=read write
+curl -X POST http://localhost:9999/oauth/token \
+  -u client-id:client-secret \
+  -d grant_type=client_credentials \
+  -d scope=read write
 ```
 
 ### Password Grant
 
 ```bash
-curl -X POST http://localhost:9999/oauth/token   -u client-id:client-secret   -d grant_type=password   -d username=user@example.com   -d password=secret   -d scope=read
+curl -X POST http://localhost:9999/oauth/token \
+  -u client-id:client-secret \
+  -d grant_type=password \
+  -d username=user@example.com \
+  -d password=secret \
+  -d scope=read
 ```
 
 ### Refresh Token
 
 ```bash
-curl -X POST http://localhost:9999/oauth/token   -u client-id:client-secret   -d grant_type=refresh_token   -d refresh_token=REFRESH_TOKEN_VALUE
+curl -X POST http://localhost:9999/oauth/token \
+  -u client-id:client-secret \
+  -d grant_type=refresh_token \
+  -d refresh_token=REFRESH_TOKEN_VALUE
 ```
 
 ---
