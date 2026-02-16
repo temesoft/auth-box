@@ -1,8 +1,8 @@
 package com.authbox.base.util;
 
 import com.authbox.base.model.GrantType;
-
 import jakarta.persistence.AttributeConverter;
+
 import java.util.List;
 import java.util.stream.Collectors;
 

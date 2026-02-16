@@ -1,6 +1,7 @@
 package com.authbox.base.util;
 
 import jakarta.persistence.AttributeConverter;
+
 import java.time.Duration;
 
 public class DurationToSecondsConverter implements AttributeConverter<Duration, Long> {

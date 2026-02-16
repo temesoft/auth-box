@@ -5,7 +5,6 @@ import com.authbox.base.model.Organization;
 import lombok.Builder;
 import lombok.Getter;
 import org.springframework.data.domain.Page;
-import org.springframework.web.bind.annotation.PathVariable;
 
 import java.time.Duration;
 import java.time.Instant;

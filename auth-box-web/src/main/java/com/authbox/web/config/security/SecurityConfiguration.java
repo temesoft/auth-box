@@ -5,12 +5,15 @@ import com.authbox.web.config.MethodSecurityConfiguration;
 import com.authbox.web.config.Oauth2ServerProperties;
 import io.micrometer.core.annotation.Timed;
 import jakarta.servlet.DispatcherType;
+import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
@@ -21,16 +24,12 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.expression.WebExpressionAuthorizationManager;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
-import org.springframework.security.web.util.matcher.RequestMatcher;
+import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
 
-import java.util.Arrays;
 import java.util.Map;
-import java.util.function.Function;
 
 import static com.authbox.web.config.Constants.API_PREFIX;
 import static org.springframework.core.Ordered.HIGHEST_PRECEDENCE;
-import static org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher;
 
 @Configuration
 @Order(HIGHEST_PRECEDENCE)
@@ -78,8 +77,33 @@ public class SecurityConfiguration {
     @Autowired
     private Oauth2ServerProperties oauth2ServerProperties;
 
+    @ConditionalOnMissingBean
     @Bean
-    public SecurityFilterChain filterChain(final HttpSecurity http) throws Exception {
+    AuthSuccessUrl defaultAuthSuccessUrl() {
+        return () -> "/secure/index.html";
+    }
+
+    @ConditionalOnMissingBean
+    @Bean
+    SavedRequestAwareAuthenticationSuccessHandler successHandlerFinalStep(final AuthSuccessUrl authSuccessUrl) {
+        val handler = new SavedRequestAwareAuthenticationSuccessHandler();
+        handler.setDefaultTargetUrl(authSuccessUrl.url());
+        handler.setRedirectStrategy((request, response, url) -> {
+            if (url.contains("/.well-known/appspecific/")) {
+                response.setHeader("Location", authSuccessUrl.url());
+            } else {
+                response.setHeader("Location", url);
+            }
+            response.setStatus(HttpStatus.FOUND.value());
+            response.getWriter().flush();
+        });
+        return handler;
+    }
+
+    @Bean
+    public SecurityFilterChain filterChain(final HttpSecurity http,
+                                           final AuthSuccessUrl authSuccessUrl,
+                                           final SavedRequestAwareAuthenticationSuccessHandler successHandlerFinalStep) {
         http.csrf(AbstractHttpConfigurer::disable);
         http.headers(config -> config.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable));
         http.authorizeHttpRequests(auth -> {
@@ -87,30 +111,28 @@ public class SecurityConfiguration {
                     auth.requestMatchers(ALLOWED).permitAll();
 
                     ACCESS_PATH_PREFIX_AND_SCOPE_PREFIX.forEach((pathPatternPrefix, scopePrefix) -> {
-                        auth.requestMatchers(antMatcher(HttpMethod.GET, API_PREFIX + pathPatternPrefix),
-                                        antMatcher(HttpMethod.GET, API_PREFIX + pathPatternPrefix + "/**"))
+                        auth.requestMatchers(HttpMethod.GET, API_PREFIX + pathPatternPrefix,
+                                        API_PREFIX + pathPatternPrefix + "/**")
                                 .access(webEx("hasAuthority('SCOPE_" + scopePrefix + "/read') || hasRole('USER') || hasRole('ADMIN')"));
 
-                        auth.requestMatchers(antMatcher(HttpMethod.GET, API_PREFIX + pathPatternPrefix + "/**/2fa-qr-code"))
+                        auth.requestMatchers(HttpMethod.GET, API_PREFIX + pathPatternPrefix + "/*/2fa-qr-code")
                                 .access(webEx("hasAuthority('SCOPE_" + scopePrefix + "/write') || hasRole('ADMIN')"));
 
-                        auth.requestMatchers(antMatcher(HttpMethod.POST, API_PREFIX + pathPatternPrefix),
-                                        antMatcher(HttpMethod.POST, API_PREFIX + pathPatternPrefix + "/**"))
+                        auth.requestMatchers(HttpMethod.POST, API_PREFIX + pathPatternPrefix,
+                                        API_PREFIX + pathPatternPrefix + "/**")
                                 .access(webEx("hasAuthority('SCOPE_" + scopePrefix + "/write') || hasRole('ADMIN')"));
 
-                        auth.requestMatchers(antMatcher(HttpMethod.PUT, API_PREFIX + pathPatternPrefix),
-                                        antMatcher(HttpMethod.PUT, API_PREFIX + pathPatternPrefix + "/**"))
+                        auth.requestMatchers(HttpMethod.PUT, API_PREFIX + pathPatternPrefix,
+                                        API_PREFIX + pathPatternPrefix + "/**")
                                 .access(webEx("hasAuthority('SCOPE_" + scopePrefix + "/write') || hasRole('ADMIN')"));
 
-                        auth.requestMatchers(antMatcher(HttpMethod.DELETE, API_PREFIX + pathPatternPrefix),
-                                        antMatcher(HttpMethod.DELETE, API_PREFIX + pathPatternPrefix + "/**"))
+                        auth.requestMatchers(HttpMethod.DELETE, API_PREFIX + pathPatternPrefix,
+                                        API_PREFIX + pathPatternPrefix + "/**")
                                 .access(webEx("hasAuthority('SCOPE_" + scopePrefix + "/write') || hasRole('ADMIN')"));
 
                     });
 
-                    auth.requestMatchers(Arrays.stream(SECURE)
-                            .map((Function<String, RequestMatcher>) AntPathRequestMatcher::antMatcher)
-                            .toArray(RequestMatcher[]::new)).authenticated();
+                    auth.requestMatchers(SECURE).authenticated();
                     auth.anyRequest().authenticated();
                 }
         );
@@ -124,7 +146,8 @@ public class SecurityConfiguration {
         http.formLogin(config -> config
                 .loginPage("/login")
                 .failureUrl("/sign-in.html?error")
-                .defaultSuccessUrl("/secure/index.html")
+                .defaultSuccessUrl(authSuccessUrl.url())
+                .successHandler(successHandlerFinalStep)
                 .permitAll());
 
         http.oauth2ResourceServer(config ->

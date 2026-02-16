@@ -11,8 +11,6 @@ import com.authbox.base.model.OauthToken;
 import com.authbox.base.model.OauthUser;
 import com.authbox.base.model.Organization;
 import com.authbox.base.service.AccessLogService;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -25,6 +23,8 @@ import jakarta.annotation.Nullable;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 import java.security.PublicKey;
 import java.time.Clock;
@@ -312,7 +312,7 @@ public class TokenDetailsServiceImpl implements TokenDetailsService {
             result.put(OAUTH2_ATTR_USERNAME, oauthUser.getUsername());
             try {
                 result.put(OAUTH2_ATTR_METADATA, objectMapper.readValue(oauthUser.getMetadata(), Map.class));
-            } catch (JsonProcessingException e) {
+            } catch (JacksonException e) {
                 result.put(OAUTH2_ATTR_METADATA, oauthUser.getMetadata());
             }
         }
@@ -371,7 +371,7 @@ public class TokenDetailsServiceImpl implements TokenDetailsService {
             try {
                 result.put(OAUTH2_ATTR_USERNAME, oauthUser.getUsername());
                 result.put(OAUTH2_ATTR_METADATA, objectMapper.readValue(oauthUser.getMetadata(), Map.class));
-            } catch (JsonProcessingException e) {
+            } catch (JacksonException e) {
                 result.put(OAUTH2_ATTR_METADATA, oauthUser.getMetadata());
             }
         }

@@ -4,22 +4,16 @@ import com.authbox.base.exception.BadRequestException;
 import com.authbox.base.exception.Oauth2Exception;
 import com.authbox.base.model.AccessLog;
 import com.authbox.base.model.GrantType;
-import com.authbox.base.model.OauthClient;
-import com.authbox.base.model.OauthToken;
 import com.authbox.base.model.OauthTokenResponse;
-import com.authbox.base.model.OauthUser;
 import com.authbox.base.model.Organization;
 import com.authbox.server.service.TokenEndpointProcessor;
-import lombok.extern.slf4j.Slf4j;
-import lombok.val;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
+import lombok.val;
+
 import java.time.Instant;
-import java.util.Optional;
 
 import static com.authbox.base.config.Constants.MSG_INVALID_REQUEST;
 import static com.authbox.base.config.Constants.MSG_INVALID_TOKEN;

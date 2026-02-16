@@ -1,9 +1,9 @@
 package com.authbox.base.model;
 
 import com.authbox.base.util.DurationJsonDeserializer;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import lombok.Getter;
 import lombok.Setter;
+import tools.jackson.databind.annotation.JsonDeserialize;
 
 import java.time.Duration;
 import java.time.Instant;

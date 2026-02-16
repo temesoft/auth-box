@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import tools.jackson.databind.ObjectMapper;
 
 @RestController
 @RequestMapping(Constants.API_PREFIX + "/oauth2-client")
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class Oauth2ClientsController extends BaseController {
 
     private final Oauth2ClientsService oauth2ClientsService;
+    private final ObjectMapper objectMapper;
 
     @GetMapping
     @PreAuthorize("isAuthenticated()")

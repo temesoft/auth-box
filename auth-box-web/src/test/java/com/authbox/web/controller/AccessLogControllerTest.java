@@ -1,10 +1,10 @@
 package com.authbox.web.controller;
 
 import com.authbox.base.service.AccessLogService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.val;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.client.RestTemplate;
+import tools.jackson.databind.ObjectMapper;
 
 import java.util.concurrent.ExecutionException;
 

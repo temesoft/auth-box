@@ -1,11 +1,7 @@
 package com.authbox.base.util;
 
-import com.authbox.base.model.RsaKeyPair;
 import lombok.val;
 import org.junit.jupiter.api.Test;
-
-import java.security.PrivateKey;
-import java.security.PublicKey;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

@@ -11,8 +11,6 @@ import com.authbox.base.model.OauthTokenResponse;
 import com.authbox.base.model.OauthUser;
 import com.authbox.base.model.Organization;
 import com.authbox.base.service.AccessLogService;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Stopwatch;
 import io.jsonwebtoken.Jwts;
 import jakarta.annotation.Nullable;
@@ -22,6 +20,8 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 import java.security.PrivateKey;
 import java.time.Clock;
@@ -133,7 +133,7 @@ public abstract class TokenEndpointProcessor {
             Object metadata = oauthUser.getMetadata();
             try {
                 metadata = objectMapper.readValue(oauthUser.getMetadata(), Map.class);
-            } catch (JsonProcessingException e) {
+            } catch (JacksonException e) {
                 log.debug("Unable to parse metadata for OauthUser user_id='{}'", oauthUser.getId());
             }
 
@@ -244,7 +244,7 @@ public abstract class TokenEndpointProcessor {
                                                         final String ip,
                                                         final String userAgent) {
         if (isEmpty(oauthClient.getGrantTypes())
-            || !oauthClient.getGrantTypes().contains(GrantType.refresh_token)) {
+                || !oauthClient.getGrantTypes().contains(GrantType.refresh_token)) {
             return Optional.empty();
         }
         if (grantType == authorization_code || grantType == password) {

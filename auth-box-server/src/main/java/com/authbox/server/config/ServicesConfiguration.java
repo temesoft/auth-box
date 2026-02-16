@@ -18,11 +18,11 @@ import com.authbox.server.service.ScopeService;
 import com.authbox.server.service.ScopeServiceImpl;
 import com.authbox.server.service.TokenDetailsService;
 import com.authbox.server.service.TokenDetailsServiceImpl;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import tools.jackson.databind.ObjectMapper;
 
 import java.time.Clock;
 

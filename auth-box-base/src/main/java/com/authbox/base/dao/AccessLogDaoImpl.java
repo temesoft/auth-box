@@ -26,15 +26,15 @@ public class AccessLogDaoImpl implements AccessLogDao {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AccessLogDaoImpl.class);
     private static final String SQL_LIST_BY = "SELECT id, create_time, organization_id, oauth_token_id, client_id, request_id, source, duration_ms, message, error, status_code, ip, user_agent " +
-                                              "FROM access_log %s " +
-                                              "ORDER BY create_time ASC, duration_ms ASC " +
-                                              "LIMIT ? " +
-                                              "OFFSET ?";
+            "FROM access_log %s " +
+            "ORDER BY create_time ASC, duration_ms ASC " +
+            "LIMIT ? " +
+            "OFFSET ?";
     private static final String SQL_COUNT_BY = "SELECT count(id) " +
-                                               "FROM access_log %s " +
-                                               "ORDER BY create_time ASC, duration_ms ASC " +
-                                               "LIMIT ? " +
-                                               "OFFSET ?";
+            "FROM access_log %s " +
+            "ORDER BY create_time ASC, duration_ms ASC " +
+            "LIMIT ? " +
+            "OFFSET ?";
     private static final String WHERE_CLAUSE = "WHERE ";
     private static final String AND_OPERAND = " AND ";
     private static final String LIST_CRITERIA_TOKEN_ID = "tokenId";

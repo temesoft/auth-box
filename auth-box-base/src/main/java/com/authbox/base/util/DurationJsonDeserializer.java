@@ -1,15 +1,21 @@
 package com.authbox.base.util;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
+import lombok.val;
+import tools.jackson.core.JsonParser;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.ValueDeserializer;
 
-import java.io.IOException;
 import java.time.Duration;
 
-public class DurationJsonDeserializer extends JsonDeserializer<Duration> {
+public class DurationJsonDeserializer extends ValueDeserializer<Duration> {
+
     @Override
-    public Duration deserialize(final JsonParser jsonParser, final DeserializationContext deserializationContext) throws IOException {
-        return Duration.parse("PT" + jsonParser.getValueAsString());
+    public Duration deserialize(final JsonParser jsonParser, final DeserializationContext deserializationContext) {
+        val value = jsonParser.getValueAsString();
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+        val isoValue = value.toUpperCase().startsWith("P") ? value : "PT" + value;
+        return Duration.parse(isoValue);
     }
 }

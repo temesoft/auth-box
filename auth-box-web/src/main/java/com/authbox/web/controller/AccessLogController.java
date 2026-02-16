@@ -1,8 +1,6 @@
 package com.authbox.web.controller;
 
 import com.authbox.base.service.AccessLogService;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -14,8 +12,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 import java.time.Duration;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import static com.authbox.web.config.Constants.API_PREFIX;
@@ -45,7 +46,9 @@ public class AccessLogController extends BaseController {
                                    return objectMapper.createObjectNode();
                                }
                                log.debug("Making request for IP details for: {}", ip);
-                               return restTemplate.getForObject(ipStackUrl.replaceAll("\\{ip}", ip), JsonNode.class);
+                               return objectMapper.valueToTree(
+                                       restTemplate.getForObject(ipStackUrl.replaceAll("\\{ip}", ip), Map.class)
+                               );
                            }
                        }
                 );

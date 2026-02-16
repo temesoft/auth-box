@@ -1,11 +1,9 @@
 package com.authbox.web.config;
 
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
-import org.springframework.security.config.annotation.method.configuration.GlobalMethodSecurityConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 
 @Configuration
-@SuppressWarnings("deprecation")
-@EnableGlobalMethodSecurity(prePostEnabled = true)
-public class MethodSecurityConfiguration extends GlobalMethodSecurityConfiguration {
+@EnableMethodSecurity
+public class MethodSecurityConfiguration {
 }

@@ -24,7 +24,7 @@ import com.authbox.base.dao.OrganizationRepository;
 import com.authbox.base.dao.UserDao;
 import com.authbox.base.dao.UserDaoImpl;
 import com.authbox.base.dao.UserRepository;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.boot.persistence.autoconfigure.EntityScan;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters;
