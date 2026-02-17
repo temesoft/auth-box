@@ -22,6 +22,7 @@ import static java.sql.Types.INTEGER;
 import static java.sql.Types.VARCHAR;
 
 @AllArgsConstructor
+@SuppressWarnings("InlineFormatString")
 public class AccessLogDaoImpl implements AccessLogDao {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AccessLogDaoImpl.class);

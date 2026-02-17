@@ -5,7 +5,6 @@ import com.authbox.base.dao.OauthTokenDao;
 import com.authbox.base.dao.OauthUserDao;
 import com.authbox.base.exception.Oauth2Exception;
 import com.authbox.base.model.AccessLog;
-import com.authbox.server.service.ParsingValidationService;
 import io.micrometer.core.annotation.Timed;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
@@ -46,8 +45,6 @@ public class UserInfoController extends BaseController {
     private final OauthUserDao oauthUserDao;
     private final OauthClientDao oauthClientDao;
     private final ObjectMapper objectMapper;
-    private final ParsingValidationService parsingValidationService;
-
 
     @GetMapping("/user")
     @Timed("getUserInfo")

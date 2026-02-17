@@ -1,6 +1,5 @@
 package com.authbox.server.config;
 
-import com.authbox.base.service.AccessLogService;
 import com.authbox.server.service.ScopeService;
 import com.authbox.server.service.TokenEndpointProcessor;
 import com.authbox.server.service.processor.AuthorizationCodeGrantTypeTokenEndpointProcessor;
@@ -33,9 +32,8 @@ public class EndpointProcessorConfiguration {
     }
 
     @Bean
-    TokenEndpointProcessor clientCredentialsGrantTypeTokenEndpointProcessor(final ScopeService scopeService,
-                                                                            final AccessLogService accessLogService) {
-        return new ClientCredentialsGrantTypeTokenEndpointProcessor(scopeService, accessLogService);
+    TokenEndpointProcessor clientCredentialsGrantTypeTokenEndpointProcessor(final ScopeService scopeService) {
+        return new ClientCredentialsGrantTypeTokenEndpointProcessor(scopeService);
     }
 
     @Bean

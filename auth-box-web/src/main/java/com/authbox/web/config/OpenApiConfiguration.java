@@ -12,6 +12,8 @@ import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.Locale;
+
 @Configuration
 @AllArgsConstructor
 // Below annotation is used to fix http vs https protocol issue when proxy does not forward X-Forwarded-Proto
@@ -26,7 +28,7 @@ public class OpenApiConfiguration {
     @Bean
     OpenAPI customOpenAPI() {
 
-        final String apiTitle = appProperties.getName().toUpperCase() + " API";
+        final String apiTitle = appProperties.getName().toUpperCase(Locale.ROOT) + " API";
         return new OpenAPI()
                 .addSecurityItem(new SecurityRequirement().addList(BEARER_AUTH))
                 .components(

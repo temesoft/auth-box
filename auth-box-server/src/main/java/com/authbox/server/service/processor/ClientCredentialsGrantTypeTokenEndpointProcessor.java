@@ -4,7 +4,6 @@ import com.authbox.base.model.AccessLog;
 import com.authbox.base.model.GrantType;
 import com.authbox.base.model.OauthTokenResponse;
 import com.authbox.base.model.Organization;
-import com.authbox.base.service.AccessLogService;
 import com.authbox.server.service.ScopeService;
 import com.authbox.server.service.TokenEndpointProcessor;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,7 +23,6 @@ import static com.authbox.server.util.RequestUtils.getTimeSinceRequest;
 public class ClientCredentialsGrantTypeTokenEndpointProcessor extends TokenEndpointProcessor {
 
     private final ScopeService scopeService;
-    private final AccessLogService accessLogService;
 
     @Override
     @Transactional

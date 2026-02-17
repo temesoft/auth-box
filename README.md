@@ -1,5 +1,5 @@
 ![License](https://img.shields.io/github/license/temesoft/auth-box)
-![Java](https://img.shields.io/badge/Java-17%2B-blue)
+![Java](https://img.shields.io/badge/Java-21%2B-blue)
 ![Maven](https://img.shields.io/badge/build-Maven-brightgreen)
 ![Status](https://img.shields.io/badge/status-active-success)
 [![Java CI](https://github.com/temesoft/auth-box/actions/workflows/main.yml/badge.svg)](https://github.com/temesoft/auth-box/actions/workflows/main.yml)
@@ -53,7 +53,7 @@ Both applications share common code from **auth-box-base**.
 Full deployment of AuthBox (Oauth2 server and web management panel) is running on
 <h3><a href='https://oauth2.cloud' target='newOauth2CloudWindow'>https://oauth2.cloud</a></h3>
 
-* Software: OpenJDK 17, Spring-Boot, MySql
+* Software: OpenJDK 21, Spring-Boot, MySql
 
 Please create an account to see complete functionality.
 Registration process will create the following:
