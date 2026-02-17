@@ -3,14 +3,14 @@ package com.authbox.web.model;
 import com.authbox.base.model.User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Builder;
-import lombok.Getter;
+import lombok.Data;
 import lombok.ToString;
 
 import java.time.Instant;
 import java.util.List;
 
 @Builder
-@Getter
+@Data
 public class UserDto {
     private String id;
     private Instant createTime;
