@@ -128,6 +128,7 @@ AuthBox supports the following OAuth2 grant types:
 
 Features include:
 
+- Opaque access tokens
 - JWT access tokens (RSA 2048)
 - Refresh token rotation
 - Configurable scopes
