@@ -1,12 +1,12 @@
 ![License](https://img.shields.io/github/license/temesoft/auth-box)
-![Java](https://img.shields.io/badge/Java-21%2B-blue)
+![Java](https://img.shields.io/badge/Java-17%2B-blue)
 ![Maven](https://img.shields.io/badge/build-Maven-brightgreen)
 ![Status](https://img.shields.io/badge/status-active-success)
 [![Java CI](https://github.com/temesoft/auth-box/actions/workflows/main.yml/badge.svg)](https://github.com/temesoft/auth-box/actions/workflows/main.yml)
 
 # AuthBox
 
-AuthBox is a free, open-source, RFC 6749–compliant OAuth2 Authorization Server implemented in Java using Spring Boot.  
+AuthBox is a free, open-source, RFC 6749-compliant OAuth2 Authorization Server implemented in Java using Spring Boot.  
 It provides both a production-ready OAuth2 server and a management portal (UI + REST API) for configuring and operating the server.
 
 AuthBox is designed for developers and organizations that require a self-hosted, extensible OAuth2 solution with full control over clients, users, scopes, and tokens.
@@ -140,7 +140,7 @@ Features include:
 
 ### Prerequisites
 
-- Java 11+
+- Java 17+
 - Maven 3.8+
 - Docker (recommended)
 - MySQL or compatible database
