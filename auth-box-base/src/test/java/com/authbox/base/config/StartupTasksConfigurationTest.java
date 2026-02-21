@@ -47,9 +47,9 @@ class StartupTasksConfigurationTest extends SpringBootBaseTest {
     @Test
     public void testStartupTasksConfiguration() throws UnknownHostException {
         startupTasksConfiguration.preDestroyTasks();
-        val userCaptor = ArgumentCaptor.forClass(AccessLog.AccessLogBuilder.class);
-        verify(accessLogService, times(2)).create(userCaptor.capture(), any());
-        val values = userCaptor.getAllValues();
+        val captor = ArgumentCaptor.forClass(AccessLog.AccessLogBuilder.class);
+        verify(accessLogService, times(2)).create(captor.capture(), any());
+        val values = captor.getAllValues();
         assertThat(values).hasSize(2);
         val message1 = values.get(0).build();
         assertThat(message1.getMessage()).contains("Oauth2Server startup on ip=");
