@@ -14,12 +14,11 @@ import java.time.Instant;
 import java.util.List;
 
 import static com.authbox.base.util.IdUtils.createId;
-import static com.authbox.server.TestUtils.assertLogEntryContains;
+import static com.authbox.server.TestUtils.assertLogEntryContainsAndReset;
 import static com.authbox.server.filter.RequestWrapperFilter.REQUEST_START_REQUEST_TIME_MDC_KEY;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.reset;
 
 class ScopeServiceTest {
 
@@ -56,9 +55,8 @@ class ScopeServiceTest {
         assertThatThrownBy(() -> service.getScopeStringBasedOnRequestedAndAllowed(SCOPE_VALID, oauthClient))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessageContaining("invalid scope");
-        assertLogEntryContains(accessLogService, "Requested scope='" + SCOPE_VALID
+        assertLogEntryContainsAndReset(accessLogService, "Requested scope='" + SCOPE_VALID
                 + "' is not found in Oauth2 client scopes=[]");
-        reset(accessLogService);
 
         oauthClient.setScopes(List.of(OauthScope.builder()
                 .withScope(SCOPE_INVALID)
@@ -66,9 +64,8 @@ class ScopeServiceTest {
         assertThatThrownBy(() -> service.getScopeStringBasedOnRequestedAndAllowed(SCOPE_VALID, oauthClient))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessageContaining("invalid scope");
-        assertLogEntryContains(accessLogService, "Requested scope='" + SCOPE_VALID
+        assertLogEntryContainsAndReset(accessLogService, "Requested scope='" + SCOPE_VALID
                 + "' is not found in Oauth2 client scopes=[" + SCOPE_INVALID + "]");
-        reset(accessLogService);
 
         oauthClient.setScopes(List.of(OauthScope.builder()
                 .withScope(SCOPE_VALID)

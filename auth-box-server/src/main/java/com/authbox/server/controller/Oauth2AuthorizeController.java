@@ -16,10 +16,10 @@ import io.micrometer.core.annotation.Timed;
 import jakarta.annotation.Nullable;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.jboss.aerogear.security.otp.Totp;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -56,23 +56,18 @@ import static org.springframework.util.ObjectUtils.isEmpty;
 
 @Controller
 @RequestMapping(OAUTH_PREFIX)
+@AllArgsConstructor
 @Slf4j
 public class Oauth2AuthorizeController extends BaseController {
 
     private static final String TWO_FACTOR_AUTH_SUCCESS_ATTRIBUTE = "TWO_FACTOR_AUTH_SUCCESS_ATTRIBUTE";
 
-    @Autowired
-    protected OauthClientDao oauthClientDao;
-    @Autowired
-    protected OauthUserDao oauthUserDao;
-    @Autowired
-    protected PasswordEncoder passwordEncoder;
-    @Autowired
-    protected Clock defaultClock;
-    @Autowired
-    protected OauthTokenDao oauthTokenDao;
-    @Autowired
-    protected ScopeService scopeService;
+    private final OauthClientDao oauthClientDao;
+    private final OauthUserDao oauthUserDao;
+    private final PasswordEncoder passwordEncoder;
+    private final Clock defaultClock;
+    private final OauthTokenDao oauthTokenDao;
+    private final ScopeService scopeService;
 
     @GetMapping(value = "/authorize", produces = "application/json")
     @Timed("getAuthorize")

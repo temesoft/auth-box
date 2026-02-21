@@ -20,12 +20,11 @@ import static com.authbox.base.config.Constants.HEADER_AUTHORIZATION_PREFIX_BASI
 import static com.authbox.base.config.Constants.OAUTH2_ATTR_CLIENT_ID;
 import static com.authbox.base.config.Constants.OAUTH2_ATTR_CLIENT_SECRET;
 import static com.authbox.base.util.IdUtils.createId;
-import static com.authbox.server.TestUtils.assertLogEntryContains;
+import static com.authbox.server.TestUtils.assertLogEntryContainsAndReset;
 import static com.authbox.server.filter.RequestWrapperFilter.REQUEST_START_REQUEST_TIME_MDC_KEY;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 
 class ParsingValidationServiceTest {
@@ -58,8 +57,7 @@ class ParsingValidationServiceTest {
         assertThatThrownBy(() -> service.getOauthClient(req, organization))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessageContaining("invalid request");
-        assertLogEntryContains(accessLogService, "Request missing client credentials");
-        reset(accessLogService);
+        assertLogEntryContainsAndReset(accessLogService, "Request missing client credentials");
 
         val clientId = createId();
         val clientSecret = createId();
@@ -68,8 +66,7 @@ class ParsingValidationServiceTest {
         assertThatThrownBy(() -> service.getOauthClient(req, organization))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessageContaining("invalid request");
-        assertLogEntryContains(accessLogService, "Oauth2 client not found by id");
-        reset(accessLogService);
+        assertLogEntryContainsAndReset(accessLogService, "Oauth2 client not found by id");
 
         val oauthClient = OauthClient.builder()
                 .withId(clientId)
@@ -81,23 +78,20 @@ class ParsingValidationServiceTest {
         assertThatThrownBy(() -> service.getOauthClient(req, organization))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessageContaining("invalid request");
-        assertLogEntryContains(accessLogService, "Oauth2 client is disabled");
-        reset(accessLogService);
+        assertLogEntryContainsAndReset(accessLogService, "Oauth2 client is disabled");
 
         oauthClient.setEnabled(true);
         oauthClient.setOrganizationId("bad-org-id");
         assertThatThrownBy(() -> service.getOauthClient(req, organization))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessageContaining("invalid request");
-        assertLogEntryContains(accessLogService, "Oauth2 client organization details do not match domain prefix specified in request");
-        reset(accessLogService);
+        assertLogEntryContainsAndReset(accessLogService, "Oauth2 client organization details do not match domain prefix specified in request");
 
         oauthClient.setOrganizationId(organization.getId());
         assertThatThrownBy(() -> service.getOauthClient(req, organization))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessageContaining("invalid request");
-        assertLogEntryContains(accessLogService, "Oauth2 client secret does not match provided value");
-        reset(accessLogService);
+        assertLogEntryContainsAndReset(accessLogService, "Oauth2 client secret does not match provided value");
 
         oauthClient.setSecret(clientSecret);
         assertThat(service.getOauthClient(req, organization)).isEqualTo(oauthClient);

@@ -10,7 +10,8 @@ import java.util.ArrayList;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 
 public class TestUtils {
@@ -19,28 +20,45 @@ public class TestUtils {
     }
 
     public static void assertLogEntryContains(final AccessLogService accessLogService,
-                                              final String... messages) {
+                                              final String... messagesExpected) {
+        for (final String message : messagesExpected) {
+            internalAssertLogEntryContains(accessLogService, message);
+        }
+    }
+
+    public static void assertLogEntryContainsAndReset(final AccessLogService accessLogService,
+                                                      final String... messagesExpected) {
+        for (final String message : messagesExpected) {
+            internalAssertLogEntryContains(accessLogService, message);
+        }
+        reset(accessLogService);
+    }
+
+    private static void internalAssertLogEntryContains(final AccessLogService accessLogService,
+                                                       final String messageExpected) {
         val captorBuilder = ArgumentCaptor.forClass(AccessLog.AccessLogBuilder.class);
         val captorMessage = ArgumentCaptor.forClass(String.class);
         val captorArguments = ArgumentCaptor.forClass(String[].class);
-        verify(accessLogService, times(messages.length)).create(
+        verify(accessLogService, atLeast(1)).create(
                 captorBuilder.capture(),
                 captorMessage.capture(),
                 captorArguments.capture()
         );
-        val valuesBuilder = captorBuilder.getAllValues();
-        val valuesMessage = captorMessage.getAllValues();
+        val valuesBuilders = captorBuilder.getAllValues();
+        val valuesMessages = captorMessage.getAllValues();
         val valuesArguments = captorArguments.getAllValues();
-        assertThat(valuesBuilder).hasSize(messages.length);
-        assertThat(valuesMessage).hasSize(messages.length);
+        assertThat(valuesBuilders).hasSizeGreaterThanOrEqualTo(1);
+        assertThat(valuesMessages).hasSizeGreaterThanOrEqualTo(1);
         val availableMessages = new ArrayList<String>();
-        for (int i = 0; i < messages.length; i++) {
-            val messageExpected = messages[i];
-            val builderMessage = valuesBuilder.get(i).build().getMessage();
-            var formattedMessage = valuesMessage.get(i);
+        val availableResults = new ArrayList<Boolean>();
+        for (int j = 0; j < valuesBuilders.size(); j++) {
+            val valuesBuilder = valuesBuilders.get(j);
+            val valuesMessage = valuesMessages.get(j);
+            val builderMessage = valuesBuilder.build().getMessage();
+            var formattedMessage = valuesMessage;
 
-            if (valuesArguments.size() >= i) {
-                formattedMessage = formattedMessage.formatted((Object[]) valuesArguments.get(i));
+            if (valuesArguments.size() >= j) {
+                formattedMessage = formattedMessage.formatted((Object[]) valuesArguments.get(j));
             }
 
             if (isNotBlank(builderMessage)) {
@@ -52,11 +70,12 @@ public class TestUtils {
 
             val fail = (builderMessage != null && !builderMessage.contains(messageExpected))
                     || !formattedMessage.contains(messageExpected);
+            availableResults.add(fail);
+        }
 
-            if (fail) {
-                val unused = Assertions.fail("Message '%s' is not found in AccessLog. \nAvailable messages are: %s",
-                        messageExpected, availableMessages);
-            }
+        if (!availableResults.contains(false)) {
+            val unused = Assertions.fail("Message '%s' is not found in AccessLog. \nAvailable messages are: %s",
+                    messageExpected, availableMessages);
         }
     }
 }

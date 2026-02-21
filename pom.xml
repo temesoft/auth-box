@@ -240,7 +240,7 @@
                     <version>3.5.4</version>
                     <configuration>
                         <argLine>
-                            -javaagent:${settings.localRepository}/org/mockito/mockito-core/${mockito.version}/mockito-core-${mockito.version}.jar
+                            @{argLine} -javaagent:${settings.localRepository}/org/mockito/mockito-core/${mockito.version}/mockito-core-${mockito.version}.jar
                         </argLine>
                     </configuration>
                 </plugin>
