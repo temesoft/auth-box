@@ -54,4 +54,9 @@ public class OrganizationDaoImpl implements OrganizationDao {
         log.debug("Updating by organization_id='{}'", id);
         organizationRepository.update(id, name, domainPrefix, address, enabled, logoUrl, lastUpdated);
     }
+
+    @Override
+    public void deleteById(final String id) {
+        organizationRepository.deleteById(id);
+    }
 }

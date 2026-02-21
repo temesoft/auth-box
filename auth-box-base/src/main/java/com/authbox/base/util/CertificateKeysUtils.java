@@ -1,6 +1,5 @@
 package com.authbox.base.util;
 
-import com.authbox.base.exception.BadRequestException;
 import com.authbox.base.model.RsaKeyPair;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -48,13 +47,13 @@ public final class CertificateKeysUtils {
             );
         } catch (final IOException | InterruptedException e) {
             log.error("Unable to generate rsa key pair: {}", e.getMessage(), e);
-            throw new BadRequestException("Unable to generate rsa key pair: " + e.getMessage());
+            throw new IllegalStateException("Unable to generate rsa key pair: " + e.getMessage());
         } finally {
             if (filenamePrivate != null) {
-                filenamePrivate.toFile().delete();
+                val unused = filenamePrivate.toFile().delete();
             }
             if (filenamePublic != null) {
-                filenamePublic.toFile().delete();
+                val unused = filenamePublic.toFile().delete();
             }
         }
     }
