@@ -166,7 +166,7 @@ public class UserInfoController extends BaseController {
                             .withOrganizationId(organization.getId())
                             .withClientId(accessOauthToken.get().getClientId())
                             .withError(MSG_UNAUTHORIZED_REQUEST),
-                    "Oauth2 user user is disabled. id='%s'", oauthUser.get().getId()
+                    "Oauth2 user is disabled. id='%s'", oauthUser.get().getId()
             );
             throw new Oauth2Exception(MSG_UNAUTHORIZED_REQUEST);
         }
@@ -195,7 +195,7 @@ public class UserInfoController extends BaseController {
                             .withOrganizationId(organization.getId())
                             .withClientId(oauthClient.get().getId())
                             .withError(MSG_UNAUTHORIZED_REQUEST),
-                    "Oauth2 user user disabled. id='%s'", oauthUser.get().getId()
+                    "OauthClient is disabled. id='%s'", oauthClient.get().getId()
             );
             throw new Oauth2Exception(MSG_UNAUTHORIZED_REQUEST);
         }
