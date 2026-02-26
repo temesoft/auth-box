@@ -52,15 +52,14 @@ import static org.mockito.Mockito.when;
 class Oauth2AuthorizeControllerTest {
 
     private static final String SCOPE = "some/scope";
+    private static final String STATE = "state";
 
     private Oauth2AuthorizeController authorizeController;
     private OauthClientDao oauthClientDao;
     private OauthUserDao oauthUserDao;
-    private OauthTokenDao oauthTokenDao;
     private ScopeService scopeService;
     private AccessLogService accessLogService;
     private OrganizationDao organizationDao;
-    private ParsingValidationService parsingValidationService;
     private HttpServletRequest req;
     private HttpServletResponse res;
 
@@ -68,7 +67,7 @@ class Oauth2AuthorizeControllerTest {
     public void setup() {
         oauthClientDao = mock(OauthClientDao.class);
         oauthUserDao = mock(OauthUserDao.class);
-        oauthTokenDao = mock(OauthTokenDao.class);
+        val oauthTokenDao = mock(OauthTokenDao.class);
         scopeService = mock(ScopeService.class);
         val passwordEncoder = new BCryptPasswordEncoder();
         val defaultClock = Clock.systemUTC();
@@ -82,7 +81,7 @@ class Oauth2AuthorizeControllerTest {
         );
         accessLogService = mock(AccessLogService.class);
         organizationDao = mock(OrganizationDao.class);
-        parsingValidationService = mock(ParsingValidationService.class);
+        val parsingValidationService = mock(ParsingValidationService.class);
         authorizeController.setAppProperties(new AppProperties());
         authorizeController.setAccessLogService(accessLogService);
         authorizeController.setOrganizationDao(organizationDao);
@@ -106,11 +105,11 @@ class Oauth2AuthorizeControllerTest {
 
         assertThatThrownBy(() -> authorizeController.getAuthorize(
                 req,
-                AuthorizationResponseType.code,
+                authorizationResponseType,
                 clientId,
                 redirectUrl,
-                "state",
-                "some/scope"
+                STATE,
+                SCOPE
         ))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessageContaining("Domain prefix unknown: some.domain");
@@ -130,11 +129,11 @@ class Oauth2AuthorizeControllerTest {
         when(organizationDao.getByDomainPrefix("some.domain")).thenReturn(Optional.of(organization));
         assertThatThrownBy(() -> authorizeController.getAuthorize(
                 req,
-                AuthorizationResponseType.code,
+                authorizationResponseType,
                 clientId,
                 redirectUrl,
-                "state",
-                "some/scope"
+                STATE,
+                SCOPE
         ))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessageContaining("Domain is disabled: some.domain");
@@ -147,11 +146,11 @@ class Oauth2AuthorizeControllerTest {
         organization.setEnabled(true);
         assertThatThrownBy(() -> authorizeController.getAuthorize(
                 req,
-                AuthorizationResponseType.code,
+                authorizationResponseType,
                 clientId,
                 redirectUrl,
-                "state",
-                "some/scope"
+                STATE,
+                SCOPE
         ))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessageContaining("invalid request");
@@ -173,29 +172,29 @@ class Oauth2AuthorizeControllerTest {
         when(oauthClientDao.getById(clientId)).thenReturn(Optional.of(oauthClient));
         assertThatThrownBy(() -> authorizeController.getAuthorize(
                 req,
-                AuthorizationResponseType.code,
+                authorizationResponseType,
                 clientId,
                 redirectUrl,
-                "state",
-                "some/scope"
+                STATE,
+                SCOPE
         ))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessageContaining("invalid request");
         assertLogEntryContainsAndReset(
                 accessLogService,
                 "Starting Oauth2 authorization process",
-                "Oauth2 client organization_id='%s' does not match domain prefix specified organization id='%s'"
+                "Oauth2 client organization id='%s' does not match domain prefix specified organization id='%s'"
                         .formatted("bad-org-id", organization.getId())
         );
 
         oauthClient.setOrganizationId(organization.getId());
         assertThatThrownBy(() -> authorizeController.getAuthorize(
                 req,
-                AuthorizationResponseType.code,
+                authorizationResponseType,
                 clientId,
                 redirectUrl,
-                "state",
-                "some/scope"
+                STATE,
+                SCOPE
         ))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessageContaining("invalid request");
@@ -212,11 +211,11 @@ class Oauth2AuthorizeControllerTest {
                 .build()));
         authorizeController.getAuthorize(
                 req,
-                AuthorizationResponseType.code,
+                authorizationResponseType,
                 clientId,
                 redirectUrl,
-                "state",
-                "some/scope"
+                STATE,
+                SCOPE
         );
         assertLogEntryContainsAndReset(
                 accessLogService,
@@ -228,11 +227,11 @@ class Oauth2AuthorizeControllerTest {
         oauthClient.setRedirectUrls(List.of(redirectUrl));
         val modelAndView = authorizeController.getAuthorize(
                 req,
-                AuthorizationResponseType.code,
+                authorizationResponseType,
                 clientId,
                 redirectUrl,
-                "state",
-                "some/scope"
+                STATE,
+                SCOPE
         );
         assertLogEntryContainsAndReset(
                 accessLogService,
@@ -260,8 +259,8 @@ class Oauth2AuthorizeControllerTest {
                 authorizationResponseType,
                 clientId,
                 redirectUrl,
-                "state",
-                "some/scope",
+                STATE,
+                SCOPE,
                 username,
                 password
         ))
@@ -287,8 +286,8 @@ class Oauth2AuthorizeControllerTest {
                 authorizationResponseType,
                 clientId,
                 redirectUrl,
-                "state",
-                "some/scope",
+                STATE,
+                SCOPE,
                 username,
                 password
         ))
@@ -307,8 +306,8 @@ class Oauth2AuthorizeControllerTest {
                 authorizationResponseType,
                 clientId,
                 redirectUrl,
-                "state",
-                "some/scope",
+                STATE,
+                SCOPE,
                 username,
                 password
         ))
@@ -336,8 +335,8 @@ class Oauth2AuthorizeControllerTest {
                 authorizationResponseType,
                 clientId,
                 redirectUrl,
-                "state",
-                "some/scope",
+                STATE,
+                SCOPE,
                 username,
                 password
         ))
@@ -357,7 +356,7 @@ class Oauth2AuthorizeControllerTest {
                 clientId,
                 redirectUrl,
                 "", // empty state
-                "some/scope",
+                SCOPE,
                 username,
                 password
         ))
@@ -376,8 +375,8 @@ class Oauth2AuthorizeControllerTest {
                 authorizationResponseType,
                 clientId,
                 redirectUrl,
-                "state",
-                "some/scope",
+                STATE,
+                SCOPE,
                 username,
                 password
         ))
@@ -400,8 +399,8 @@ class Oauth2AuthorizeControllerTest {
                 authorizationResponseType,
                 clientId,
                 redirectUrl,
-                "state",
-                "some/scope",
+                STATE,
+                SCOPE,
                 username,
                 password
         );
@@ -419,8 +418,8 @@ class Oauth2AuthorizeControllerTest {
                 authorizationResponseType,
                 clientId,
                 redirectUrl,
-                "state",
-                "some/scope",
+                STATE,
+                SCOPE,
                 username,
                 password
         );
@@ -447,8 +446,8 @@ class Oauth2AuthorizeControllerTest {
                 authorizationResponseType,
                 clientId,
                 redirectUrl,
-                "state",
-                "some/scope",
+                STATE,
+                SCOPE,
                 username,
                 password
         );
@@ -466,8 +465,8 @@ class Oauth2AuthorizeControllerTest {
                 authorizationResponseType,
                 clientId,
                 redirectUrl,
-                "state",
-                "some/scope",
+                STATE,
+                SCOPE,
                 username,
                 password
         ))
@@ -487,8 +486,8 @@ class Oauth2AuthorizeControllerTest {
                 authorizationResponseType,
                 clientId,
                 redirectUrl,
-                "state",
-                "some/scope",
+                STATE,
+                SCOPE,
                 username,
                 "bad-password"
         );
@@ -509,8 +508,8 @@ class Oauth2AuthorizeControllerTest {
                 authorizationResponseType,
                 clientId,
                 redirectUrl,
-                "state",
-                "some/scope",
+                STATE,
+                SCOPE,
                 username,
                 password
         );
@@ -554,8 +553,8 @@ class Oauth2AuthorizeControllerTest {
                 authorizationResponseType,
                 clientId,
                 redirectUrl,
-                "state",
-                "some/scope",
+                STATE,
+                SCOPE,
                 code2faInvalid
         ))
                 .isInstanceOf(BadRequestException.class)
@@ -580,8 +579,8 @@ class Oauth2AuthorizeControllerTest {
                 authorizationResponseType,
                 clientId,
                 redirectUrl,
-                "state",
-                "some/scope",
+                STATE,
+                SCOPE,
                 code2faInvalid
         ))
                 .isInstanceOf(BadRequestException.class)
@@ -599,8 +598,8 @@ class Oauth2AuthorizeControllerTest {
                 authorizationResponseType,
                 clientId,
                 redirectUrl,
-                "state",
-                "some/scope",
+                STATE,
+                SCOPE,
                 code2faInvalid
         ))
                 .isInstanceOf(BadRequestException.class)
@@ -627,8 +626,8 @@ class Oauth2AuthorizeControllerTest {
                 authorizationResponseType,
                 clientId,
                 redirectUrl,
-                "state",
-                "some/scope",
+                STATE,
+                SCOPE,
                 code2faInvalid
         ))
                 .isInstanceOf(BadRequestException.class)
@@ -647,7 +646,7 @@ class Oauth2AuthorizeControllerTest {
                 clientId,
                 redirectUrl,
                 "", // empty state
-                "some/scope",
+                SCOPE,
                 code2faInvalid
         ))
                 .isInstanceOf(BadRequestException.class)
@@ -665,8 +664,8 @@ class Oauth2AuthorizeControllerTest {
                 authorizationResponseType,
                 clientId,
                 redirectUrl,
-                "state",
-                "some/scope",
+                STATE,
+                SCOPE,
                 code2faInvalid
         ))
                 .isInstanceOf(BadRequestException.class)
@@ -688,8 +687,8 @@ class Oauth2AuthorizeControllerTest {
                 authorizationResponseType,
                 clientId,
                 redirectUrl,
-                "state",
-                "some/scope",
+                STATE,
+                SCOPE,
                 code2faInvalid
         );
         assertLogEntryContainsAndReset(
@@ -710,8 +709,8 @@ class Oauth2AuthorizeControllerTest {
                 authorizationResponseType,
                 clientId,
                 redirectUrl,
-                "state",
-                "some/scope",
+                STATE,
+                SCOPE,
                 code2faInvalid
         );
         assertLogEntryContainsAndReset(
@@ -738,8 +737,8 @@ class Oauth2AuthorizeControllerTest {
                 authorizationResponseType,
                 clientId,
                 redirectUrl,
-                "state",
-                "some/scope",
+                STATE,
+                SCOPE,
                 code2faInvalid
         );
         assertLogEntryContainsAndReset(
@@ -756,8 +755,8 @@ class Oauth2AuthorizeControllerTest {
                 authorizationResponseType,
                 clientId,
                 redirectUrl,
-                "state",
-                "some/scope",
+                STATE,
+                SCOPE,
                 code2faInvalid
         ))
                 .isInstanceOf(BadRequestException.class)
@@ -776,8 +775,8 @@ class Oauth2AuthorizeControllerTest {
                 authorizationResponseType,
                 clientId,
                 redirectUrl,
-                "state",
-                "some/scope",
+                STATE,
+                SCOPE,
                 code2faInvalid
         );
         assertLogEntryContainsAndReset(
@@ -793,8 +792,8 @@ class Oauth2AuthorizeControllerTest {
                 authorizationResponseType,
                 clientId,
                 redirectUrl,
-                "state",
-                "some/scope",
+                STATE,
+                SCOPE,
                 code2faValid
         );
         assertLogEntryContainsAndReset(
@@ -813,10 +812,238 @@ class Oauth2AuthorizeControllerTest {
                 authorizationResponseType,
                 clientId,
                 redirectUrl,
-                "state",
-                "some/scope",
+                STATE,
+                SCOPE,
                 code2faValid
         );
+        assertThat(modelAndView).isNull();
+        val urlCaptor = ArgumentCaptor.forClass(String.class);
+        verify(res, times(1)).sendRedirect(urlCaptor.capture());
+        assertThat(urlCaptor.getValue())
+                .contains("http://some.domain/redirect?code=");
+    }
+
+    @ParameterizedTest
+    @MethodSource("authorizationResponseTypes")
+    public void testAuthorizeFinish(final AuthorizationResponseType authorizationResponseType) throws IOException {
+        val clientId = createId();
+        val redirectUrl = "http://some.domain/redirect";
+        val username = "username";
+        val password = "password";
+        when(req.getRequestURL()).thenReturn(new StringBuffer("http://some.domain/auth"));
+
+        assertThatThrownBy(() -> authorizeController.authorizeFinish(
+                req,
+                res,
+                authorizationResponseType,
+                clientId,
+                redirectUrl,
+                STATE,
+                SCOPE
+        ))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessageContaining("Domain prefix unknown: some.domain");
+        assertLogEntryContainsAndReset(
+                accessLogService,
+                "Starting Oauth2 authorization process (redirect with authorization code)",
+                "Organization not found by domain prefix='some.domain'"
+        );
+
+        val organization = Organization.builder()
+                .withId(createId())
+                .withCreateTime(Instant.now())
+                .withDomainPrefix("some.domain")
+                .withEnabled(false)
+                .withName("Some Organization")
+                .build();
+        when(organizationDao.getByDomainPrefix("some.domain")).thenReturn(Optional.of(organization));
+        assertThatThrownBy(() -> authorizeController.authorizeFinish(
+                req,
+                res,
+                authorizationResponseType,
+                clientId,
+                redirectUrl,
+                STATE,
+                SCOPE
+        ))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessageContaining("Domain is disabled: some.domain");
+        assertLogEntryContainsAndReset(
+                accessLogService,
+                "Starting Oauth2 authorization process (redirect with authorization code)",
+                "Organization with prefix='some.domain' is disabled"
+        );
+
+        organization.setEnabled(true);
+        assertThatThrownBy(() -> authorizeController.authorizeFinish(
+                req,
+                res,
+                authorizationResponseType,
+                clientId,
+                redirectUrl,
+                STATE,
+                SCOPE
+        ))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessageContaining("invalid request");
+        assertLogEntryContainsAndReset(
+                accessLogService,
+                "Starting Oauth2 authorization process (redirect with authorization code)",
+                "Oauth2 client not found by id='%s'".formatted(clientId)
+        );
+
+        val oauthClient = OauthClient.builder()
+                .withId(clientId)
+                .withCreateTime(Instant.now())
+                .withSecret("bad-secret")
+                .withEnabled(false)
+                .withOrganizationId("bad-org-id")
+                .withRedirectUrls(List.of("http://bad-redirect-url"))
+                .withScopes(List.of())
+                .build();
+        when(oauthClientDao.getById(clientId)).thenReturn(Optional.of(oauthClient));
+        assertThatThrownBy(() -> authorizeController.authorizeFinish(
+                req,
+                res,
+                authorizationResponseType,
+                clientId,
+                redirectUrl,
+                STATE,
+                SCOPE
+        ))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessageContaining("invalid request");
+        assertLogEntryContainsAndReset(
+                accessLogService,
+                "Starting Oauth2 authorization process (redirect with authorization code)",
+                "Oauth2 client organization id='%s' does not match domain prefix specified organization id='%s'"
+                        .formatted("bad-org-id", organization.getId())
+        );
+
+        oauthClient.setOrganizationId(organization.getId());
+        assertThatThrownBy(() -> authorizeController.authorizeFinish(
+                req,
+                res,
+                authorizationResponseType,
+                clientId,
+                redirectUrl,
+                STATE,
+                SCOPE
+        ))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessageContaining("invalid request");
+        assertLogEntryContainsAndReset(
+                accessLogService,
+                "Starting Oauth2 authorization process (redirect with authorization code)",
+                "Oauth2 client is disabled id='%s'".formatted(clientId)
+        );
+
+        when(scopeService.getScopeStringBasedOnRequestedAndAllowed(any(), any())).thenReturn(SCOPE);
+        oauthClient.setEnabled(true);
+        oauthClient.setScopes(List.of(OauthScope.builder()
+                .withScope(SCOPE)
+                .build()));
+        authorizeController.authorizeFinish(
+                req,
+                res,
+                authorizationResponseType,
+                clientId,
+                redirectUrl,
+                STATE,
+                SCOPE
+        );
+        assertLogEntryContainsAndReset(
+                accessLogService,
+                "Starting Oauth2 authorization process (redirect with authorization code)",
+                ("Oauth2 client approved redirect urls=[http://bad-redirect-url] " +
+                        "does not match requested redirect url='%s'").formatted(redirectUrl)
+        );
+
+        val session = mock(HttpSession.class);
+        when(req.getSession()).thenReturn(session);
+        when(session.getAttribute(OAUTH2_ATTR_USERNAME)).thenReturn("username");
+        when(session.getAttribute(OAUTH2_ATTR_PASSWORD)).thenReturn("password");
+        oauthClient.setRedirectUrls(List.of(redirectUrl));
+        val oauthUser = OauthUser.builder()
+                .withId(createId())
+                .withCreateTime(Instant.now())
+                .withOrganizationId("bad-org-id")
+                .withUsername(username)
+                .withPassword(password)
+                .withUsing2Fa(true)
+                .withSecret("some-secret")
+                .build();
+        when(oauthUserDao.getByUsernameAndOrganizationId(username, organization.getId()))
+                .thenReturn(Optional.of(oauthUser));
+        assertThatThrownBy(() -> authorizeController.authorizeFinish(
+                req,
+                res,
+                authorizationResponseType,
+                clientId,
+                redirectUrl,
+                STATE,
+                SCOPE
+        ))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessageContaining("invalid request");
+        assertLogEntryContainsAndReset(
+                accessLogService,
+                "Starting Oauth2 authorization process (redirect with authorization code)",
+                "Oauth2 user organization id='bad-org-id' does not match request organization id='%s'"
+                        .formatted(organization.getId())
+        );
+
+        oauthUser.setOrganizationId(organization.getId());
+        authorizeController.authorizeFinish(
+                req,
+                res,
+                authorizationResponseType,
+                clientId,
+                redirectUrl,
+                STATE,
+                SCOPE
+        );
+        assertLogEntryContainsAndReset(
+                accessLogService,
+                "Starting Oauth2 authorization process (redirect with authorization code)",
+                "Oauth2 user password does not match request password"
+        );
+
+        oauthUser.setPassword(new BCryptPasswordEncoder().encode(password));
+        assertThatThrownBy(() -> authorizeController.authorizeFinish(
+                req,
+                res,
+                authorizationResponseType,
+                clientId,
+                redirectUrl,
+                STATE,
+                SCOPE
+        ))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessageContaining("2FA verification code session attribute not found");
+        assertLogEntryContainsAndReset(
+                accessLogService,
+                "Starting Oauth2 authorization process (redirect with authorization code)",
+                "2FA verification code session attribute not found"
+        );
+
+        val code2faValid = new Totp(oauthUser.getSecret()).now();
+        when(session.getAttribute(TWO_FACTOR_AUTH_SUCCESS_ATTRIBUTE)).thenReturn(code2faValid);
+        val modelAndView = authorizeController.authorizeFinish(
+                req,
+                res,
+                authorizationResponseType,
+                clientId,
+                redirectUrl,
+                STATE,
+                SCOPE
+        );
+        assertLogEntryContainsAndReset(
+                accessLogService,
+                "Starting Oauth2 authorization process (redirect with authorization code)",
+                "Oauth2 authorization process finished"
+        );
+
         assertThat(modelAndView).isNull();
         val urlCaptor = ArgumentCaptor.forClass(String.class);
         verify(res, times(1)).sendRedirect(urlCaptor.capture());
