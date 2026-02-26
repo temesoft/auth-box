@@ -11,6 +11,7 @@ import com.authbox.base.model.OauthToken;
 import com.authbox.base.model.Organization;
 import com.authbox.base.util.NetUtils;
 import com.authbox.server.service.ScopeService;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import io.micrometer.core.annotation.Timed;
 import jakarta.annotation.Nullable;
@@ -60,7 +61,8 @@ import static org.springframework.util.ObjectUtils.isEmpty;
 @Slf4j
 public class Oauth2AuthorizeController extends BaseController {
 
-    private static final String TWO_FACTOR_AUTH_SUCCESS_ATTRIBUTE = "TWO_FACTOR_AUTH_SUCCESS_ATTRIBUTE";
+    @VisibleForTesting
+    static final String TWO_FACTOR_AUTH_SUCCESS_ATTRIBUTE = "TWO_FACTOR_AUTH_SUCCESS_ATTRIBUTE";
 
     private final OauthClientDao oauthClientDao;
     private final OauthUserDao oauthUserDao;
