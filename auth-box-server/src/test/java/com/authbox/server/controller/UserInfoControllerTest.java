@@ -20,6 +20,7 @@ import com.authbox.server.Application;
 import lombok.val;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTestClient;
@@ -52,6 +53,9 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 class UserInfoControllerTest {
 
     private static final String SCOPE = "some/scope";
+    private static final String OAUTH_CLIENT_ID = createId();
+    private static final String OAUTH_USER_ID = createId();
+    private static final String OAUTH_TOKEN_ID = createId();
 
     @Autowired
     private OauthTokenDao oauthTokenDao;
@@ -74,12 +78,19 @@ class UserInfoControllerTest {
     @MockitoSpyBean
     private AccessLogService accessLogService;
 
+    private Organization presetOrg;
+
+    @BeforeEach
+    public void setup() {
+        presetOrg = organizationRepository.findById("c1ade6b3-c023-44f4-b3ef-b0f27ba5e6e8").orElseThrow();
+    }
+
     @AfterEach
     public void teardown() {
-        oauthTokenRepository.deleteAll();
-        oauthClientRepository.deleteAll();
-        oauthUserRepository.deleteAll();
+        oauthClientRepository.deleteById(OAUTH_CLIENT_ID);
+        oauthUserRepository.deleteById(OAUTH_USER_ID);
         organizationRepository.deleteAll();
+        organizationRepository.save(presetOrg);
     }
 
     @Test
@@ -155,7 +166,7 @@ class UserInfoControllerTest {
         organizationDao.insert(organization);
 
         val client = new OauthClient(
-                createId(),
+                OAUTH_CLIENT_ID,
                 Instant.now(),
                 "description",
                 "secret",
@@ -176,7 +187,7 @@ class UserInfoControllerTest {
 
         val username = RandomStringUtils.secure().nextAlphabetic(20);
         val oauthUser = OauthUser.builder()
-                .withId(createId())
+                .withId(OAUTH_USER_ID)
                 .withCreateTime(Instant.now())
                 .withUsername(username)
                 .withOrganizationId(organization.getId())
@@ -190,7 +201,7 @@ class UserInfoControllerTest {
         val goodToken = "good-token";
         val goodTokenHash = sha256(goodToken);
         val oauthToken = OauthToken.builder()
-                .withId(createId())
+                .withId(OAUTH_TOKEN_ID)
                 .withCreateTime(Instant.now())
                 .withExpiration(Instant.now().plusSeconds(10))
                 .withOrganizationId("invalid-org-id")
