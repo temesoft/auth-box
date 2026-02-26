@@ -46,6 +46,7 @@ import static com.authbox.base.util.IdUtils.createId;
 import static com.authbox.server.util.RequestUtils.getRequestId;
 import static com.authbox.server.util.RequestUtils.getTimeSinceRequest;
 import static org.apache.commons.lang3.ObjectUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
@@ -131,11 +132,13 @@ public abstract class TokenEndpointProcessor {
 
             Object metadata = oauthUser.getMetadata();
             try {
-                metadata = objectMapper.readValue(oauthUser.getMetadata(), Map.class);
+                metadata = objectMapper.readValue(
+                        isBlank(oauthUser.getMetadata()) ? "{}" : oauthUser.getMetadata(),
+                        Map.class
+                );
             } catch (JacksonException e) {
                 log.debug("Unable to parse metadata for OauthUser user_id='{}'", oauthUser.getId());
             }
-
             jwsBuilder.claim(OAUTH2_ATTR_METADATA, metadata);
         }
 

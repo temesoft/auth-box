@@ -5,17 +5,16 @@ import com.authbox.base.dao.OauthTokenDao;
 import com.authbox.base.dao.OauthUserDao;
 import com.authbox.base.dao.OrganizationDao;
 import com.authbox.base.exception.BadRequestException;
-import com.authbox.base.exception.Oauth2Exception;
 import com.authbox.base.model.OauthClient;
-import com.authbox.base.model.OauthToken;
-import com.authbox.base.model.OauthUser;
 import com.authbox.base.model.Organization;
 import com.authbox.base.model.TokenFormat;
-import com.authbox.base.model.TokenType;
 import com.authbox.base.service.AccessLogService;
+import com.authbox.base.util.CertificateKeysUtils;
 import com.authbox.server.service.ParsingValidationService;
 import com.authbox.server.service.ParsingValidationServiceImpl;
+import com.authbox.server.service.ScopeService;
 import com.authbox.server.service.TokenEndpointProcessor;
+import io.jsonwebtoken.Jwts;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.val;
@@ -36,39 +35,39 @@ import java.util.Optional;
 
 import static com.authbox.base.config.Constants.OAUTH2_ATTR_CLIENT_ID;
 import static com.authbox.base.config.Constants.OAUTH2_ATTR_CLIENT_SECRET;
-import static com.authbox.base.config.Constants.OAUTH2_ATTR_CODE;
-import static com.authbox.base.util.HashUtils.sha256;
+import static com.authbox.base.util.CertificateKeysUtils.generatePublicKey;
 import static com.authbox.base.util.IdUtils.createId;
 import static com.authbox.server.TestUtils.assertLogEntryContainsAndReset;
 import static com.authbox.server.filter.RequestWrapperFilter.REQUEST_START_REQUEST_TIME_MDC_KEY;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-class AuthorizationCodeGrantTypeTokenEndpointProcessorTest {
+class ClientCredentialsGrantTypeTokenEndpointProcessorTest {
 
     private static final String SCOPE = "some/scope";
     private static final String OAUTH_CLIENT_ID = createId();
     private static final String OAUTH_CLIENT_SECRET = createId();
 
-    private AuthorizationCodeGrantTypeTokenEndpointProcessor processor;
+    private ClientCredentialsGrantTypeTokenEndpointProcessor processor;
     private OauthClientDao oauthClientDao;
-    private OauthUserDao oauthUserDao;
     private AccessLogService accessLogService;
     private OrganizationDao organizationDao;
-    private OauthTokenDao oauthTokenDao;
+    private ScopeService scopeService;
     private HttpServletRequest req;
     private HttpServletResponse res;
 
     @BeforeEach
     public void setup() {
         oauthClientDao = mock(OauthClientDao.class);
-        oauthUserDao = mock(OauthUserDao.class);
-        oauthTokenDao = mock(OauthTokenDao.class);
+        final OauthUserDao oauthUserDao = mock(OauthUserDao.class);
+        final OauthTokenDao oauthTokenDao = mock(OauthTokenDao.class);
         val passwordEncoder = new BCryptPasswordEncoder();
         val defaultClock = Clock.systemUTC();
-        processor = new AuthorizationCodeGrantTypeTokenEndpointProcessor();
+        scopeService = mock(ScopeService.class);
+        processor = new ClientCredentialsGrantTypeTokenEndpointProcessor(scopeService);
         accessLogService = mock(AccessLogService.class);
         organizationDao = mock(OrganizationDao.class);
         val objectMapper = new ObjectMapper();
@@ -91,7 +90,7 @@ class AuthorizationCodeGrantTypeTokenEndpointProcessorTest {
     }
 
     @Test
-    public void testProcess() {
+    public void testProcess_OpaqueToken() {
         val organization = Organization.builder()
                 .withId(createId())
                 .withCreateTime(Instant.now())
@@ -161,98 +160,8 @@ class AuthorizationCodeGrantTypeTokenEndpointProcessorTest {
                 "Oauth2 client organization details do not match domain prefix specified in request: 'some.domain'"
         );
 
+        when(scopeService.getScopeStringBasedOnRequestedAndAllowed(any(), any())).thenReturn(SCOPE);
         oauthClient.setOrganizationId(organization.getId());
-        assertThatThrownBy(() -> processor.process(organization, req, res))
-                .isInstanceOf(BadRequestException.class)
-                .hasMessageContaining("invalid request");
-        assertLogEntryContainsAndReset(
-                accessLogService,
-                "Parsing and validating Oauth2 client",
-                "Authorization code is missing or empty"
-        );
-
-        val code = createId();
-        when(req.getParameter(OAUTH2_ATTR_CODE)).thenReturn(code);
-        val hash = sha256(code);
-        assertThatThrownBy(() -> processor.process(organization, req, res))
-                .isInstanceOf(Oauth2Exception.class)
-                .hasMessageContaining("unauthorized request");
-        assertLogEntryContainsAndReset(
-                accessLogService,
-                "Parsing and validating Oauth2 client",
-                "Authorization code='%s', hash='%s' was not found".formatted(code, hash)
-        );
-
-        val oauthUser = OauthUser.builder()
-                .withId(createId())
-                .withCreateTime(Instant.now())
-                .withUsername("username")
-                .withOrganizationId(organization.getId())
-                .build();
-        val oauthToken = OauthToken.builder()
-                .withId(createId())
-                .withCreateTime(Instant.now())
-                .withScopes(List.of("some/scope"))
-                .withHash(hash)
-                .withClientId("clientId")
-                .withOauthUserId(null)
-                .withOrganizationId("orgId")
-                .withTokenType(TokenType.ACCESS_TOKEN)
-                .withLinkedTokenId("already-used")
-                .withExpiration(Instant.now().minusSeconds(10))
-                .build();
-        when(oauthTokenDao.getByHash(hash)).thenReturn(Optional.of(oauthToken));
-        assertThatThrownBy(() -> processor.process(organization, req, res))
-                .isInstanceOf(Oauth2Exception.class)
-                .hasMessageContaining("invalid token");
-        assertLogEntryContainsAndReset(
-                accessLogService,
-                "Parsing and validating Oauth2 client",
-                "Provided token is not %s. type='%s' token='%s' / hash='%s'"
-                        .formatted(TokenType.AUTHORIZATION_CODE, TokenType.ACCESS_TOKEN, code, hash)
-        );
-
-        oauthToken.setTokenType(TokenType.AUTHORIZATION_CODE);
-        assertThatThrownBy(() -> processor.process(organization, req, res))
-                .isInstanceOf(Oauth2Exception.class)
-                .hasMessageContaining("invalid token");
-        assertLogEntryContainsAndReset(
-                accessLogService,
-                "Parsing and validating Oauth2 client",
-                "Provided authorization code token is already used. hash='%s'".formatted(hash)
-        );
-
-        oauthToken.setLinkedTokenId(null);
-        assertThatThrownBy(() -> processor.process(organization, req, res))
-                .isInstanceOf(Oauth2Exception.class)
-                .hasMessageContaining("invalid token");
-        assertLogEntryContainsAndReset(
-                accessLogService,
-                "Parsing and validating Oauth2 client",
-                "Authorization code expired code='%s', hash='%s'".formatted(code, hash)
-        );
-
-        oauthToken.setExpiration(Instant.now().plusSeconds(10));
-        assertThatThrownBy(() -> processor.process(organization, req, res))
-                .isInstanceOf(Oauth2Exception.class)
-                .hasMessageContaining("unauthorized request");
-        assertLogEntryContainsAndReset(
-                accessLogService,
-                "Parsing and validating Oauth2 client",
-                "Authorization code user id not available"
-        );
-
-        oauthToken.setOauthUserId(oauthUser.getId());
-        assertThatThrownBy(() -> processor.process(organization, req, res))
-                .isInstanceOf(Oauth2Exception.class)
-                .hasMessageContaining("unauthorized request");
-        assertLogEntryContainsAndReset(
-                accessLogService,
-                "Parsing and validating Oauth2 client",
-                "Authorization code user not found by id='%s'".formatted(oauthUser.getId())
-        );
-
-        when(oauthUserDao.getById(oauthUser.getId())).thenReturn(Optional.of(oauthUser));
         val oauthTokenResponse = processor.process(organization, req, res);
         assertLogEntryContainsAndReset(
                 accessLogService,
@@ -265,5 +174,113 @@ class AuthorizationCodeGrantTypeTokenEndpointProcessorTest {
         assertThat(oauthTokenResponse.refreshToken).isNull();
         assertThat(oauthTokenResponse.scope).isEqualTo(SCOPE);
         assertThat(oauthTokenResponse.accessToken).hasSize(64);
+    }
+
+    @Test
+    public void testProcess_JwtToken() {
+        val organization = Organization.builder()
+                .withId(createId())
+                .withCreateTime(Instant.now())
+                .withDomainPrefix("some.domain")
+                .withEnabled(false)
+                .withName("Some Organization")
+                .build();
+
+        assertThatThrownBy(() -> processor.process(organization, req, res))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessageContaining("invalid request");
+        assertLogEntryContainsAndReset(
+                accessLogService,
+                "Parsing and validating Oauth2 client",
+                "Request missing client credentials"
+        );
+
+        when(req.getParameter(OAUTH2_ATTR_CLIENT_ID)).thenReturn(OAUTH_CLIENT_ID);
+        when(req.getParameter(OAUTH2_ATTR_CLIENT_SECRET)).thenReturn(OAUTH_CLIENT_SECRET);
+        assertThatThrownBy(() -> processor.process(organization, req, res))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessageContaining("invalid request");
+        assertLogEntryContainsAndReset(
+                accessLogService,
+                "Parsing and validating Oauth2 client",
+                "Oauth2 client not found by id='%s'".formatted(OAUTH_CLIENT_ID)
+        );
+
+        val rsaKeyPair = CertificateKeysUtils.generateRsaKeyPair();
+        val oauthClient = OauthClient.builder()
+                .withId(OAUTH_CLIENT_ID)
+                .withCreateTime(Instant.now())
+                .withSecret(OAUTH_CLIENT_SECRET)
+                .withEnabled(false)
+                .withOrganizationId("bad-org-id")
+                .withRedirectUrls(List.of("http://bad-redirect-url"))
+                .withScopes(List.of())
+                .withPrivateKey(rsaKeyPair.privateKeyPem)
+                .withPublicKey(rsaKeyPair.publicKeyPem)
+                .withTokenFormat(TokenFormat.JWT)
+                .withExpiration(Duration.ofMinutes(10))
+                .build();
+        when(oauthClientDao.getById(OAUTH_CLIENT_ID)).thenReturn(Optional.of(oauthClient));
+        assertThatThrownBy(() -> processor.process(organization, req, res))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessageContaining("invalid request");
+        assertLogEntryContainsAndReset(
+                accessLogService,
+                "Parsing and validating Oauth2 client",
+                "Oauth2 client is disabled"
+        );
+
+        oauthClient.setEnabled(true);
+        assertThatThrownBy(() -> processor.process(organization, req, res))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessageContaining("invalid request");
+        assertLogEntryContainsAndReset(
+                accessLogService,
+                "Parsing and validating Oauth2 client",
+                "Oauth2 client organization details do not match domain prefix specified in request: 'some.domain'"
+        );
+
+        when(organizationDao.getByDomainPrefix("some.domain")).thenReturn(Optional.of(organization));
+        assertThatThrownBy(() -> processor.process(organization, req, res))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessageContaining("invalid request");
+        assertLogEntryContainsAndReset(
+                accessLogService,
+                "Parsing and validating Oauth2 client",
+                "Oauth2 client organization details do not match domain prefix specified in request: 'some.domain'"
+        );
+
+        when(scopeService.getScopeStringBasedOnRequestedAndAllowed(any(), any())).thenReturn(SCOPE);
+        oauthClient.setOrganizationId(organization.getId());
+        val oauthTokenResponse = processor.process(organization, req, res);
+        assertLogEntryContainsAndReset(
+                accessLogService,
+                "Parsing and validating Oauth2 client",
+                "Generating JWT access token",
+                "Preparing private key for JWT token creation",
+                "Signing JWT access token using private key",
+                "Inserting JWT access token into DB"
+        );
+        assertThat(oauthTokenResponse).isNotNull();
+        assertThat(oauthTokenResponse.tokenType).isEqualTo("bearer");
+        assertThat(oauthTokenResponse.expiresIn).isEqualTo(600);
+        assertThat(oauthTokenResponse.refreshToken).isNull();
+        assertThat(oauthTokenResponse.scope).isEqualTo(SCOPE);
+        assertThat(oauthTokenResponse.accessToken).hasSizeGreaterThan(64);
+
+        val jwt = Jwts.parser()
+                .verifyWith(generatePublicKey(oauthClient.getPublicKey()))
+                .build()
+                .parseSignedClaims(oauthTokenResponse.accessToken);
+        assertThat(jwt).isNotNull();
+        assertThat(jwt.getHeader()).isNotNull();
+        assertThat(jwt.getHeader().get("alg")).isEqualTo("RS384");
+        assertThat(jwt.getPayload()).isNotNull();
+        assertThat(jwt.getPayload().get("iss")).isEqualTo(organization.getId());
+        assertThat(jwt.getPayload().get("sub")).isEqualTo(oauthClient.getId());
+        assertThat(jwt.getPayload().get("organization_id")).isEqualTo(organization.getId());
+        assertThat(jwt.getPayload().get("iat")).isNotNull();
+        assertThat(jwt.getPayload().get("exp")).isNotNull();
+        assertThat(jwt.getDigest()).isNotNull();
     }
 }
