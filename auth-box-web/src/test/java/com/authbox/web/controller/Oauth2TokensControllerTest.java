@@ -1,6 +1,5 @@
 package com.authbox.web.controller;
 
-import com.authbox.base.dao.OauthScopeRepository;
 import com.authbox.web.Application;
 import com.authbox.web.TestUtils;
 import com.authbox.web.model.DeleteTokensRequest;
@@ -42,8 +41,6 @@ class Oauth2TokensControllerTest {
     private int port;
     @Autowired
     private RestTestClient restTestClient;
-    @Autowired
-    private OauthScopeRepository oauthScopeRepository;
 
     private String jSessionId;
 
