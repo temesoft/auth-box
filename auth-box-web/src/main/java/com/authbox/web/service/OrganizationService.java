@@ -1,8 +1,10 @@
 package com.authbox.web.service;
 
 import com.authbox.base.model.Organization;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.Instant;
@@ -26,6 +28,8 @@ public interface OrganizationService {
      */
     void validateDomainPrefix(String domainPrefix, String providedOrganizationId);
 
+    @AllArgsConstructor
+    @NoArgsConstructor
     @Builder
     @Getter
     class OrganizationDto {
@@ -39,7 +43,7 @@ public interface OrganizationService {
         @Setter
         private Instant lastUpdated;
 
-        public static OrganizationDto fromEntity(Organization entity) {
+        public static OrganizationDto fromEntity(final Organization entity) {
             return OrganizationDto.builder()
                     .id(entity.getId())
                     .createTime(entity.getCreateTime())

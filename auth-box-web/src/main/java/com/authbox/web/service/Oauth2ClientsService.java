@@ -89,13 +89,13 @@ public interface Oauth2ClientsService {
         private List<OauthScope> scopes;
         private List<String> scopeIds;
 
-        static List<OauthClientDto> fromEntityCollection(Collection<OauthClient> entities) {
+        static List<OauthClientDto> fromEntityCollection(final Collection<OauthClient> entities) {
             return entities.stream()
                     .map(OauthClientDto::fromEntity)
                     .collect(Collectors.toList());
         }
 
-        static OauthClientDto fromEntity(OauthClient entity) {
+        static OauthClientDto fromEntity(final OauthClient entity) {
             return OauthClientDto.builder()
                     .id(entity.getId())
                     .createTime(entity.getCreateTime())

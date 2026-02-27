@@ -5,8 +5,10 @@ import com.authbox.base.model.Organization;
 import com.authbox.base.model.UpdateOauthUserRequest;
 import com.authbox.web.model.DeleteUsersRequest;
 import com.authbox.web.model.PasswordChangeRequest;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.springframework.data.domain.Page;
 
 import java.awt.image.BufferedImage;
@@ -49,6 +51,8 @@ public interface Oauth2UsersService {
      */
     void deleteUsers(Organization organization, DeleteUsersRequest deleteUsersRequest);
 
+    @AllArgsConstructor
+    @NoArgsConstructor
     @Builder
     @Getter
     class OauthUserDto {
@@ -61,7 +65,7 @@ public interface Oauth2UsersService {
         private boolean using2Fa;
         private Instant lastUpdated;
 
-        static OauthUserDto fromEntity(OauthUser entity) {
+        static OauthUserDto fromEntity(final OauthUser entity) {
             return OauthUserDto.builder()
                     .id(entity.getId())
                     .createTime(entity.getCreateTime())
