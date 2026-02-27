@@ -50,7 +50,6 @@ public class AccessLogControllerTest {
 
     @BeforeEach
     public void setup() {
-        // setup http client with no redirect
         jSessionId = TestUtils.authenticateAccountGetCookie(port);
 
         // setup cache for IpDetails

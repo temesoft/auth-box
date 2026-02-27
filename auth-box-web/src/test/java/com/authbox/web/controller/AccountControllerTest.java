@@ -1,6 +1,5 @@
 package com.authbox.web.controller;
 
-import com.authbox.base.dao.AccessLogRepository;
 import com.authbox.web.Application;
 import com.authbox.web.TestUtils;
 import com.authbox.web.model.CreateAccountRequest;
@@ -21,7 +20,6 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.client.RestTestClient;
-import tools.jackson.databind.ObjectMapper;
 
 import java.util.List;
 import java.util.Map;
@@ -46,18 +44,11 @@ class AccountControllerTest {
     private int port;
     @Autowired
     private RestTestClient restTestClient;
-    @Autowired
-    private ObjectMapper objectMapper;
-    @Autowired
-    private AccessLogController accessLogController;
-    @Autowired
-    private AccessLogRepository accessLogRepository;
 
     private String jSessionId;
 
     @BeforeEach
     public void setup() {
-        // setup http client with no redirect
         jSessionId = TestUtils.authenticateAccountGetCookie(port);
     }
 
