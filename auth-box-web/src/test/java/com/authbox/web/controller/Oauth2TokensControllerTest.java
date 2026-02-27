@@ -155,7 +155,7 @@ class Oauth2TokensControllerTest {
     }
 
     @Test
-    void deleteOauth2Tokens() {
+    void testDeleteOauth2Tokens() {
         val deleteTokensRequest = new DeleteTokensRequest(List.of(createId()));
         restTestClient.method(HttpMethod.DELETE)
                 .uri(API_PREFIX + "/oauth2-token")
