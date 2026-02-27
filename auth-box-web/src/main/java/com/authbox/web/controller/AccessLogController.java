@@ -1,6 +1,7 @@
 package com.authbox.web.controller;
 
 import com.authbox.base.service.AccessLogService;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -62,5 +63,10 @@ public class AccessLogController extends BaseController {
     @GetMapping("/ip/{ip}")
     public JsonNode getIpDetails(@PathVariable("ip") final String ip) throws ExecutionException {
         return ipDetailsCache.get(ip.trim());
+    }
+
+    @VisibleForTesting
+    public LoadingCache<String, JsonNode> getIpDetailsCache() {
+        return ipDetailsCache;
     }
 }

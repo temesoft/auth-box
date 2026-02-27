@@ -37,7 +37,6 @@ public class AccessLogDaoImpl implements AccessLogDao {
             "OFFSET ?";
     private static final String SQL_COUNT_BY = "SELECT count(id) " +
             "FROM access_log %s " +
-            "ORDER BY create_time ASC, duration_ms ASC " +
             "LIMIT ? " +
             "OFFSET ?";
     private static final String WHERE_CLAUSE = "WHERE ";
