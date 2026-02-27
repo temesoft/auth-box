@@ -32,7 +32,7 @@ import static org.apache.commons.lang3.ArrayUtils.isEmpty;
 @Slf4j
 public class AccessLogServiceImpl implements AccessLogService, DisposableBean {
 
-    private static final BlockingQueue<AccessLog> QUEUE = new LinkedBlockingDeque<>();
+    private final BlockingQueue<AccessLog> QUEUE = new LinkedBlockingDeque<>();
 
     private final AppProperties appProperties;
     private final Clock defaultClock;

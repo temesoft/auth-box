@@ -33,6 +33,7 @@ import static com.authbox.base.model.TokenType.ACCESS_TOKEN;
 import static com.authbox.base.util.HashUtils.sha256;
 import static com.authbox.server.util.RequestUtils.getRequestId;
 import static com.authbox.server.util.RequestUtils.getTimeSinceRequest;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.springframework.util.ObjectUtils.isEmpty;
 
 @RestController
@@ -202,7 +203,7 @@ public class UserInfoController extends BaseController {
 
         Object metadata = null;
         try {
-            metadata = objectMapper.readValue(oauthUser.get().getMetadata(), Map.class);
+            metadata = objectMapper.readValue(isBlank(oauthUser.get().getMetadata()) ? "{}" : oauthUser.get().getMetadata(), Map.class);
         } catch (JacksonException e) {
             log.debug("Unable to parse metadata for OauthUser user_id='{}'", oauthUser.get().getId());
         }

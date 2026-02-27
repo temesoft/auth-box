@@ -3,7 +3,6 @@ package com.authbox.server.service.processor;
 import com.authbox.base.dao.OauthClientDao;
 import com.authbox.base.dao.OauthTokenDao;
 import com.authbox.base.dao.OauthUserDao;
-import com.authbox.base.dao.OrganizationDao;
 import com.authbox.base.exception.BadRequestException;
 import com.authbox.base.model.OauthClient;
 import com.authbox.base.model.OauthUser;
@@ -59,8 +58,6 @@ class PasswordGrantTypeTokenEndpointProcessorTest {
     private OauthClientDao oauthClientDao;
     private OauthUserDao oauthUserDao;
     private AccessLogService accessLogService;
-    private OrganizationDao organizationDao;
-    private OauthTokenDao oauthTokenDao;
     private ScopeService scopeService;
     private HttpServletRequest req;
     private HttpServletResponse res;
@@ -69,13 +66,12 @@ class PasswordGrantTypeTokenEndpointProcessorTest {
     public void setup() {
         oauthClientDao = mock(OauthClientDao.class);
         oauthUserDao = mock(OauthUserDao.class);
-        oauthTokenDao = mock(OauthTokenDao.class);
+        val oauthTokenDao = mock(OauthTokenDao.class);
         val passwordEncoder = new BCryptPasswordEncoder();
         val defaultClock = Clock.systemUTC();
         scopeService = mock(ScopeService.class);
         processor = new PasswordGrantTypeTokenEndpointProcessor(scopeService);
         accessLogService = mock(AccessLogService.class);
-        organizationDao = mock(OrganizationDao.class);
         val objectMapper = new ObjectMapper();
         val parsingValidationService = new ParsingValidationServiceImpl(oauthClientDao, accessLogService);
         ReflectionTestUtils.setField(processor, TokenEndpointProcessor.class, "defaultClock", defaultClock, Clock.class);
@@ -157,7 +153,6 @@ class PasswordGrantTypeTokenEndpointProcessorTest {
         );
 
         oauthClient.setOrganizationId(organization.getId());
-        when(organizationDao.getByDomainPrefix("some.domain")).thenReturn(Optional.of(organization));
         assertThatThrownBy(() -> processor.process(organization, req, res))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessageContaining("invalid request");
@@ -292,7 +287,6 @@ class PasswordGrantTypeTokenEndpointProcessorTest {
         );
 
         oauthClient.setOrganizationId(organization.getId());
-        when(organizationDao.getByDomainPrefix("some.domain")).thenReturn(Optional.of(organization));
         assertThatThrownBy(() -> processor.process(organization, req, res))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessageContaining("invalid request");

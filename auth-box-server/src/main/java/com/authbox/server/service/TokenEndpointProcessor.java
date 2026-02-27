@@ -132,10 +132,7 @@ public abstract class TokenEndpointProcessor {
 
             Object metadata = oauthUser.getMetadata();
             try {
-                metadata = objectMapper.readValue(
-                        isBlank(oauthUser.getMetadata()) ? "{}" : oauthUser.getMetadata(),
-                        Map.class
-                );
+                metadata = objectMapper.readValue(isBlank(oauthUser.getMetadata()) ? "{}" : oauthUser.getMetadata(), Map.class);
             } catch (JacksonException e) {
                 log.debug("Unable to parse metadata for OauthUser user_id='{}'", oauthUser.getId());
             }

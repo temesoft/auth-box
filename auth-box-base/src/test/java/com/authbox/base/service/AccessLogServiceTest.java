@@ -13,6 +13,7 @@ import lombok.val;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.hibernate.autoconfigure.HibernateJpaAutoConfiguration;
 import org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration;
@@ -26,7 +27,7 @@ import java.time.Instant;
 import static com.authbox.base.model.AccessLog.Source.Oauth2Server;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -70,6 +71,7 @@ class AccessLogServiceTest extends SpringBootBaseTest {
 
     @Test
     public void testAccessLogQueueProcessing() {
+        reset(accessLogDao);
         val accessLogThreadCache = new AccessLogThreadCache();
         val service = new AccessLogServiceImpl(
                 new AppProperties(),
@@ -89,7 +91,15 @@ class AccessLogServiceTest extends SpringBootBaseTest {
                 , "Test message");
         service.processCachedAccessLogs();
         await().atMost(Duration.ofSeconds(2)).until(() -> service.getQueue().isEmpty());
-        verify(accessLogDao, times(1)).insert(any());
+        val captor = ArgumentCaptor.forClass(AccessLog.class);
+        verify(accessLogDao, times(1)).insert(captor.capture());
+        val accessLog = captor.getValue();
+        assertThat(accessLog).isNotNull();
+        assertThat(accessLog.getId()).isNotNull();
+        assertThat(accessLog.getCreateTime()).isNotNull();
+        assertThat(accessLog.getRequestId()).isNotNull();
+        assertThat(accessLog.getOrganizationId()).isNotNull();
+        assertThat(accessLog.getMessage()).isEqualTo("Test message");
 
         val pageOfLogs = service.getAccessLogByRequestId(organization.get(), requestId);
         assertThat(pageOfLogs).isNotNull();

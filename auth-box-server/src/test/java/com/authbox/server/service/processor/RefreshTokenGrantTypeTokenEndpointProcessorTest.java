@@ -3,7 +3,6 @@ package com.authbox.server.service.processor;
 import com.authbox.base.dao.OauthClientDao;
 import com.authbox.base.dao.OauthTokenDao;
 import com.authbox.base.dao.OauthUserDao;
-import com.authbox.base.dao.OrganizationDao;
 import com.authbox.base.exception.BadRequestException;
 import com.authbox.base.exception.Oauth2Exception;
 import com.authbox.base.model.OauthClient;
@@ -59,7 +58,6 @@ class RefreshTokenGrantTypeTokenEndpointProcessorTest {
     private OauthClientDao oauthClientDao;
     private OauthUserDao oauthUserDao;
     private AccessLogService accessLogService;
-    private OrganizationDao organizationDao;
     private OauthTokenDao oauthTokenDao;
     private HttpServletRequest req;
     private HttpServletResponse res;
@@ -73,7 +71,6 @@ class RefreshTokenGrantTypeTokenEndpointProcessorTest {
         val defaultClock = Clock.systemUTC();
         processor = new RefreshTokenGrantTypeTokenEndpointProcessor();
         accessLogService = mock(AccessLogService.class);
-        organizationDao = mock(OrganizationDao.class);
         val objectMapper = new ObjectMapper();
         val parsingValidationService = new ParsingValidationServiceImpl(oauthClientDao, accessLogService);
         ReflectionTestUtils.setField(processor, TokenEndpointProcessor.class, "defaultClock", defaultClock, Clock.class);
@@ -155,7 +152,6 @@ class RefreshTokenGrantTypeTokenEndpointProcessorTest {
         );
 
         oauthClient.setOrganizationId(organization.getId());
-        when(organizationDao.getByDomainPrefix("some.domain")).thenReturn(Optional.of(organization));
         assertThatThrownBy(() -> processor.process(organization, req, res))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessageContaining("invalid request");
@@ -307,7 +303,6 @@ class RefreshTokenGrantTypeTokenEndpointProcessorTest {
         );
 
         oauthClient.setOrganizationId(organization.getId());
-        when(organizationDao.getByDomainPrefix("some.domain")).thenReturn(Optional.of(organization));
         assertThatThrownBy(() -> processor.process(organization, req, res))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessageContaining("invalid request");
@@ -441,7 +436,6 @@ class RefreshTokenGrantTypeTokenEndpointProcessorTest {
         );
 
         oauthClient.setOrganizationId(organization.getId());
-        when(organizationDao.getByDomainPrefix("some.domain")).thenReturn(Optional.of(organization));
         assertThatThrownBy(() -> processor.process(organization, req, res))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessageContaining("invalid request");
@@ -612,7 +606,6 @@ class RefreshTokenGrantTypeTokenEndpointProcessorTest {
         );
 
         oauthClient.setOrganizationId(organization.getId());
-        when(organizationDao.getByDomainPrefix("some.domain")).thenReturn(Optional.of(organization));
         assertThatThrownBy(() -> processor.process(organization, req, res))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessageContaining("invalid request");

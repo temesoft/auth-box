@@ -56,7 +56,6 @@ class AuthorizationCodeGrantTypeTokenEndpointProcessorTest {
     private OauthClientDao oauthClientDao;
     private OauthUserDao oauthUserDao;
     private AccessLogService accessLogService;
-    private OrganizationDao organizationDao;
     private OauthTokenDao oauthTokenDao;
     private HttpServletRequest req;
     private HttpServletResponse res;
@@ -70,7 +69,6 @@ class AuthorizationCodeGrantTypeTokenEndpointProcessorTest {
         val defaultClock = Clock.systemUTC();
         processor = new AuthorizationCodeGrantTypeTokenEndpointProcessor();
         accessLogService = mock(AccessLogService.class);
-        organizationDao = mock(OrganizationDao.class);
         val objectMapper = new ObjectMapper();
         val parsingValidationService = new ParsingValidationServiceImpl(oauthClientDao, accessLogService);
         ReflectionTestUtils.setField(processor, TokenEndpointProcessor.class, "defaultClock", defaultClock, Clock.class);
@@ -151,6 +149,7 @@ class AuthorizationCodeGrantTypeTokenEndpointProcessorTest {
                 "Oauth2 client organization details do not match domain prefix specified in request: 'some.domain'"
         );
 
+        val organizationDao = mock(OrganizationDao.class);
         when(organizationDao.getByDomainPrefix("some.domain")).thenReturn(Optional.of(organization));
         assertThatThrownBy(() -> processor.process(organization, req, res))
                 .isInstanceOf(BadRequestException.class)
