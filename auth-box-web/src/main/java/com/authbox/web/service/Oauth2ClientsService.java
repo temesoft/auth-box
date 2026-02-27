@@ -11,8 +11,10 @@ import com.authbox.base.model.UpdateOauthClientRequest;
 import com.authbox.base.util.DurationJsonDeserializer;
 import com.authbox.base.util.DurationJsonSerializer;
 import com.authbox.web.model.DeleteClientsRequest;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.springframework.data.domain.Page;
 import tools.jackson.databind.annotation.JsonDeserialize;
 import tools.jackson.databind.annotation.JsonSerialize;
@@ -61,6 +63,8 @@ public interface Oauth2ClientsService {
      */
     OauthClientDto assignKeys(String clientId, Organization organization, String publicKeyString, String privateKeyString);
 
+    @NoArgsConstructor
+    @AllArgsConstructor
     @Builder
     @Getter
     class OauthClientDto {
