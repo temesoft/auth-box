@@ -18,6 +18,7 @@ import tools.jackson.databind.ObjectMapper;
 import java.time.Instant;
 
 import static com.authbox.base.util.IdUtils.createId;
+import static com.authbox.web.TestConstants.VALID_ORGANIZATION_ID;
 import static com.authbox.web.config.Constants.API_PREFIX;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -66,7 +67,7 @@ public class AccessLogControllerTest {
                         .withMessage("Test message")
                         .withSource(AccessLog.Source.Oauth2Server)
                         .withRequestId(requestId)
-                        .withOrganizationId("c1ade6b3-c023-44f4-b3ef-b0f27ba5e6e8")
+                        .withOrganizationId(VALID_ORGANIZATION_ID)
                         .build()
         );
 
