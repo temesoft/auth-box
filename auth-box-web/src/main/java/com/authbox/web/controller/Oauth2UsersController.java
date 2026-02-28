@@ -1,6 +1,6 @@
 package com.authbox.web.controller;
 
-import com.authbox.base.model.UpdateOauthUserRequest;
+import com.authbox.base.model.OauthUserRequest;
 import com.authbox.web.model.DeleteUsersRequest;
 import com.authbox.web.model.PasswordChangeRequest;
 import com.authbox.web.service.Oauth2UsersService;
@@ -54,12 +54,13 @@ public class Oauth2UsersController extends BaseController {
     @PostMapping("/{id}")
     @Transactional
     public OauthUserDto updateOauth2UserById(@PathVariable("id") final String userId,
-                                             @RequestBody final UpdateOauthUserRequest updatedOauthUser) {
+                                             @RequestBody final OauthUserRequest updatedOauthUser) {
+        updatedOauthUser.setId(userId);
         return oauth2UsersService.updateOauth2UserById(getOrganization(), userId, updatedOauthUser);
     }
 
     @PostMapping
-    public OauthUserDto createOauth2User(@RequestBody final UpdateOauthUserRequest newOauthUser) {
+    public OauthUserDto createOauth2User(@RequestBody final OauthUserRequest newOauthUser) {
         return oauth2UsersService.createOauth2User(getOrganization(), newOauthUser);
     }
 

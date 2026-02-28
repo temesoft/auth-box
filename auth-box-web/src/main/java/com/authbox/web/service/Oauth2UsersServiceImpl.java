@@ -5,12 +5,13 @@ import com.authbox.base.exception.AccessDeniedException;
 import com.authbox.base.exception.BadRequestException;
 import com.authbox.base.exception.EntityNotFoundException;
 import com.authbox.base.model.OauthUser;
+import com.authbox.base.model.OauthUserRequest;
 import com.authbox.base.model.Organization;
-import com.authbox.base.model.UpdateOauthUserRequest;
 import com.authbox.base.util.HashUtils;
 import com.authbox.web.model.DeleteUsersRequest;
 import com.authbox.web.model.PasswordChangeRequest;
 import com.google.zxing.WriterException;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.val;
 import org.springframework.data.domain.Page;
@@ -124,7 +125,8 @@ public class Oauth2UsersServiceImpl implements Oauth2UsersService {
      * Updates user with provided organization using UpdateOauthUserRequest
      */
     @Override
-    public OauthUserDto updateOauth2UserById(final Organization organization, final String userId, final UpdateOauthUserRequest updatedOauthUser) {
+    @Transactional
+    public OauthUserDto updateOauth2UserById(final Organization organization, final String userId, final OauthUserRequest updatedOauthUser) {
         val oauthUser = oauthUserDao.getById(userId);
         if (oauthUser.isEmpty()) {
             throwUserNotFound(userId);
@@ -172,7 +174,7 @@ public class Oauth2UsersServiceImpl implements Oauth2UsersService {
      * Creates a new user for provided organization using UpdateOauthUserRequest object
      */
     @Override
-    public OauthUserDto createOauth2User(final Organization organization, final UpdateOauthUserRequest newOauthUser) {
+    public OauthUserDto createOauth2User(final Organization organization, final OauthUserRequest newOauthUser) {
         if (isEmpty(newOauthUser.getUsername())) {
             throw new BadRequestException("Username can not be empty");
         }

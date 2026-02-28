@@ -1,8 +1,8 @@
 package com.authbox.web.service;
 
 import com.authbox.base.model.OauthUser;
+import com.authbox.base.model.OauthUserRequest;
 import com.authbox.base.model.Organization;
-import com.authbox.base.model.UpdateOauthUserRequest;
 import com.authbox.web.model.DeleteUsersRequest;
 import com.authbox.web.model.PasswordChangeRequest;
 import lombok.AllArgsConstructor;
@@ -39,12 +39,12 @@ public interface Oauth2UsersService {
     /**
      * Updates user with provided organization using UpdateOauthUserRequest object
      */
-    OauthUserDto updateOauth2UserById(Organization organization, String userId, UpdateOauthUserRequest updatedOauthUser);
+    OauthUserDto updateOauth2UserById(Organization organization, String userId, OauthUserRequest updatedOauthUser);
 
     /**
      * Creates a new user for provided organization using UpdateOauthUserRequest object
      */
-    OauthUserDto createOauth2User(Organization organization, UpdateOauthUserRequest newOauthUser);
+    OauthUserDto createOauth2User(Organization organization, OauthUserRequest newOauthUser);
 
     /**
      * Deletes user for provided organization using DeleteUsersRequest object
