@@ -141,7 +141,7 @@ Features include:
 
 ### Prerequisites
 
-- Java 17+
+- Java 21+
 - Maven 3.8+
 - Docker (recommended)
 - MySQL or compatible database
