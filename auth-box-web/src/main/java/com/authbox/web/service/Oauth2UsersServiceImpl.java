@@ -52,7 +52,7 @@ public class Oauth2UsersServiceImpl implements Oauth2UsersService {
     public OauthUserDto getOauth2UserById(final Organization organization, final String id) {
         val oauthUser = oauthUserDao.getById(id);
         if (oauthUser.isEmpty()) {
-            throwUserNotFound(id);
+            throw new EntityNotFoundException("User not found by id: " + id);
         }
         if (!organization.getId().equals(oauthUser.get().getOrganizationId())) {
             throw new AccessDeniedException();
@@ -67,7 +67,7 @@ public class Oauth2UsersServiceImpl implements Oauth2UsersService {
     public OauthUserDto updatePassword(final Organization organization, final String userId, final PasswordChangeRequest passwordChangeRequest) {
         val oauthUser = oauthUserDao.getById(userId);
         if (oauthUser.isEmpty()) {
-            throwUserNotFound(userId);
+            throw new EntityNotFoundException("User not found by id: " + userId);
         }
         if (!organization.getId().equals(oauthUser.get().getOrganizationId())) {
             throw new AccessDeniedException();
@@ -101,7 +101,7 @@ public class Oauth2UsersServiceImpl implements Oauth2UsersService {
     public BufferedImage generate2FaQrCodeImage(final Organization organization, final String userId) {
         val oauthUser = oauthUserDao.getById(userId);
         if (oauthUser.isEmpty()) {
-            throwUserNotFound(userId);
+            throw new EntityNotFoundException("User not found by id: " + userId);
         }
         if (!organization.getId().equals(oauthUser.get().getOrganizationId())) {
             throw new AccessDeniedException();
@@ -129,7 +129,7 @@ public class Oauth2UsersServiceImpl implements Oauth2UsersService {
     public OauthUserDto updateOauth2UserById(final Organization organization, final String userId, final OauthUserRequest updatedOauthUser) {
         val oauthUser = oauthUserDao.getById(userId);
         if (oauthUser.isEmpty()) {
-            throwUserNotFound(userId);
+            throw new EntityNotFoundException("User not found by id: " + userId);
         }
         if (!organization.getId().equals(oauthUser.get().getOrganizationId()) || !oauthUser.get().getId().equals(updatedOauthUser.getId())) {
             throw new AccessDeniedException();
@@ -214,16 +214,12 @@ public class Oauth2UsersServiceImpl implements Oauth2UsersService {
         deleteUsersRequest.userIds.stream().parallel().forEach(userId -> {
             val oauthUser = oauthUserDao.getById(userId);
             if (oauthUser.isEmpty()) {
-                throwUserNotFound(userId);
+                throw new EntityNotFoundException("User not found by id: " + userId);
             }
             if (!organization.getId().equals(oauthUser.get().getOrganizationId())) {
                 throw new AccessDeniedException();
             }
             oauthUserDao.deleteById(oauthUser.get().getId());
         });
-    }
-
-    private void throwUserNotFound(final String userId) {
-        throw new EntityNotFoundException("User not found by id: " + userId);
     }
 }
