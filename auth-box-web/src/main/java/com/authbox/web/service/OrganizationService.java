@@ -32,6 +32,7 @@ public interface OrganizationService {
     @NoArgsConstructor
     @Builder
     @Getter
+    @Setter
     class OrganizationDto {
         private String id;
         private Instant createTime;
@@ -40,7 +41,6 @@ public interface OrganizationService {
         private String address;
         private boolean enabled;
         private String logoUrl;
-        @Setter
         private Instant lastUpdated;
 
         public static OrganizationDto fromEntity(final Organization entity) {
@@ -56,5 +56,4 @@ public interface OrganizationService {
                     .build();
         }
     }
-
 }
