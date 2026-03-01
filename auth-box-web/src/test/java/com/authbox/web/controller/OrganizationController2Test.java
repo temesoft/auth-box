@@ -29,7 +29,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 )
 @AutoConfigureRestTestClient
 @TestPropertySource(locations = "classpath:application-test.properties")
-class OrganizationControllerIT {
+class OrganizationController2Test {
 
     private final ParameterizedTypeReference<Map<String, Object>> mapResponseType =
             new ParameterizedTypeReference<>() {

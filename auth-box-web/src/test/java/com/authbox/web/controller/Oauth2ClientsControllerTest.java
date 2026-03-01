@@ -102,7 +102,7 @@ class Oauth2ClientsControllerTest {
     }
 
     @Test
-    public void testUpdateOauth2ClientById() {
+    public void testUpdateOauth2ClientById_JwtToken() {
         val client = createOauth2Client();
         val updateOauthClientRequest = new UpdateOauthClientRequest();
         updateOauthClientRequest.setDescription(client.getDescription());
@@ -131,6 +131,36 @@ class Oauth2ClientsControllerTest {
         assertThat(updatedClient.getId()).isNotBlank().isEqualTo(client.getId());
         assertThat(updatedClient.getGrantTypes()).contains(GrantType.password);
         assertThat(updatedClient.getTokenFormat()).isEqualTo(TokenFormat.JWT).isNotEqualTo(client.getTokenFormat());
+        oauthClientRepository.deleteById(client.getId());
+    }
+
+    @Test
+    public void testUpdateOauth2ClientById_OpaqueToken() {
+        val client = createOauth2Client();
+        val updateOauthClientRequest = new UpdateOauthClientRequest();
+        updateOauthClientRequest.setDescription(client.getDescription());
+        updateOauthClientRequest.setSecret(client.getSecret());
+        updateOauthClientRequest.setGrantTypes(List.of(GrantType.password));
+        updateOauthClientRequest.setOrganizationId(client.getOrganizationId());
+        updateOauthClientRequest.setEnabled(client.isEnabled());
+        updateOauthClientRequest.setRedirectUrls(client.getRedirectUrls());
+        updateOauthClientRequest.setExpiration(client.getExpiration());
+        updateOauthClientRequest.setRefreshExpiration(client.getRefreshExpiration());
+        updateOauthClientRequest.setTokenFormat(TokenFormat.STANDARD);
+        updateOauthClientRequest.setScopes(List.of());
+        val updatedClient = restTestClient.post()
+                .uri(API_PREFIX + "/oauth2-client/" + client.getId())
+                .header("cookie", jSessionId)
+                .body(updateOauthClientRequest)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(Oauth2ClientsService.OauthClientDto.class)
+                .returnResult()
+                .getResponseBody();
+        assertThat(updatedClient).isNotNull();
+        assertThat(updatedClient.getId()).isNotBlank().isEqualTo(client.getId());
+        assertThat(updatedClient.getGrantTypes()).contains(GrantType.password);
+        assertThat(updatedClient.getTokenFormat()).isEqualTo(TokenFormat.STANDARD);
         oauthClientRepository.deleteById(client.getId());
     }
 

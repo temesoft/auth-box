@@ -1,11 +1,6 @@
 package com.authbox.web.controller;
 
 import com.authbox.base.config.AppProperties;
-import com.authbox.base.dao.OauthClientDao;
-import com.authbox.base.dao.OauthClientScopeDao;
-import com.authbox.base.dao.OauthScopeDao;
-import com.authbox.base.dao.OauthTokenDao;
-import com.authbox.base.dao.OauthUserDao;
 import com.authbox.base.dao.OrganizationDao;
 import com.authbox.base.dao.UserDao;
 import com.authbox.base.exception.AccessDeniedException;
@@ -39,16 +34,6 @@ public class BaseController {
     protected OrganizationDao organizationDao;
     @Autowired
     protected UserDao userDao;
-    @Autowired
-    protected OauthClientDao oauthClientDao;
-    @Autowired
-    protected OauthUserDao oauthUserDao;
-    @Autowired
-    protected OauthClientScopeDao oauthClientScopeDao;
-    @Autowired
-    protected OauthScopeDao oauthScopeDao;
-    @Autowired
-    protected OauthTokenDao oauthTokenDao;
 
     /**
      * Both Client/Password/AuthCode tokens as well, as standard logged-in User

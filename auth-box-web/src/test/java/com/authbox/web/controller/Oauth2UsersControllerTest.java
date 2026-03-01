@@ -71,6 +71,17 @@ class Oauth2UsersControllerTest {
 
     @Test
     void testGetOauth2UserById() {
+        val badId = createId();
+        assertThat(
+                restTestClient.get()
+                        .uri(API_PREFIX + "/oauth2-user/" + badId)
+                        .header("cookie", jSessionId)
+                        .exchange()
+                        .expectStatus().isNotFound()
+                        .expectBody(String.class)
+                        .returnResult().getResponseBody()
+        ).contains("User not found by id: " + badId);
+
         val user = restTestClient.get()
                 .uri(API_PREFIX + "/oauth2-user/" + VALID_OAUTH_USER_ID)
                 .header("cookie", jSessionId)
@@ -87,12 +98,57 @@ class Oauth2UsersControllerTest {
 
     @Test
     void testUpdatePassword() {
-        val passwordChangeRequest = new PasswordChangeRequest(
+        var passwordChangeRequest = new PasswordChangeRequest(
+                "password",
+                "password2",
+                "password3"
+        );
+
+        val badId = createId();
+        assertThat(
+                restTestClient.post()
+                        .uri(API_PREFIX + "/oauth2-user/" + badId + "/password-reset")
+                        .header("cookie", jSessionId)
+                        .body(passwordChangeRequest)
+                        .exchange()
+                        .expectStatus().isNotFound()
+                        .expectBody(String.class)
+                        .returnResult().getResponseBody()
+        ).contains("User not found by id: " + badId);
+
+        assertThat(
+                restTestClient.post()
+                        .uri(API_PREFIX + "/oauth2-user/" + VALID_OAUTH_USER_ID + "/password-reset")
+                        .header("cookie", jSessionId)
+                        .body(passwordChangeRequest)
+                        .exchange()
+                        .expectStatus().isBadRequest()
+                        .expectBody(String.class)
+                        .returnResult().getResponseBody()
+        ).contains("New password and new password 2 do not match");
+
+        passwordChangeRequest = new PasswordChangeRequest(
                 "password",
                 "password",
                 "password"
         );
-        val user = restTestClient.post()
+        var user = restTestClient.post()
+                .uri(API_PREFIX + "/oauth2-user/" + VALID_OAUTH_USER_ID + "/password-reset")
+                .header("cookie", jSessionId)
+                .body(passwordChangeRequest)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(Oauth2UsersService.OauthUserDto.class)
+                .returnResult()
+                .getResponseBody();
+        assertThat(user).isNotNull();
+
+        passwordChangeRequest = new PasswordChangeRequest(
+                "password",
+                "", // set to empty to make random
+                ""
+        );
+        user = restTestClient.post()
                 .uri(API_PREFIX + "/oauth2-user/" + VALID_OAUTH_USER_ID + "/password-reset")
                 .header("cookie", jSessionId)
                 .body(passwordChangeRequest)
