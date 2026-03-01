@@ -32,7 +32,41 @@ public class AccessLogControllerTest {
 
     private static final String IP = "142.250.191.46";
     private static final String IP_DETAILS = """
-            {"ip":"142.250.191.46","type":"ipv4","continent_code":"NA","continent_name":"North America","country_code":"US","country_name":"United States","region_code":"IL","region_name":"Illinois","city":"Chicago","zip":"60608","latitude":41.84885025024414,"longitude":-87.67124938964844,"msa":"16980","dma":"602","radius":"0","ip_routing_type":"fixed","connection_type":"tx","location":{"geoname_id":4887539,"capital":"Washington D.C.","languages":[{"code":"en","name":"English","native":"English"}],"country_flag":"https://assets.ipstack.com/flags/us.svg","country_flag_emoji":"🇺🇸","country_flag_emoji_unicode":"U+1F1FA U+1F1F8","calling_code":"1","is_eu":false}}
+            {
+              "ip": "142.250.191.46",
+              "type": "ipv4",
+              "continent_code": "NA",
+              "continent_name": "North America",
+              "country_code": "US",
+              "country_name": "United States",
+              "region_code": "IL",
+              "region_name": "Illinois",
+              "city": "Chicago",
+              "zip": "60608",
+              "latitude": 41.84885025024414,
+              "longitude": -87.67124938964844,
+              "msa": "16980",
+              "dma": "602",
+              "radius": "0",
+              "ip_routing_type": "fixed",
+              "connection_type": "tx",
+              "location": {
+                "geoname_id": 4887539,
+                "capital": "Washington D.C.",
+                "languages": [
+                  {
+                    "code": "en",
+                    "name": "English",
+                    "native": "English"
+                  }
+                ],
+                "country_flag": "https://assets.ipstack.com/flags/us.svg",
+                "country_flag_emoji": "🇺🇸",
+                "country_flag_emoji_unicode": "U+1F1FA U+1F1F8",
+                "calling_code": "1",
+                "is_eu": false
+              }
+            }            
             """;
 
     @LocalServerPort
