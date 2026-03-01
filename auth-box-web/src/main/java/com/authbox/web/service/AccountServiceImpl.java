@@ -21,7 +21,6 @@ import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Supplier;
 
 import static com.authbox.base.util.IdUtils.createId;
 import static org.springframework.util.ObjectUtils.isEmpty;
@@ -47,7 +46,9 @@ public class AccountServiceImpl implements AccountService {
                 updatedUser.isEnabled(),
                 Instant.now(defaultClock)
         );
-        return UserDto.fromEntity(userDao.getById(currentUser.getId()).orElseThrow(userNotFound(currentUser.getId())));
+        return UserDto.fromEntity(userDao.getById(currentUser.getId()).orElseThrow(
+                () -> new EntityNotFoundException("User not found by id: " + currentUser.getId())
+        ));
     }
 
     /**
@@ -79,7 +80,8 @@ public class AccountServiceImpl implements AccountService {
                 currentUser.isEnabled(),
                 Instant.now(defaultClock)
         );
-        return UserDto.fromEntity(userDao.getById(currentUser.getId()).orElseThrow(userNotFound(currentUser.getId())));
+        return UserDto.fromEntity(userDao.getById(currentUser.getId())
+                .orElseThrow(() -> new EntityNotFoundException("User not found by id: " + currentUser.getId())));
     }
 
     /**
@@ -98,7 +100,7 @@ public class AccountServiceImpl implements AccountService {
     public UserDto getAccount(final UserDto adminUser, final String id) {
         val foundUser = userDao.getById(id);
         if (foundUser.isEmpty()) {
-            throwUserNotFound(id);
+            throw new EntityNotFoundException("User not found by id: " + id);
         }
         if (!adminUser.getOrganizationId().equals(foundUser.get().getOrganizationId())) {
             throw new AccessDeniedException();
@@ -143,7 +145,7 @@ public class AccountServiceImpl implements AccountService {
                         now
                 )
         );
-        return UserDto.fromEntity(userDao.getById(userId).orElseThrow(userNotFound(userId)));
+        return UserDto.fromEntity(userDao.getById(userId).orElseThrow(() -> new EntityNotFoundException("User not found by id: " + userId)));
     }
 
     /**
@@ -153,7 +155,7 @@ public class AccountServiceImpl implements AccountService {
     public void updateAccount(final UserDto adminUser, final String id, final UpdateUserRequest updatedUser) {
         val user = userDao.getById(updatedUser.getId());
         if (user.isEmpty()) {
-            throwUserNotFound(id);
+            throw new EntityNotFoundException("User not found by id: " + updatedUser.getId());
         }
         if (!adminUser.getOrganizationId().equals(user.get().getOrganizationId())) {
             throw new AccessDeniedException();
@@ -195,7 +197,7 @@ public class AccountServiceImpl implements AccountService {
         request.accountIds.stream().parallel().forEach(accountId -> {
             final Optional<User> foundUser = userDao.getById(accountId);
             if (foundUser.isEmpty()) {
-                throw new BadRequestException("User not found by id: " + accountId);
+                throw new EntityNotFoundException("User not found by id: " + accountId);
             }
             if (!adminUser.getOrganizationId().equals(foundUser.get().getOrganizationId())) {
                 throw new AccessDeniedException();
@@ -205,13 +207,5 @@ public class AccountServiceImpl implements AccountService {
             }
             userDao.delete(foundUser.get());
         });
-    }
-
-    private void throwUserNotFound(final String userId) {
-        throw new EntityNotFoundException("User not found by id: " + userId);
-    }
-
-    private Supplier<EntityNotFoundException> userNotFound(final String userId) {
-        return () -> new EntityNotFoundException("User not found by id: " + userId);
     }
 }

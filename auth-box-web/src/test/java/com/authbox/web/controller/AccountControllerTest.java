@@ -363,6 +363,29 @@ class AccountControllerTest {
                 .header("cookie", jSessionId)
                 .exchange()
                 .expectStatus().isNotFound();
+
+        assertThat(
+                restTestClient.method(HttpMethod.DELETE)
+                        .uri(API_PREFIX + "/account")
+                        .header("cookie", jSessionId)
+                        .body(new DeleteAccountsRequest(List.of(VALID_USER_ID)))
+                        .exchange()
+                        .expectStatus().isBadRequest()
+                        .expectBody(String.class)
+                        .returnResult().getResponseBody()
+        ).contains("User is unable to remove self");
+
+        val badUserId = createId();
+        assertThat(
+                restTestClient.method(HttpMethod.DELETE)
+                        .uri(API_PREFIX + "/account")
+                        .header("cookie", jSessionId)
+                        .body(new DeleteAccountsRequest(List.of(badUserId)))
+                        .exchange()
+                        .expectStatus().isNotFound()
+                        .expectBody(String.class)
+                        .returnResult().getResponseBody()
+        ).contains("User not found by id: " + badUserId);
     }
 
     @Test
