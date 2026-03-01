@@ -27,13 +27,10 @@ public abstract class BaseController {
 
     @Autowired
     protected AppProperties appProperties;
-
     @Autowired
     protected OrganizationDao organizationDao;
-
     @Autowired
     protected ParsingValidationService parsingValidationService;
-
     @Autowired
     protected AccessLogService accessLogService;
 
@@ -80,5 +77,21 @@ public abstract class BaseController {
         }
         MDC.put(RequestWrapperFilter.REQUEST_ORGANIZATION_MDC_KEY, organization.get().getId());
         return organization.get();
+    }
+
+    public void setAppProperties(final AppProperties appProperties) {
+        this.appProperties = appProperties;
+    }
+
+    public void setOrganizationDao(final OrganizationDao organizationDao) {
+        this.organizationDao = organizationDao;
+    }
+
+    public void setParsingValidationService(final ParsingValidationService parsingValidationService) {
+        this.parsingValidationService = parsingValidationService;
+    }
+
+    public void setAccessLogService(final AccessLogService accessLogService) {
+        this.accessLogService = accessLogService;
     }
 }

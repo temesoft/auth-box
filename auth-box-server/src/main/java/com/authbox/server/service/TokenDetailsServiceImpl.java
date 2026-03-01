@@ -52,6 +52,7 @@ import static com.authbox.server.util.RequestUtils.getRequestId;
 import static com.authbox.server.util.RequestUtils.getTimeSinceRequest;
 import static java.lang.String.join;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.springframework.util.ObjectUtils.isEmpty;
 
 @AllArgsConstructor
@@ -153,7 +154,7 @@ public class TokenDetailsServiceImpl implements TokenDetailsService {
         }
 
         if (providedClient != null && !providedClient.getId().equals(oauthToken.get().getClientId())) {
-            log.debug("OauthClient provided (client_id: {}) does not correspond to OauthClient associated with provided token (client_id: {})", providedClient.getId(), oauthToken.get().getClientId());
+            log.debug("OauthClient provided (client_id: '{}') does not correspond to OauthClient associated with provided token (client_id: '{}')", providedClient.getId(), oauthToken.get().getClientId());
             accessLogService.create(
                     AccessLog.builder()
                             .withRequestId(getRequestId())
@@ -161,14 +162,14 @@ public class TokenDetailsServiceImpl implements TokenDetailsService {
                             .withOrganizationId(organization.getId())
                             .withClientId(oauthClient.get().getId())
                             .withError(MSG_UNAUTHORIZED_REQUEST),
-                    "Oauth2 client provided (client id: %s) does not correspond to Oauth2 client associated with provided token (client id: %s)", providedClient.getId(), oauthToken.get().getClientId()
+                    "Oauth2 client provided (client id: '%s') does not correspond to Oauth2 client associated with provided token (client id: '%s')", providedClient.getId(), oauthToken.get().getClientId()
             );
             throw new Oauth2Exception(MSG_UNAUTHORIZED_REQUEST);
         }
 
         if (!organization.getId().equals(oauthClient.get().getOrganizationId())) {
             log.debug("OauthClient organization_id='{}' does not match OauthClient specified organization_id='{}'",
-                    oauthToken.get().getOrganizationId(), organization.getId());
+                    oauthClient.get().getOrganizationId(), organization.getId());
             accessLogService.create(
                     AccessLog.builder()
                             .withRequestId(getRequestId())
@@ -177,7 +178,7 @@ public class TokenDetailsServiceImpl implements TokenDetailsService {
                             .withClientId(oauthClient.get().getId())
                             .withError(MSG_UNAUTHORIZED_REQUEST),
                     "Oauth2 client organization id='%s' does not match Oauth2 client specified organization id='%s'",
-                    oauthToken.get().getOrganizationId(), organization.getId()
+                    oauthClient.get().getOrganizationId(), organization.getId()
             );
             throw new Oauth2Exception(MSG_UNAUTHORIZED_REQUEST);
         }
@@ -194,7 +195,7 @@ public class TokenDetailsServiceImpl implements TokenDetailsService {
     @SuppressWarnings("JavaUtilDate") // java.util.Date is used inside io.jsonwebtoken.impl.DefaultClaims
     private Map<String, Object> getJwtAccessTokenDetails(final OauthClient oauthClient, final OauthToken oauthToken, final String accessToken) {
         if (isEmpty(oauthClient.getPublicKey())) {
-            log.debug("Client with oauth_client_id='{}' does not have public key to validate JWT token.", oauthClient.getId());
+            log.debug("Oauth2 client with id='{}' does not have public key to validate JWT token.", oauthClient.getId());
             accessLogService.create(
                     AccessLog.builder()
                             .withRequestId(getRequestId())
@@ -203,7 +204,7 @@ public class TokenDetailsServiceImpl implements TokenDetailsService {
                             .withClientId(oauthClient.getId())
                             .withOauthTokenId(oauthToken.getId())
                             .withError(MSG_INVALID_REQUEST),
-                    "Client with oauth_client_id='{}' does not have public key to validate JWT token.", oauthClient.getId()
+                    "Oauth2 client with id='%s' does not have public key to validate JWT token.", oauthClient.getId()
             );
             throw new BadRequestException(MSG_INVALID_REQUEST);
         }
@@ -312,7 +313,10 @@ public class TokenDetailsServiceImpl implements TokenDetailsService {
             val oauthUser = getUserById(userId, oauthClient);
             result.put(OAUTH2_ATTR_USERNAME, oauthUser.getUsername());
             try {
-                result.put(OAUTH2_ATTR_METADATA, objectMapper.readValue(oauthUser.getMetadata(), Map.class));
+                result.put(
+                        OAUTH2_ATTR_METADATA,
+                        objectMapper.readValue(isBlank(oauthUser.getMetadata()) ? "{}" : oauthUser.getMetadata(), Map.class)
+                );
             } catch (JacksonException e) {
                 result.put(OAUTH2_ATTR_METADATA, oauthUser.getMetadata());
             }
@@ -336,7 +340,7 @@ public class TokenDetailsServiceImpl implements TokenDetailsService {
             throw new Oauth2Exception(MSG_UNAUTHORIZED_REQUEST);
         }
         if (!oauthUser.get().isEnabled()) {
-            log.debug("OauthUser user disabled. id='{}'", oauthUser.get().getId());
+            log.debug("OauthUser user disabled id='{}'", oauthUser.get().getId());
             accessLogService.create(
                     AccessLog.builder()
                             .withRequestId(getRequestId())
@@ -344,7 +348,7 @@ public class TokenDetailsServiceImpl implements TokenDetailsService {
                             .withOrganizationId(oauthClient.getOrganizationId())
                             .withClientId(oauthClient.getId())
                             .withError(MSG_UNAUTHORIZED_REQUEST),
-                    "OauthUser user disabled. id='%s'", oauthUser.get().getId()
+                    "OauthUser user disabled id='%s'", oauthUser.get().getId()
             );
             throw new Oauth2Exception(MSG_UNAUTHORIZED_REQUEST);
         }
@@ -371,7 +375,10 @@ public class TokenDetailsServiceImpl implements TokenDetailsService {
             final OauthUser oauthUser = getUserById(oauthToken.getOauthUserId(), oauthClient);
             try {
                 result.put(OAUTH2_ATTR_USERNAME, oauthUser.getUsername());
-                result.put(OAUTH2_ATTR_METADATA, objectMapper.readValue(oauthUser.getMetadata(), Map.class));
+                result.put(
+                        OAUTH2_ATTR_METADATA,
+                        objectMapper.readValue(isBlank(oauthUser.getMetadata()) ? "{}" : oauthUser.getMetadata(), Map.class)
+                );
             } catch (JacksonException e) {
                 result.put(OAUTH2_ATTR_METADATA, oauthUser.getMetadata());
             }

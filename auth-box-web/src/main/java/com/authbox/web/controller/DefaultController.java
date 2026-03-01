@@ -51,7 +51,7 @@ public class DefaultController extends BaseController {
 
     @GetMapping("/secure/{securePageName}.html")
     @PreAuthorize("isAuthenticated()")
-    public ModelAndView secureOrganization(@PathVariable("securePageName") final String securePageName) {
+    public ModelAndView securePage(@PathVariable("securePageName") final String securePageName) {
         return createModelAndView("secure/" + securePageName);
     }
 

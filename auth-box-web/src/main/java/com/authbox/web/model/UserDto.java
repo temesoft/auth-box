@@ -2,8 +2,10 @@ package com.authbox.web.model;
 
 import com.authbox.base.model.User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 import java.time.Instant;
@@ -11,6 +13,8 @@ import java.util.List;
 
 @Builder
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class UserDto {
     private String id;
     private Instant createTime;

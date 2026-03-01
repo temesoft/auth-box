@@ -1,15 +1,12 @@
 package com.authbox.web.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class CreateAccountWithOrganizationRequest {
 
     public final String id;
     public final String username;
-    @JsonIgnore
     public final String password;
-    @JsonIgnore
     public final String password2;
     public final String name;
     public final String organizationName;

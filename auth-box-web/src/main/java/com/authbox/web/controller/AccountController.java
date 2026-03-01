@@ -72,6 +72,7 @@ public class AccountController extends BaseController {
     @Transactional
     public ResponseEntity<String> updateAccount(@PathVariable("id") final String id,
                                                 @RequestBody final UpdateUserRequest updatedUser) {
+        updatedUser.setId(id);
         accountService.updateAccount(getCurrentUserVerifyAdmin(), id, updatedUser);
         return ResponseEntity.ok("{}");
     }

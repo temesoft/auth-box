@@ -5,7 +5,7 @@
 
     <groupId>com.authbox</groupId>
     <artifactId>auth-box</artifactId>
-    <version>0.2.1</version>
+    <version>0.3.1</version>
     <packaging>pom</packaging>
 
     <modules>
@@ -16,8 +16,9 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+
         <springdoc.version>3.0.1</springdoc.version>
         <ksuid.version>1.1.4</ksuid.version>
         <h2.version>2.4.240</h2.version>
@@ -29,12 +30,13 @@
         <commons-validator.version>1.10.1</commons-validator.version>
         <guava.version>33.5.0-jre</guava.version>
         <awaitility.version>4.3.0</awaitility.version>
+        <mockito.version>5.20.0</mockito.version>
     </properties>
 
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>4.0.2</version>
+        <version>4.0.3</version>
         <relativePath/> <!-- lookup parent from central -->
     </parent>
 
@@ -231,6 +233,15 @@
                                 <version>${errorprone.version}</version>
                             </path>
                         </annotationProcessorPaths>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>3.5.4</version>
+                    <configuration>
+                        <argLine>${argLine} -javaagent:${settings.localRepository}/org/mockito/mockito-core/${mockito.version}/mockito-core-${mockito.version}.jar
+                        </argLine>
                     </configuration>
                 </plugin>
             </plugins>

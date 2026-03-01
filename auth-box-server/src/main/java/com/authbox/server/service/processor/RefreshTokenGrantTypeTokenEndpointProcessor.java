@@ -5,6 +5,7 @@ import com.authbox.base.exception.Oauth2Exception;
 import com.authbox.base.model.AccessLog;
 import com.authbox.base.model.GrantType;
 import com.authbox.base.model.OauthTokenResponse;
+import com.authbox.base.model.OauthUser;
 import com.authbox.base.model.Organization;
 import com.authbox.server.service.TokenEndpointProcessor;
 import jakarta.servlet.http.HttpServletRequest;
@@ -27,6 +28,7 @@ import static com.authbox.base.util.NetUtils.getUserAgent;
 import static com.authbox.server.util.RequestUtils.getRequestId;
 import static com.authbox.server.util.RequestUtils.getTimeSinceRequest;
 import static java.lang.String.join;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.springframework.util.ObjectUtils.isEmpty;
 
 @Slf4j
@@ -76,7 +78,7 @@ public class RefreshTokenGrantTypeTokenEndpointProcessor extends TokenEndpointPr
         }
 
         if (!refreshToken.get().getTokenType().equals(REFRESH_TOKEN)) {
-            log.debug("Provided token is not ACCESS_TOKEN. type='{}' / hash='{}'", refreshToken.get().getTokenType(), hash);
+            log.debug("Provided token is not REFRESH_TOKEN. type='{}' / hash='{}'", refreshToken.get().getTokenType(), hash);
             accessLogService.create(
                     AccessLog.builder()
                             .withRequestId(getRequestId())
@@ -84,7 +86,7 @@ public class RefreshTokenGrantTypeTokenEndpointProcessor extends TokenEndpointPr
                             .withClientId(oauthClient.getId())
                             .withError(MSG_INVALID_REQUEST)
                             .withOrganizationId(organization.getId()),
-                    "Provided token is not ACCESS_TOKEN. type='%s' hash='%s'",
+                    "Provided token is not REFRESH_TOKEN. type='%s' hash='%s'",
                     refreshToken.get().getTokenType().name(), hash
             );
             throw new Oauth2Exception(MSG_INVALID_TOKEN);
@@ -119,24 +121,45 @@ public class RefreshTokenGrantTypeTokenEndpointProcessor extends TokenEndpointPr
             throw new Oauth2Exception(MSG_INVALID_TOKEN);
         }
 
-        val oauthUser = oauthUserDao.getById(refreshToken.get().getOauthUserId());
-        if (oauthUser.isEmpty()) {
-            log.debug("OauthUser not found by id='{}'", refreshToken.get().getOauthUserId());
-            accessLogService.create(
-                    AccessLog.builder()
-                            .withRequestId(getRequestId())
-                            .withDuration(getTimeSinceRequest())
-                            .withClientId(oauthClient.getId())
-                            .withError(MSG_INVALID_REQUEST)
-                            .withOrganizationId(organization.getId()),
-                    "Oauth2 user not found by id='%s'", refreshToken.get().getOauthUserId()
-            );
-            throw new BadRequestException(MSG_INVALID_REQUEST);
+        final OauthUser userIfAvailable;
+        if (isNotBlank(refreshToken.get().getOauthUserId())) {
+            val oauthUser = oauthUserDao.getById(refreshToken.get().getOauthUserId());
+            if (oauthUser.isEmpty()) {
+                log.debug("OauthUser not found by id='{}'", refreshToken.get().getOauthUserId());
+                accessLogService.create(
+                        AccessLog.builder()
+                                .withRequestId(getRequestId())
+                                .withDuration(getTimeSinceRequest())
+                                .withClientId(oauthClient.getId())
+                                .withError(MSG_INVALID_REQUEST)
+                                .withOrganizationId(organization.getId()),
+                        "Oauth2 user not found by id='%s'", refreshToken.get().getOauthUserId()
+                );
+                throw new BadRequestException(MSG_INVALID_REQUEST);
+            }
+            if (!organization.getId().equals(oauthUser.get().getOrganizationId())) {
+                log.debug("OauthUser organization_id='{}' does not match request organization_id='{}'",
+                        oauthUser.get().getOrganizationId(), organization.getId());
+                accessLogService.create(
+                        AccessLog.builder()
+                                .withRequestId(getRequestId())
+                                .withDuration(getTimeSinceRequest())
+                                .withClientId(oauthClient.getId())
+                                .withError(MSG_INVALID_REQUEST)
+                                .withOrganizationId(organization.getId()),
+                        "Oauth2 user organization id='%s' does not match request organization id='%s'",
+                        oauthUser.get().getOrganizationId(), organization.getId()
+                );
+                throw new BadRequestException(MSG_INVALID_REQUEST);
+            }
+            userIfAvailable = oauthUser.get();
+        } else {
+            userIfAvailable = null;
         }
 
-        if (!organization.getId().equals(oauthUser.get().getOrganizationId())) {
-            log.debug("OauthUser organization_id='{}' does not match request organization_id='{}'",
-                    oauthUser.get().getOrganizationId(), organization.getId());
+        if (!organization.getId().equals(oauthClient.getOrganizationId())) {
+            log.debug("OauthClient organization_id='{}' does not match request organization_id='{}'",
+                    oauthClient.getOrganizationId(), organization.getId());
             accessLogService.create(
                     AccessLog.builder()
                             .withRequestId(getRequestId())
@@ -144,8 +167,8 @@ public class RefreshTokenGrantTypeTokenEndpointProcessor extends TokenEndpointPr
                             .withClientId(oauthClient.getId())
                             .withError(MSG_INVALID_REQUEST)
                             .withOrganizationId(organization.getId()),
-                    "Oauth2 user organization id='%s' does not match request organization id='%s'",
-                    oauthUser.get().getOrganizationId(), organization.getId()
+                    "Oauth2 client organization id='%s' does not match request organization id='%s'",
+                    oauthClient.getOrganizationId(), organization.getId()
             );
             throw new BadRequestException(MSG_INVALID_REQUEST);
         }
@@ -156,7 +179,7 @@ public class RefreshTokenGrantTypeTokenEndpointProcessor extends TokenEndpointPr
                     oauthClient,
                     scope,
                     getProcessingGrantType(),
-                    oauthUser.get(),
+                    userIfAvailable,
                     getIp(req),
                     getUserAgent(req),
                     refreshToken.get().getId());
@@ -165,7 +188,7 @@ public class RefreshTokenGrantTypeTokenEndpointProcessor extends TokenEndpointPr
                     oauthClient,
                     scope,
                     getProcessingGrantType(),
-                    oauthUser.get(),
+                    userIfAvailable,
                     getIp(req),
                     getUserAgent(req),
                     refreshToken.get().getId());

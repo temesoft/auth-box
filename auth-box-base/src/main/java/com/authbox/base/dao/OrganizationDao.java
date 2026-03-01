@@ -15,4 +15,6 @@ public interface OrganizationDao {
 
     void update(String id, String name, String domainPrefix, String address, boolean enabled, String logoUrl, Instant lastUpdated);
 
+    void deleteById(String id);
+
 }

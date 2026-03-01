@@ -33,6 +33,7 @@ import static com.authbox.base.model.TokenType.ACCESS_TOKEN;
 import static com.authbox.base.util.HashUtils.sha256;
 import static com.authbox.server.util.RequestUtils.getRequestId;
 import static com.authbox.server.util.RequestUtils.getTimeSinceRequest;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.springframework.util.ObjectUtils.isEmpty;
 
 @RestController
@@ -166,7 +167,7 @@ public class UserInfoController extends BaseController {
                             .withOrganizationId(organization.getId())
                             .withClientId(accessOauthToken.get().getClientId())
                             .withError(MSG_UNAUTHORIZED_REQUEST),
-                    "Oauth2 user user is disabled. id='%s'", oauthUser.get().getId()
+                    "Oauth2 user is disabled. id='%s'", oauthUser.get().getId()
             );
             throw new Oauth2Exception(MSG_UNAUTHORIZED_REQUEST);
         }
@@ -195,14 +196,14 @@ public class UserInfoController extends BaseController {
                             .withOrganizationId(organization.getId())
                             .withClientId(oauthClient.get().getId())
                             .withError(MSG_UNAUTHORIZED_REQUEST),
-                    "Oauth2 user user disabled. id='%s'", oauthUser.get().getId()
+                    "OauthClient is disabled. id='%s'", oauthClient.get().getId()
             );
             throw new Oauth2Exception(MSG_UNAUTHORIZED_REQUEST);
         }
 
         Object metadata = null;
         try {
-            metadata = objectMapper.readValue(oauthUser.get().getMetadata(), Map.class);
+            metadata = objectMapper.readValue(isBlank(oauthUser.get().getMetadata()) ? "{}" : oauthUser.get().getMetadata(), Map.class);
         } catch (JacksonException e) {
             log.debug("Unable to parse metadata for OauthUser user_id='{}'", oauthUser.get().getId());
         }

@@ -11,15 +11,16 @@ import com.authbox.base.model.OauthToken;
 import com.authbox.base.model.Organization;
 import com.authbox.base.util.NetUtils;
 import com.authbox.server.service.ScopeService;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import io.micrometer.core.annotation.Timed;
 import jakarta.annotation.Nullable;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.jboss.aerogear.security.otp.Totp;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -56,23 +57,19 @@ import static org.springframework.util.ObjectUtils.isEmpty;
 
 @Controller
 @RequestMapping(OAUTH_PREFIX)
+@AllArgsConstructor
 @Slf4j
 public class Oauth2AuthorizeController extends BaseController {
 
-    private static final String TWO_FACTOR_AUTH_SUCCESS_ATTRIBUTE = "TWO_FACTOR_AUTH_SUCCESS_ATTRIBUTE";
+    @VisibleForTesting
+    static final String TWO_FACTOR_AUTH_SUCCESS_ATTRIBUTE = "TWO_FACTOR_AUTH_SUCCESS_ATTRIBUTE";
 
-    @Autowired
-    protected OauthClientDao oauthClientDao;
-    @Autowired
-    protected OauthUserDao oauthUserDao;
-    @Autowired
-    protected PasswordEncoder passwordEncoder;
-    @Autowired
-    protected Clock defaultClock;
-    @Autowired
-    protected OauthTokenDao oauthTokenDao;
-    @Autowired
-    protected ScopeService scopeService;
+    private final OauthClientDao oauthClientDao;
+    private final OauthUserDao oauthUserDao;
+    private final PasswordEncoder passwordEncoder;
+    private final Clock defaultClock;
+    private final OauthTokenDao oauthTokenDao;
+    private final ScopeService scopeService;
 
     @GetMapping(value = "/authorize", produces = "application/json")
     @Timed("getAuthorize")
@@ -104,7 +101,7 @@ public class Oauth2AuthorizeController extends BaseController {
             throw new BadRequestException(MSG_INVALID_REQUEST);
         }
         if (!oauthClient.get().getOrganizationId().equals(organization.getId())) {
-            log.debug("OauthClient organization_id='{}' does not match domain prefix specified organization_id='{}'",
+            log.debug("OauthClient organization id='{}' does not match domain prefix specified organization id='{}'",
                     oauthClient.get().getOrganizationId(), organization.getId());
             accessLogService.create(
                     AccessLog.builder()
@@ -113,7 +110,7 @@ public class Oauth2AuthorizeController extends BaseController {
                             .withClientId(oauthClient.get().getId())
                             .withDuration(getTimeSinceRequest())
                             .withError(MSG_INVALID_REQUEST),
-                    "Oauth2 client organization_id='%s' does not match domain prefix specified organization id='%s'",
+                    "Oauth2 client organization id='%s' does not match domain prefix specified organization id='%s'",
                     oauthClient.get().getOrganizationId(), organization.getId()
             );
             throw new BadRequestException(MSG_INVALID_REQUEST);
@@ -218,7 +215,7 @@ public class Oauth2AuthorizeController extends BaseController {
             throw new BadRequestException(MSG_INVALID_REQUEST);
         }
         if (!oauthClient.get().getOrganizationId().equals(organization.getId())) {
-            log.debug("OauthClient organization_id='{}' does not match domain prefix specified organization_id='{}'", oauthClient.get().getOrganizationId(), organization.getId());
+            log.debug("OauthClient organization id='{}' does not match domain prefix specified organization id='{}'", oauthClient.get().getOrganizationId(), organization.getId());
             accessLogService.create(
                     AccessLog.builder()
                             .withRequestId(getRequestId())
@@ -270,7 +267,7 @@ public class Oauth2AuthorizeController extends BaseController {
         // Authenticate user credentials
         val oauthUser = oauthUserDao.getByUsernameAndOrganizationId(username, organization.getId());
         if (oauthUser.isEmpty()) {
-            log.debug("OauthUser not found by username='{}' and organization_id='{}'", username, organization.getId());
+            log.debug("OauthUser not found by username='{}' and organization id='{}'", username, organization.getId());
             accessLogService.create(
                     AccessLog.builder()
                             .withRequestId(getRequestId())
@@ -289,7 +286,7 @@ public class Oauth2AuthorizeController extends BaseController {
         }
 
         if (!oauthUser.get().isEnabled()) {
-            log.debug("OauthUser is disabled; username='{}' and organization_id='{}'", username, organization.getId());
+            log.debug("OauthUser is disabled; username='{}' and organization id='{}'", username, organization.getId());
             accessLogService.create(
                     AccessLog.builder()
                             .withRequestId(getRequestId())
@@ -308,7 +305,7 @@ public class Oauth2AuthorizeController extends BaseController {
         }
 
         if (!organization.getId().equals(oauthUser.get().getOrganizationId())) {
-            log.debug("OauthUser organization_id='{}' does not match request organization_id='{}'",
+            log.debug("OauthUser organization id='{}' does not match request organization id='{}'",
                     oauthUser.get().getOrganizationId(), organization.getId());
             accessLogService.create(
                     AccessLog.builder()
@@ -425,7 +422,7 @@ public class Oauth2AuthorizeController extends BaseController {
             throw new BadRequestException(MSG_INVALID_REQUEST);
         }
         if (!oauthClient.get().getOrganizationId().equals(organization.getId())) {
-            log.debug("OauthClient organization_id='{}' does not match domain prefix specified organization_id='{}'",
+            log.debug("OauthClient organization id='{}' does not match domain prefix specified organization id='{}'",
                     oauthClient.get().getOrganizationId(), organization.getId());
             accessLogService.create(
                     AccessLog.builder()
@@ -480,7 +477,7 @@ public class Oauth2AuthorizeController extends BaseController {
         val username = (String) req.getSession().getAttribute(OAUTH2_ATTR_USERNAME);
         val oauthUser = oauthUserDao.getByUsernameAndOrganizationId(username, organization.getId());
         if (oauthUser.isEmpty()) {
-            log.debug("OauthUser not found by username='{}' and organization_id='{}'", username, organization.getId());
+            log.debug("OauthUser not found by username='{}' and organization id='{}'", username, organization.getId());
             accessLogService.create(
                     AccessLog.builder()
                             .withRequestId(getRequestId())
@@ -499,7 +496,7 @@ public class Oauth2AuthorizeController extends BaseController {
         }
 
         if (!oauthUser.get().isEnabled()) {
-            log.debug("OauthUser is disabled; username='{}' and organization_id='{}'", username, organization.getId());
+            log.debug("OauthUser is disabled; username='{}' and organization id='{}'", username, organization.getId());
             accessLogService.create(
                     AccessLog.builder()
                             .withRequestId(getRequestId())
@@ -518,7 +515,7 @@ public class Oauth2AuthorizeController extends BaseController {
         }
 
         if (!organization.getId().equals(oauthUser.get().getOrganizationId())) {
-            log.debug("OauthUser organization_id='{}' does not match request organization_id='{}'",
+            log.debug("OauthUser organization id='{}' does not match request organization id='{}'",
                     oauthUser.get().getOrganizationId(), organization.getId());
             accessLogService.create(
                     AccessLog.builder()
@@ -626,7 +623,7 @@ public class Oauth2AuthorizeController extends BaseController {
             throw new BadRequestException(MSG_INVALID_REQUEST);
         }
         if (!oauthClient.get().getOrganizationId().equals(organization.getId())) {
-            log.debug("OauthClient organization_id='{}' does not match domain prefix specified organization_id='{}'",
+            log.debug("OauthClient organization id='{}' does not match domain prefix specified organization id='{}'",
                     oauthClient.get().getOrganizationId(), organization.getId());
             accessLogService.create(
                     AccessLog.builder()
@@ -688,7 +685,7 @@ public class Oauth2AuthorizeController extends BaseController {
         // Authenticate user credentials
         val oauthUser = oauthUserDao.getByUsernameAndOrganizationId(username, organization.getId());
         if (oauthUser.isEmpty()) {
-            log.debug("OauthUser not found by username='{}' and organization_id='{}'", username, organization.getId());
+            log.debug("OauthUser not found by username='{}' and organization id='{}'", username, organization.getId());
             accessLogService.create(
                     AccessLog.builder()
                             .withRequestId(getRequestId())
@@ -707,7 +704,7 @@ public class Oauth2AuthorizeController extends BaseController {
         }
 
         if (!organization.getId().equals(oauthUser.get().getOrganizationId())) {
-            log.debug("OauthUser organization_id='{}' does not match request organization_id='{}'",
+            log.debug("OauthUser organization id='{}' does not match request organization id='{}'",
                     oauthUser.get().getOrganizationId(), organization.getId());
             accessLogService.create(
                     AccessLog.builder()

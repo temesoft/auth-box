@@ -78,7 +78,7 @@ public class AuthorizationCodeGrantTypeTokenEndpointProcessor extends TokenEndpo
         }
 
         if (!oauthToken.get().getTokenType().equals(AUTHORIZATION_CODE)) {
-            log.debug("Provided token is not ACCESS_TOKEN. type='{}' token='{}' / hash='{}'",
+            log.debug("Provided token is not AUTHORIZATION_CODE. type='{}' token='{}' / hash='{}'",
                     oauthToken.get().getTokenType(), code, hash);
             accessLogService.create(
                     AccessLog.builder()
@@ -87,7 +87,7 @@ public class AuthorizationCodeGrantTypeTokenEndpointProcessor extends TokenEndpo
                             .withOrganizationId(organization.getId())
                             .withClientId(oauthClient.getId())
                             .withError(MSG_INVALID_TOKEN),
-                    "Provided token is not ACCESS_TOKEN. type='%s' token='%s' / hash='%s'",
+                    "Provided token is not AUTHORIZATION_CODE. type='%s' token='%s' / hash='%s'",
                     oauthToken.get().getTokenType().name(), code, hash
             );
             throw new Oauth2Exception(MSG_INVALID_TOKEN);

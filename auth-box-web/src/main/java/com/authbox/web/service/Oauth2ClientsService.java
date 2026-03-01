@@ -11,8 +11,10 @@ import com.authbox.base.model.UpdateOauthClientRequest;
 import com.authbox.base.util.DurationJsonDeserializer;
 import com.authbox.base.util.DurationJsonSerializer;
 import com.authbox.web.model.DeleteClientsRequest;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.springframework.data.domain.Page;
 import tools.jackson.databind.annotation.JsonDeserialize;
 import tools.jackson.databind.annotation.JsonSerialize;
@@ -61,6 +63,8 @@ public interface Oauth2ClientsService {
      */
     OauthClientDto assignKeys(String clientId, Organization organization, String publicKeyString, String privateKeyString);
 
+    @NoArgsConstructor
+    @AllArgsConstructor
     @Builder
     @Getter
     class OauthClientDto {
@@ -85,13 +89,13 @@ public interface Oauth2ClientsService {
         private List<OauthScope> scopes;
         private List<String> scopeIds;
 
-        static List<OauthClientDto> fromEntityCollection(Collection<OauthClient> entities) {
+        static List<OauthClientDto> fromEntityCollection(final Collection<OauthClient> entities) {
             return entities.stream()
                     .map(OauthClientDto::fromEntity)
                     .collect(Collectors.toList());
         }
 
-        static OauthClientDto fromEntity(OauthClient entity) {
+        static OauthClientDto fromEntity(final OauthClient entity) {
             return OauthClientDto.builder()
                     .id(entity.getId())
                     .createTime(entity.getCreateTime())

@@ -18,6 +18,7 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -41,6 +42,7 @@ import static jakarta.persistence.EnumType.STRING;
 @Table(name = "oauth_client")
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder(setterPrefix = "with")
 @Setter
 @Getter
 @ToString

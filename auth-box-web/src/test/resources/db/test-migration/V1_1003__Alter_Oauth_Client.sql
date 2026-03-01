@@ -1,0 +1,1 @@
+ALTER TABLE oauth_client CHANGE COLUMN token_type token_format VARCHAR(36) NOT NULL;

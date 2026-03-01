@@ -4,8 +4,10 @@ import com.authbox.base.model.OauthToken;
 import com.authbox.base.model.Organization;
 import com.authbox.base.model.TokenType;
 import com.authbox.web.model.DeleteTokensRequest;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.springframework.data.domain.Page;
 
 import java.time.Instant;
@@ -48,6 +50,8 @@ public interface Oauth2TokensService {
      */
     void deleteOauth2Tokens(Organization organization, DeleteTokensRequest deleteTokensRequest);
 
+    @AllArgsConstructor
+    @NoArgsConstructor
     @Builder
     @Getter
     class OauthTokenDto {
@@ -65,7 +69,7 @@ public interface Oauth2TokensService {
         private String requestId;
         private String linkedTokenId;
 
-        static OauthTokenDto fromEntity(OauthToken entity) {
+        static OauthTokenDto fromEntity(final OauthToken entity) {
             return OauthTokenDto.builder()
                     .id(entity.getId())
                     .createTime(entity.getCreateTime())

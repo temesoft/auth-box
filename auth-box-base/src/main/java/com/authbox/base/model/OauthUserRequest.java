@@ -1,11 +1,13 @@
 package com.authbox.base.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+@AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class UpdateOauthUserRequest {
+public class OauthUserRequest {
 
     private String id;
     private String username;

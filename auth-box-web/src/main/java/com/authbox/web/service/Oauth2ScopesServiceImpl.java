@@ -9,7 +9,8 @@ import com.authbox.base.model.OauthScope;
 import com.authbox.base.model.Organization;
 import com.authbox.web.config.Constants;
 import com.authbox.web.model.CreateScopeRequest;
-import com.authbox.web.model.DeleteScopesRequest;
+import com.authbox.web.model.ScopesRequest;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.val;
 import org.springframework.data.domain.Page;
@@ -59,7 +60,7 @@ public class Oauth2ScopesServiceImpl implements Oauth2ScopesService {
      * Returns a count of clients using specified scope for provided organization
      */
     @Override
-    public long countClientsUsingScopeId(final Organization organization, final DeleteScopesRequest request) {
+    public long countClientsUsingScopeId(final Organization organization, final ScopesRequest request) {
         request.scopeIds.stream().parallel().forEach(scopeId -> {
             val oauthScope = oauthScopeDao.getById(scopeId);
             if (oauthScope.isEmpty()) {
@@ -108,6 +109,7 @@ public class Oauth2ScopesServiceImpl implements Oauth2ScopesService {
      * Updates scope for provided organization using specified OauthScopeDto
      */
     @Override
+    @Transactional
     public OauthScopeDto updateScope(final Organization organization, final OauthScopeDto updatedOauthScope) {
         if (isEmpty(updatedOauthScope.getScope())) {
             throw new BadRequestException("Scope can not be empty");
@@ -141,11 +143,11 @@ public class Oauth2ScopesServiceImpl implements Oauth2ScopesService {
      * Deletes scopes for provided organization using DeleteScopesRequest.scopeIds
      */
     @Override
-    public void deleteScope(final Organization organization, final DeleteScopesRequest deleteScopesRequest) {
-        if (isEmpty(deleteScopesRequest.scopeIds)) {
+    public void deleteScope(final Organization organization, final ScopesRequest scopesRequest) {
+        if (isEmpty(scopesRequest.scopeIds)) {
             throw new BadRequestException("Scope can not be empty");
         }
-        deleteScopesRequest.scopeIds
+        scopesRequest.scopeIds
                 .forEach(scopeId -> {
                     val oauthScope = oauthScopeDao.getById(scopeId);
                     if (oauthScope.isEmpty()) {

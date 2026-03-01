@@ -3,9 +3,12 @@ package com.authbox.web.service;
 import com.authbox.base.model.OauthScope;
 import com.authbox.base.model.Organization;
 import com.authbox.web.model.CreateScopeRequest;
-import com.authbox.web.model.DeleteScopesRequest;
+import com.authbox.web.model.ScopesRequest;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.data.domain.Page;
 
 import java.time.Instant;
@@ -25,7 +28,7 @@ public interface Oauth2ScopesService {
     /**
      * Returns a count of clients using specified scope for provided organization
      */
-    long countClientsUsingScopeId(Organization organization, DeleteScopesRequest request);
+    long countClientsUsingScopeId(Organization organization, ScopesRequest request);
 
     /**
      * Creates scope for provided organization using CreateScopeRequest
@@ -40,18 +43,21 @@ public interface Oauth2ScopesService {
     /**
      * Deletes scopes for provided organization using DeleteScopesRequest.scopeIds
      */
-    void deleteScope(Organization organization, DeleteScopesRequest deleteScopesRequest);
+    void deleteScope(Organization organization, ScopesRequest scopesRequest);
 
+    @AllArgsConstructor
+    @NoArgsConstructor
     @Builder
     @Getter
     class OauthScopeDto {
+        @Setter
         private String id;
         private Instant createTime;
         private String description;
         private String scope;
         private String organizationId;
 
-        static OauthScopeDto fromEntity(OauthScope entity) {
+        static OauthScopeDto fromEntity(final OauthScope entity) {
             return OauthScopeDto.builder()
                     .id(entity.getId())
                     .createTime(entity.getCreateTime())
