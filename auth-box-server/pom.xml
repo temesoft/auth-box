@@ -11,7 +11,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
-        <jacoco-maven-plugin.version>0.8.14</jacoco-maven-plugin.version>
+        <aerogear-otp-java.version>1.0.0</aerogear-otp-java.version>
     </properties>
 
     <parent>
@@ -30,7 +30,7 @@
         <dependency>
             <groupId>org.jboss.aerogear</groupId>
             <artifactId>aerogear-otp-java</artifactId>
-            <version>1.0.0</version>
+            <version>${aerogear-otp-java.version}</version>
         </dependency>
         <dependency>
             <groupId>com.mysql</groupId>
@@ -48,7 +48,7 @@
             <plugin>
                 <groupId>pl.project13.maven</groupId>
                 <artifactId>git-commit-id-plugin</artifactId>
-                <version>4.9.10</version>
+                <version>${git-commit-id-plugin.version}</version>
                 <executions>
                     <execution>
                         <goals>
@@ -64,10 +64,6 @@
                     <generateGitPropertiesFilename>src/main/resources/git.properties</generateGitPropertiesFilename>
                     <failOnNoGitDirectory>true</failOnNoGitDirectory>
                 </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
             </plugin>
             <plugin>
                 <groupId>org.jacoco</groupId>
@@ -102,7 +98,7 @@
                                         <limit>
                                             <counter>LINE</counter>
                                             <value>COVEREDRATIO</value>
-                                            <minimum>0.8500</minimum>
+                                            <minimum>${jacoco.coverage.ration}</minimum>
                                         </limit>
                                     </limits>
                                 </rule>

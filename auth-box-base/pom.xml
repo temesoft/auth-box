@@ -11,7 +11,6 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
-        <jacoco-maven-plugin.version>0.8.14</jacoco-maven-plugin.version>
     </properties>
 
     <parent>
@@ -60,7 +59,7 @@
                                         <limit>
                                             <counter>LINE</counter>
                                             <value>COVEREDRATIO</value>
-                                            <minimum>0.8500</minimum>
+                                            <minimum>${jacoco.coverage.ration}</minimum>
                                         </limit>
                                     </limits>
                                 </rule>
