@@ -24,7 +24,7 @@
         <git-commit-id-plugin.version>4.9.10</git-commit-id-plugin.version>
 
         <!-- minimum JaCoCo test coverage ratio -->
-        <jacoco.coverage.ration>0.8600</jacoco.coverage.ration>
+        <jacoco.coverage.ratio>0.8600</jacoco.coverage.ratio>
 
         <springdoc.version>3.0.1</springdoc.version>
         <ksuid.version>1.1.4</ksuid.version>
