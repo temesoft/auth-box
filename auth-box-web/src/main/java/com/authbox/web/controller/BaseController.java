@@ -8,6 +8,7 @@ import com.authbox.base.exception.BadRequestException;
 import com.authbox.base.model.Organization;
 import com.authbox.base.model.User;
 import com.authbox.web.model.UserDto;
+import com.google.common.annotations.VisibleForTesting;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.slf4j.MDC;
@@ -46,7 +47,7 @@ public class BaseController {
         val organizationId = Optional.ofNullable(details.get(OAUTH2_ATTR_ORGANIZATION_ID));
 
         if (organizationId.isEmpty()) {
-            throw new BadRequestException("Token details do not contain organization_id");
+            throw new BadRequestException("Token details do not contain organization id");
         }
         return getOrganization(organizationId.get().toString());
     }
@@ -71,7 +72,8 @@ public class BaseController {
         return user;
     }
 
-    private Map<String, Object> getTokenAttributes(final Principal principal) {
+    @VisibleForTesting
+    Map<String, Object> getTokenAttributes(final Principal principal) {
         if (principal instanceof BearerTokenAuthentication p) {
             return p.getTokenAttributes();
         } else if (principal instanceof AbstractAuthenticationToken p) {
