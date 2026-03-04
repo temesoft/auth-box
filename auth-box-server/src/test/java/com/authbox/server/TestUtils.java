@@ -17,6 +17,7 @@ import static org.mockito.Mockito.verify;
 public class TestUtils {
 
     private TestUtils() {
+        throw new IllegalStateException("Use static methods directly, without using constructor");
     }
 
     public static void assertLogEntryContains(final AccessLogService accessLogService,

@@ -11,6 +11,7 @@ public class IdUtilsTest {
         assertThat(IdUtils.createId())
                 .isNotBlank()
                 .hasSize(27)
+                .matches("^[a-zA-Z0-9]+$")
                 .isNotEqualTo(IdUtils.createId());
     }
 }

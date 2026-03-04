@@ -19,6 +19,7 @@ import com.authbox.server.service.ScopeServiceImpl;
 import com.authbox.server.service.TokenDetailsService;
 import com.authbox.server.service.TokenDetailsServiceImpl;
 import io.micrometer.core.instrument.MeterRegistry;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -31,8 +32,8 @@ import java.time.Clock;
         DaoConfiguration.class,
         StartupTasksConfiguration.class,
         ExceptionHandlerConfiguration.class,
-        AppProperties.class
 })
+@EnableConfigurationProperties(AppProperties.class)
 public class ServicesConfiguration {
 
     @Bean

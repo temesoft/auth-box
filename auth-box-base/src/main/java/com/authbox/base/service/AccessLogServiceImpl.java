@@ -8,6 +8,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.util.concurrent.Uninterruptibles;
 import io.micrometer.core.instrument.MeterRegistry;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -15,6 +16,8 @@ import org.springframework.data.domain.PageRequest;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -27,12 +30,15 @@ import static com.authbox.base.dao.AccessLogDaoImpl.LIST_CRITERIA_REQUEST_ID;
 import static com.authbox.base.util.IdUtils.createId;
 import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static org.apache.commons.lang3.ArrayUtils.addFirst;
 import static org.apache.commons.lang3.ArrayUtils.isEmpty;
 
 @Slf4j
 public class AccessLogServiceImpl implements AccessLogService, DisposableBean {
 
-    private final BlockingQueue<AccessLog> QUEUE = new LinkedBlockingDeque<>();
+    private static final int MAX_BATCH_SIZE = 100;
+    private static final int MAX_QUEUE_SIZE = 10_000;
+    private final BlockingQueue<AccessLog> QUEUE = new LinkedBlockingDeque<>(MAX_QUEUE_SIZE);
 
     private final AppProperties appProperties;
     private final Clock defaultClock;
@@ -71,8 +77,9 @@ public class AccessLogServiceImpl implements AccessLogService, DisposableBean {
     }
 
     @Override
-    public void destroy() {
+    public void destroy() throws InterruptedException {
         queueConsumerThread.interrupt();
+        queueConsumerThread.join(10_000);
     }
 
     @Override
@@ -89,7 +96,12 @@ public class AccessLogServiceImpl implements AccessLogService, DisposableBean {
 
     @Override
     public void processCachedAccessLogs() {
-        QUEUE.addAll(accessLogThreadCache.getAll());
+        for (final AccessLog accessLog : accessLogThreadCache.getAll()) {
+            if (!QUEUE.offer(accessLog)) {
+                log.warn("Access log queue is full (capacity={}), dropping log entry id='{}'",
+                        MAX_QUEUE_SIZE, accessLog.getId());
+            }
+        }
         accessLogThreadCache.cleanup();
     }
 
@@ -113,18 +125,29 @@ public class AccessLogServiceImpl implements AccessLogService, DisposableBean {
         @Override
         public void run() {
             try {
-                while (true) {
-                    final Optional<AccessLog> accessLog = Optional.ofNullable(
-                            QUEUE.poll(appProperties.getAccessQueueProcessingPull().toMillis(), MILLISECONDS)
-                    );
-                    accessLog.ifPresent(accessLogDao::insert);
-                    if (accessLog.isEmpty() && !Objects.equals(appProperties.getAccessQueueProcessingIdle(), Duration.ZERO)) {
-                        Uninterruptibles.sleepUninterruptibly(appProperties.getAccessQueueProcessingIdle());
+                while (!Thread.currentThread().isInterrupted()) {
+                    final AccessLog accessLog = QUEUE.poll(appProperties.getAccessQueueProcessingPull().toMillis(), MILLISECONDS);
+                    if (accessLog != null) {
+                        val batch = new ArrayList<AccessLog>();
+                        batch.add(accessLog);
+                        QUEUE.drainTo(batch, MAX_BATCH_SIZE - 1);
+                        accessLogDao.insertBatch(batch);
                     }
                 }
-            } catch (final Exception e) {
-                log.info("Stopping '{}' thread, received exception: {}", this.getClass().getSimpleName(), e.getMessage());
+            } catch (final InterruptedException e) {
                 Thread.currentThread().interrupt();
+            } catch (final Exception e) {
+                log.error("Error persisting access log batch, will retry on next cycle", e);
+            }
+            // Drain remaining entries on graceful shutdown
+            val remaining = new ArrayList<AccessLog>();
+            QUEUE.drainTo(remaining);
+            if (!remaining.isEmpty()) {
+                try {
+                    accessLogDao.insertBatch(remaining);
+                } catch (final Exception e) {
+                    log.error("Failed to persist {} access log entries during shutdown", remaining.size(), e);
+                }
             }
         }
     }

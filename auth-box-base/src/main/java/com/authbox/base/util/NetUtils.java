@@ -12,7 +12,13 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  */
 public class NetUtils {
 
+    /**
+     * Private constructor to prevent instantiation.
+     *
+     * @throws IllegalStateException if called.
+     */
     private NetUtils() {
+        throw new IllegalStateException("Use static methods directly, without using constructor");
     }
 
     /**
