@@ -8,12 +8,16 @@ import lombok.val;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.time.Duration;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -30,6 +34,9 @@ public class AccessLogDaoImpl implements AccessLogDao {
     public static final String LIST_CRITERIA_ORGANIZATION_ID = "organizationId";
     public static final String LIST_CRITERIA_REQUEST_ID = "requestId";
 
+    private static final String SQL_INSERT = "INSERT INTO access_log " +
+            "(id, create_time, organization_id, oauth_token_id, client_id, request_id, source, duration_ms, message, error, status_code, ip, user_agent) " +
+            "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
     private static final String SQL_LIST_BY = "SELECT id, create_time, organization_id, oauth_token_id, client_id, request_id, source, duration_ms, message, error, status_code, ip, user_agent " +
             "FROM access_log %s " +
             "ORDER BY create_time ASC, duration_ms ASC " +
@@ -54,7 +61,23 @@ public class AccessLogDaoImpl implements AccessLogDao {
     @Override
     public void insert(final AccessLog accessLog) {
         log.debug("Inserting: {}", accessLog);
-        accessLogRepository.save(accessLog);
+        jdbcTemplate.update(SQL_INSERT, ps -> setInsertParameters(ps, accessLog));
+    }
+
+    @Override
+    public void insertBatch(final List<AccessLog> accessLogs) {
+        log.debug("Batch inserting: {} entries", accessLogs.size());
+        jdbcTemplate.batchUpdate(SQL_INSERT, new BatchPreparedStatementSetter() {
+            @Override
+            public void setValues(final PreparedStatement ps, final int i) throws SQLException {
+                setInsertParameters(ps, accessLogs.get(i));
+            }
+
+            @Override
+            public int getBatchSize() {
+                return accessLogs.size();
+            }
+        });
     }
 
     @Override
@@ -137,5 +160,21 @@ public class AccessLogDaoImpl implements AccessLogDao {
                     .withMessage(rs.getString("message"))
                     .build();
         }
+    }
+
+    private void setInsertParameters(final PreparedStatement ps, final AccessLog accessLog) throws SQLException {
+        ps.setString(1, accessLog.getId());
+        ps.setTimestamp(2, accessLog.getCreateTime() != null ? Timestamp.from(accessLog.getCreateTime()) : null);
+        ps.setString(3, accessLog.getOrganizationId());
+        ps.setString(4, accessLog.getOauthTokenId());
+        ps.setString(5, accessLog.getClientId());
+        ps.setString(6, accessLog.getRequestId());
+        ps.setString(7, accessLog.getSource() != null ? accessLog.getSource().name() : null);
+        ps.setObject(8, accessLog.getDuration() != null ? accessLog.getDuration().toMillis() : null);
+        ps.setString(9, accessLog.getMessage());
+        ps.setString(10, accessLog.getError());
+        ps.setInt(11, accessLog.getStatusCode());
+        ps.setString(12, accessLog.getIp());
+        ps.setString(13, accessLog.getUserAgent());
     }
 }

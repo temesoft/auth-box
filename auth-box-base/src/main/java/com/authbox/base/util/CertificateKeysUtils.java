@@ -18,6 +18,13 @@ import java.security.spec.X509EncodedKeySpec;
 
 import static com.authbox.base.util.IdUtils.createId;
 
+/**
+ * Utility class for RSA cryptographic key operations.
+ * <p>
+ * Provides functionality to generate RSA key pairs using system-level OpenSSL commands
+ * and convert PEM-encoded strings into {@link PublicKey} and {@link PrivateKey} objects.
+ * Uses BouncyCastle as the underlying security provider.
+ */
 @Slf4j
 public final class CertificateKeysUtils {
 
@@ -29,10 +36,24 @@ public final class CertificateKeysUtils {
         Security.addProvider(new BouncyCastleProvider());
     }
 
+    /**
+     * Private constructor to prevent instantiation.
+     *
+     * @throws IllegalStateException if called.
+     */
     private CertificateKeysUtils() {
         throw new IllegalStateException("Use static methods directly, without using constructor");
     }
 
+    /**
+     * Generates a new 2048-bit RSA key pair by invoking the system OpenSSL binary.
+     * <p>
+     * Temporary files are created in the system's temp directory and deleted
+     * immediately after the keys are loaded into memory.
+     *
+     * @return An {@link RsaKeyPair} containing the PEM-encoded private and public keys.
+     * @throws IllegalStateException if OpenSSL execution fails or file I/O occurs.
+     */
     public static RsaKeyPair generateRsaKeyPair() {
         Path filenamePrivate = null;
         Path filenamePublic = null;
@@ -46,7 +67,6 @@ public final class CertificateKeysUtils {
                     Files.readString(filenamePublic)
             );
         } catch (final IOException | InterruptedException e) {
-            log.error("Unable to generate rsa key pair: {}", e.getMessage(), e);
             throw new IllegalStateException("Unable to generate rsa key pair: " + e.getMessage());
         } finally {
             if (filenamePrivate != null) {
@@ -58,6 +78,16 @@ public final class CertificateKeysUtils {
         }
     }
 
+    /**
+     * Converts a PEM-encoded string into a {@link PublicKey}.
+     * <p>
+     * This method strips standard RSA headers and footers, removes line separators,
+     * and decodes the Base64 content using an X509 specification.
+     *
+     * @param pem The PEM-encoded public key string.
+     * @return The reconstructed {@link PublicKey}.
+     * @throws IllegalArgumentException if the PEM string is malformed or invalid.
+     */
     public static PublicKey generatePublicKey(final String pem) throws IllegalArgumentException {
         try {
             val publicKeyPem = pem
@@ -71,11 +101,20 @@ public final class CertificateKeysUtils {
             val keySpec = new X509EncodedKeySpec(encoded);
             return keyFactory.generatePublic(keySpec);
         } catch (final Exception e) {
-            log.error("Unable to create public key: {}", e.getMessage());
             throw new IllegalArgumentException("Unable to create public key: " + e.getMessage());
         }
     }
 
+    /**
+     * Converts a PEM-encoded string into a {@link PrivateKey}.
+     * <p>
+     * This method strips standard RSA headers and footers, removes line separators,
+     * and decodes the Base64 content using a PKCS8 specification.
+     *
+     * @param pem The PEM-encoded private key string.
+     * @return The reconstructed {@link PrivateKey}.
+     * @throws IllegalArgumentException if the PEM string is malformed or invalid.
+     */
     public static PrivateKey generatePrivateKey(final String pem) throws IllegalArgumentException {
         try {
             val privateKeyPem = pem
@@ -89,7 +128,6 @@ public final class CertificateKeysUtils {
             val keySpec = new PKCS8EncodedKeySpec(encoded);
             return keyFactory.generatePrivate(keySpec);
         } catch (final Exception e) {
-            log.error("Unable to create private key: {}", e.getMessage());
             throw new IllegalArgumentException("Unable to create private key: " + e.getMessage());
         }
     }

@@ -23,8 +23,10 @@ import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.List;
 
 import static com.authbox.base.model.AccessLog.Source.Oauth2Server;
+import static com.authbox.base.util.IdUtils.createId;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.mockito.Mockito.reset;
@@ -41,7 +43,7 @@ import static org.mockito.Mockito.verify;
 )
 class AccessLogServiceTest extends SpringBootBaseTest {
 
-    private static final String ORGANIZATION_ID = Ksuid.newKsuid().toString();
+    private static final String ORGANIZATION_ID = createId();
 
     @MockitoSpyBean
     private AccessLogDao accessLogDao;
@@ -83,17 +85,21 @@ class AccessLogServiceTest extends SpringBootBaseTest {
         );
         val organization = organizationDao.getById(ORGANIZATION_ID);
         assertThat(organization).isPresent();
-        val requestId = Ksuid.newKsuid().toString();
-        service.create(AccessLog.builder()
+        val requestId = createId();
+        service.create(
+                AccessLog.builder()
                         .withOrganizationId(organization.get().getId())
                         .withRequestId(requestId)
-                        .withDuration(Duration.ofSeconds(2))
-                , "Test message");
+                        .withDuration(Duration.ofSeconds(2)),
+                "Test message"
+        );
         service.processCachedAccessLogs();
         await().atMost(Duration.ofSeconds(2)).until(() -> service.getQueue().isEmpty());
-        val captor = ArgumentCaptor.forClass(AccessLog.class);
-        verify(accessLogDao, times(1)).insert(captor.capture());
-        val accessLog = captor.getValue();
+        final ArgumentCaptor<List<AccessLog>> captor = ArgumentCaptor.captor();
+        verify(accessLogDao, times(1)).insertBatch(captor.capture());
+        val accessLogList = captor.getValue();
+        assertThat(accessLogList).isNotEmpty().hasSize(1);
+        val accessLog = accessLogList.getFirst();
         assertThat(accessLog).isNotNull();
         assertThat(accessLog.getId()).isNotNull();
         assertThat(accessLog.getCreateTime()).isNotNull();
