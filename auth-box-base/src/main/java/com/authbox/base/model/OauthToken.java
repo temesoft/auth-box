@@ -2,6 +2,7 @@ package com.authbox.base.model;
 
 import com.authbox.base.util.ListOfStringsConverter;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import jakarta.annotation.Nullable;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
@@ -55,6 +56,7 @@ public class OauthToken implements Serializable {
     @Enumerated(STRING)
     private TokenType tokenType;
     private String ip;
+    @Nullable
     private String userAgent;
     private String requestId;
     private String linkedTokenId;
