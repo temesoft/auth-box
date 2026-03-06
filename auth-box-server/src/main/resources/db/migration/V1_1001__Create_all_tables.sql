@@ -80,7 +80,7 @@ CREATE TABLE IF NOT EXISTS oauth_token (
   oauth_user_id     VARCHAR(36),
   token_type        VARCHAR(24)   NOT NULL,
   ip                VARCHAR(15)   NOT NULL,
-  user_agent        TEXT          NOT NULL,
+  user_agent        TEXT,
   request_id        VARCHAR(36)   NOT NULL,
   linked_token_id   VARCHAR(36),
   PRIMARY KEY (id)
