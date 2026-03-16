@@ -1,6 +1,7 @@
 package com.authbox.web.controller;
 
 import com.authbox.base.dao.OauthUserRepository;
+import com.authbox.base.model.ErrorResponse;
 import com.authbox.base.model.OauthUserRequest;
 import com.authbox.web.Application;
 import com.authbox.web.TestUtils;
@@ -23,6 +24,7 @@ import org.springframework.test.web.servlet.client.RestTestClient;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static com.authbox.base.util.IdUtils.createId;
 import static com.authbox.web.TestConstants.VALID_OAUTH_USER_ID;
@@ -66,20 +68,21 @@ class Oauth2UsersControllerTest {
         assertThat(pageOfUsers)
                 .isNotNull()
                 .containsKey("content")
-                .containsKey("page");
+                .containsKey("pageable");
     }
 
     @Test
     void testGetOauth2UserById() {
         val badId = createId();
         assertThat(
-                restTestClient.get()
+                Objects.requireNonNull(restTestClient.get()
                         .uri(API_PREFIX + "/oauth2-user/" + badId)
                         .header("cookie", jSessionId)
                         .exchange()
                         .expectStatus().isNotFound()
-                        .expectBody(String.class)
-                        .returnResult().getResponseBody()
+                        .expectBody(ErrorResponse.class)
+                        .returnResult().getResponseBody())
+                        .message
         ).contains("User not found by id: " + badId);
 
         val user = restTestClient.get()
@@ -106,25 +109,27 @@ class Oauth2UsersControllerTest {
 
         val badId = createId();
         assertThat(
-                restTestClient.post()
+                Objects.requireNonNull(restTestClient.post()
                         .uri(API_PREFIX + "/oauth2-user/" + badId + "/password-reset")
                         .header("cookie", jSessionId)
                         .body(passwordChangeRequest)
                         .exchange()
                         .expectStatus().isNotFound()
-                        .expectBody(String.class)
-                        .returnResult().getResponseBody()
+                        .expectBody(ErrorResponse.class)
+                        .returnResult().getResponseBody())
+                        .message
         ).contains("User not found by id: " + badId);
 
         assertThat(
-                restTestClient.post()
+                Objects.requireNonNull(restTestClient.post()
                         .uri(API_PREFIX + "/oauth2-user/" + VALID_OAUTH_USER_ID + "/password-reset")
                         .header("cookie", jSessionId)
                         .body(passwordChangeRequest)
                         .exchange()
                         .expectStatus().isBadRequest()
-                        .expectBody(String.class)
-                        .returnResult().getResponseBody()
+                        .expectBody(ErrorResponse.class)
+                        .returnResult().getResponseBody())
+                        .message
         ).contains("New password and new password 2 do not match");
 
         passwordChangeRequest = new PasswordChangeRequest(
@@ -178,14 +183,15 @@ class Oauth2UsersControllerTest {
 
         val badUserId = createId();
         assertThat(
-                restTestClient.get()
+                Objects.requireNonNull(restTestClient.get()
                         .uri(API_PREFIX + "/oauth2-user/" + badUserId + "/2fa-qr-code")
                         .header("cookie", jSessionId)
                         .exchange()
                         .expectStatus().isNotFound()
-                        .expectBody(String.class)
+                        .expectBody(ErrorResponse.class)
                         .returnResult()
-                        .getResponseBody()
+                        .getResponseBody())
+                        .message
         ).contains("User not found by id: " + badUserId);
     }
 
@@ -221,15 +227,16 @@ class Oauth2UsersControllerTest {
 
         val badUserId = createId();
         assertThat(
-                restTestClient.post()
+                Objects.requireNonNull(restTestClient.post()
                         .uri(API_PREFIX + "/oauth2-user/" + badUserId)
                         .header("cookie", jSessionId)
                         .body(updateOauthUserRequest)
                         .exchange()
                         .expectStatus().isNotFound()
-                        .expectBody(String.class)
+                        .expectBody(ErrorResponse.class)
                         .returnResult()
-                        .getResponseBody()
+                        .getResponseBody())
+                        .message
         ).contains("User not found by id: " + badUserId);
 
         updateOauthUserRequest = new OauthUserRequest(
@@ -268,14 +275,15 @@ class Oauth2UsersControllerTest {
                 false
         );
         assertThat(
-                restTestClient.post()
+                Objects.requireNonNull(restTestClient.post()
                         .uri(API_PREFIX + "/oauth2-user/" + user.getId())
                         .header("cookie", jSessionId)
                         .body(updateOauthUserRequest)
                         .exchange()
                         .expectStatus().isBadRequest()
-                        .expectBody(String.class)
-                        .returnResult().getResponseBody()
+                        .expectBody(ErrorResponse.class)
+                        .returnResult().getResponseBody())
+                        .message
         ).contains("Username already exists: user1");
     }
 
@@ -296,15 +304,16 @@ class Oauth2UsersControllerTest {
                 false
         );
         assertThat(
-                restTestClient.post()
+                Objects.requireNonNull(restTestClient.post()
                         .uri(API_PREFIX + "/oauth2-user")
                         .header("cookie", jSessionId)
                         .body(oauthUserRequest)
                         .exchange()
                         .expectStatus().isBadRequest()
-                        .expectBody(String.class)
+                        .expectBody(ErrorResponse.class)
                         .returnResult()
-                        .getResponseBody()
+                        .getResponseBody())
+                        .message
         ).contains("Username can not be empty");
 
         oauthUserRequest = new OauthUserRequest(
@@ -316,15 +325,16 @@ class Oauth2UsersControllerTest {
                 false
         );
         assertThat(
-                restTestClient.post()
+                Objects.requireNonNull(restTestClient.post()
                         .uri(API_PREFIX + "/oauth2-user")
                         .header("cookie", jSessionId)
                         .body(oauthUserRequest)
                         .exchange()
                         .expectStatus().isBadRequest()
-                        .expectBody(String.class)
+                        .expectBody(ErrorResponse.class)
                         .returnResult()
-                        .getResponseBody()
+                        .getResponseBody())
+                        .message
         ).contains("Username already exists: user1");
     }
 
@@ -340,36 +350,39 @@ class Oauth2UsersControllerTest {
                 .expectStatus().isOk();
 
         assertThat(
-                restTestClient.get()
+                Objects.requireNonNull(restTestClient.get()
                         .uri(API_PREFIX + "/oauth2-user/" + user.getId())
                         .header("cookie", jSessionId)
                         .exchange()
                         .expectStatus().isNotFound()
-                        .expectBody(String.class)
-                        .returnResult().getResponseBody()
+                        .expectBody(ErrorResponse.class)
+                        .returnResult().getResponseBody())
+                        .message
         ).contains("ser not found by id: " + user.getId());
 
         assertThat(
-                restTestClient.method(HttpMethod.DELETE)
+                Objects.requireNonNull(restTestClient.method(HttpMethod.DELETE)
                         .uri(API_PREFIX + "/oauth2-user")
                         .header("cookie", jSessionId)
                         .body(new DeleteUsersRequest(List.of())) // empty list will fail
                         .exchange()
                         .expectStatus().isBadRequest()
-                        .expectBody(String.class)
-                        .returnResult().getResponseBody()
+                        .expectBody(ErrorResponse.class)
+                        .returnResult().getResponseBody())
+                        .message
         ).contains("User IDs can not be empty");
 
         val badUserId = createId();
         assertThat(
-                restTestClient.method(HttpMethod.DELETE)
+                Objects.requireNonNull(restTestClient.method(HttpMethod.DELETE)
                         .uri(API_PREFIX + "/oauth2-user")
                         .header("cookie", jSessionId)
                         .body(new DeleteUsersRequest(List.of(badUserId))) // bad user id in list will fail
                         .exchange()
                         .expectStatus().isNotFound()
-                        .expectBody(String.class)
-                        .returnResult().getResponseBody()
+                        .expectBody(ErrorResponse.class)
+                        .returnResult().getResponseBody())
+                        .message
         ).contains("User not found by id: " + badUserId);
     }
 

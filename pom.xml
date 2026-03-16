@@ -27,6 +27,7 @@
         <jacoco.coverage.ratio>0.8600</jacoco.coverage.ratio>
 
         <springdoc.version>3.0.1</springdoc.version>
+        <quartz-plus.version>1.0.1</quartz-plus.version>
         <ksuid.version>1.1.4</ksuid.version>
         <h2.version>2.4.240</h2.version>
         <errorprone.version>2.48.0</errorprone.version>

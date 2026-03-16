@@ -66,7 +66,7 @@ public class Oauth2ClientsController extends BaseController {
         return oauth2ClientsService.createNewKeys(clientId, getOrganization());
     }
 
-    @PostMapping(value = "/{id}/assign-keys", consumes = "application/x-www-form-urlencoded")
+    @PostMapping(value = "/{id}/assign-keys", consumes = {"application/x-www-form-urlencoded", "application/json"})
     @PreAuthorize("hasAuthority('SCOPE_organization/write') OR isAuthenticated()")
     public OauthClientDto assignKeys(
             @PathVariable("id") final String clientId,

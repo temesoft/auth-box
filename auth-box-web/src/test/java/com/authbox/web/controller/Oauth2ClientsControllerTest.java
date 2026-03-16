@@ -69,7 +69,7 @@ class Oauth2ClientsControllerTest {
         assertThat(pageOfClients)
                 .isNotNull()
                 .containsKey("content")
-                .containsKey("page");
+                .containsKey("pageable");
     }
 
     @Test
@@ -204,6 +204,8 @@ class Oauth2ClientsControllerTest {
         restTestClient.post()
                 .uri(API_PREFIX + "/oauth2-client/" + client.getId() + "/assign-keys")
                 .header("cookie", jSessionId)
+                .header("accept", "application/json")
+                .header("content-type", "application/x-www-form-urlencoded")
                 .body(formData)
                 .exchange()
                 .expectStatus().isOk();

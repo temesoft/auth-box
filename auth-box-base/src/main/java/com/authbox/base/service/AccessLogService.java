@@ -2,8 +2,10 @@ package com.authbox.base.service;
 
 import com.authbox.base.model.AccessLog;
 import com.authbox.base.model.Organization;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.springframework.data.domain.Page;
 
 import java.time.Duration;
@@ -17,8 +19,12 @@ public interface AccessLogService {
 
     Page<AccessLogDto> getAccessLogByRequestId(Organization organization, String requestId);
 
+    int clearAccessLogEntriesBeforeDate(final Instant date);
+
     @Builder
     @Getter
+    @AllArgsConstructor
+    @NoArgsConstructor
     class AccessLogDto {
         private String id;
         private Instant createTime;
@@ -26,7 +32,7 @@ public interface AccessLogService {
         private String oauthTokenId;
         private String clientId;
         private String requestId;
-        private com.authbox.base.model.AccessLog.Source source;
+        private AccessLog.Source source;
         private Duration duration;
         private String message;
         private String error;

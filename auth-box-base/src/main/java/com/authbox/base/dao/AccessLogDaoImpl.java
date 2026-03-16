@@ -17,6 +17,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -132,6 +133,11 @@ public class AccessLogDaoImpl implements AccessLogDao {
                 new AccessLogMapper()
         );
         return new PageImpl<>(resultList, pageable, count);
+    }
+
+    @Override
+    public int deleteAllBeforeDate(final Instant date) {
+        return jdbcTemplate.update("DELETE FROM access_log WHERE create_time < ?", date);
     }
 
     private void addAndOptionally(final StringBuilder whereQuery) {

@@ -40,7 +40,11 @@
             <artifactId>auth-box-base</artifactId>
             <version>${project.version}</version>
         </dependency>
-
+        <dependency>
+            <groupId>io.github.temesoft</groupId>
+            <artifactId>quartz-plus</artifactId>
+            <version>${quartz-plus.version}</version>
+        </dependency>
         <dependency>
             <groupId>com.nimbusds</groupId>
             <artifactId>oauth2-oidc-sdk</artifactId>
@@ -148,8 +152,14 @@
                     <dotGitDirectory>${project.basedir}/.git</dotGitDirectory>
                     <dateFormat>MM-dd-yyyy '@' HH:mm:ss Z</dateFormat>
                     <generateGitPropertiesFile>true</generateGitPropertiesFile>
-                    <generateGitPropertiesFilename>src/main/resources/git.properties</generateGitPropertiesFilename>
+                    <generateGitPropertiesFilename>target/classes/git.properties</generateGitPropertiesFilename>
                     <failOnNoGitDirectory>true</failOnNoGitDirectory>
+                    <excludeProperties>
+                        <excludeProperty>git.commit.user.*</excludeProperty>
+                        <excludeProperty>git.build.user.*</excludeProperty>
+                        <excludeProperty>git.remote.*</excludeProperty>
+                        <excludeProperty>git.commit.message.*</excludeProperty>
+                    </excludeProperties>
                 </configuration>
             </plugin>
             <plugin>

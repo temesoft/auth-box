@@ -1,5 +1,6 @@
 package com.authbox.web.controller;
 
+import com.authbox.base.model.ErrorResponse;
 import com.authbox.web.Application;
 import com.authbox.web.TestUtils;
 import com.authbox.web.model.CreateAccountRequest;
@@ -23,6 +24,7 @@ import org.springframework.test.web.servlet.client.RestTestClient;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static com.authbox.base.util.IdUtils.createId;
 import static com.authbox.web.TestConstants.VALID_ORGANIZATION_ID;
@@ -140,16 +142,18 @@ class AccountControllerTest {
                 VALID_PASSWORD,
                 VALID_PASSWORD
         );
+
         assertThat(
-                restTestClient.post()
+                Objects.requireNonNull(restTestClient.post()
                         .uri(API_PREFIX + "/account/password")
                         .header("cookie", jSessionId)
                         .body(passwordChangeRequest)
                         .exchange()
                         .expectStatus().isBadRequest()
-                        .expectBody(String.class)
+                        .expectBody(ErrorResponse.class)
                         .returnResult()
-                        .getResponseBody()
+                        .getResponseBody())
+                        .message
         ).contains("Old password can not be empty");
 
         passwordChangeRequest = new PasswordChangeRequest(
@@ -158,15 +162,16 @@ class AccountControllerTest {
                 VALID_PASSWORD
         );
         assertThat(
-                restTestClient.post()
+                Objects.requireNonNull(restTestClient.post()
                         .uri(API_PREFIX + "/account/password")
                         .header("cookie", jSessionId)
                         .body(passwordChangeRequest)
                         .exchange()
                         .expectStatus().isBadRequest()
-                        .expectBody(String.class)
+                        .expectBody(ErrorResponse.class)
                         .returnResult()
-                        .getResponseBody()
+                        .getResponseBody())
+                        .message
         ).contains("Old password does not match");
 
         passwordChangeRequest = new PasswordChangeRequest(
@@ -175,15 +180,16 @@ class AccountControllerTest {
                 "" // empty password will trigger failure
         );
         assertThat(
-                restTestClient.post()
+                Objects.requireNonNull(restTestClient.post()
                         .uri(API_PREFIX + "/account/password")
                         .header("cookie", jSessionId)
                         .body(passwordChangeRequest)
                         .exchange()
                         .expectStatus().isBadRequest()
-                        .expectBody(String.class)
+                        .expectBody(ErrorResponse.class)
                         .returnResult()
-                        .getResponseBody()
+                        .getResponseBody())
+                        .message
         ).contains("New password is empty or shorter than 6 characters");
 
         passwordChangeRequest = new PasswordChangeRequest(
@@ -192,15 +198,16 @@ class AccountControllerTest {
                 "password2" // second password does not match first will trigger failure
         );
         assertThat(
-                restTestClient.post()
+                Objects.requireNonNull(restTestClient.post()
                         .uri(API_PREFIX + "/account/password")
                         .header("cookie", jSessionId)
                         .body(passwordChangeRequest)
                         .exchange()
                         .expectStatus().isBadRequest()
-                        .expectBody(String.class)
+                        .expectBody(ErrorResponse.class)
                         .returnResult()
-                        .getResponseBody()
+                        .getResponseBody())
+                        .message
         ).contains("New password and new password 2 do not match");
     }
 
@@ -218,7 +225,7 @@ class AccountControllerTest {
         assertThat(pageOfUsers)
                 .isNotNull()
                 .containsKey("content")
-                .containsKey("page");
+                .containsKey("pageable");
     }
 
     @Test
@@ -239,14 +246,15 @@ class AccountControllerTest {
 
         val badUserId = createId();
         assertThat(
-                restTestClient.get()
+                Objects.requireNonNull(restTestClient.get()
                         .uri(API_PREFIX + "/account/" + badUserId)
                         .header("cookie", jSessionId)
                         .exchange()
                         .expectStatus().isNotFound()
-                        .expectBody(String.class)
+                        .expectBody(ErrorResponse.class)
                         .returnResult()
-                        .getResponseBody()
+                        .getResponseBody())
+                        .message
         ).contains("User not found by id: " + badUserId);
     }
 
@@ -272,14 +280,15 @@ class AccountControllerTest {
 
         val badUserId = createId();
         assertThat(
-                restTestClient.post()
+                Objects.requireNonNull(restTestClient.post()
                         .uri(API_PREFIX + "/account/" + badUserId)
                         .header("cookie", jSessionId)
                         .body(updateUserRequest)
                         .exchange()
                         .expectStatus().isNotFound()
-                        .expectBody(String.class)
-                        .returnResult().getResponseBody()
+                        .expectBody(ErrorResponse.class)
+                        .returnResult().getResponseBody())
+                        .message
         ).contains("User not found by id: " + badUserId);
 
 
@@ -295,14 +304,15 @@ class AccountControllerTest {
                 )
         );
         assertThat(
-                restTestClient.post()
+                Objects.requireNonNull(restTestClient.post()
                         .uri(API_PREFIX + "/account/" + VALID_USER_ID)
                         .header("cookie", jSessionId)
                         .body(updateUserRequest)
                         .exchange()
                         .expectStatus().isBadRequest()
-                        .expectBody(String.class)
-                        .returnResult().getResponseBody()
+                        .expectBody(ErrorResponse.class)
+                        .returnResult().getResponseBody())
+                        .message
         ).contains("Account username can not be empty");
 
         updateUserRequest = new UpdateUserRequest(
@@ -317,14 +327,15 @@ class AccountControllerTest {
                 )
         );
         assertThat(
-                restTestClient.post()
+                Objects.requireNonNull(restTestClient.post()
                         .uri(API_PREFIX + "/account/" + VALID_USER_ID)
                         .header("cookie", jSessionId)
                         .body(updateUserRequest)
                         .exchange()
                         .expectStatus().isBadRequest()
-                        .expectBody(String.class)
-                        .returnResult().getResponseBody()
+                        .expectBody(ErrorResponse.class)
+                        .returnResult().getResponseBody())
+                        .message
         ).contains("Account name can not be empty");
 
         updateUserRequest = new UpdateUserRequest(
@@ -336,14 +347,15 @@ class AccountControllerTest {
                 List.of() // empty roles will trigger failure
         );
         assertThat(
-                restTestClient.post()
+                Objects.requireNonNull(restTestClient.post()
                         .uri(API_PREFIX + "/account/" + VALID_USER_ID)
                         .header("cookie", jSessionId)
                         .body(updateUserRequest)
                         .exchange()
                         .expectStatus().isBadRequest()
-                        .expectBody(String.class)
-                        .returnResult().getResponseBody()
+                        .expectBody(ErrorResponse.class)
+                        .returnResult().getResponseBody())
+                        .message
         ).contains("Account access roles can not be empty");
     }
 
@@ -365,26 +377,28 @@ class AccountControllerTest {
                 .expectStatus().isNotFound();
 
         assertThat(
-                restTestClient.method(HttpMethod.DELETE)
+                Objects.requireNonNull(restTestClient.method(HttpMethod.DELETE)
                         .uri(API_PREFIX + "/account")
                         .header("cookie", jSessionId)
                         .body(new DeleteAccountsRequest(List.of(VALID_USER_ID)))
                         .exchange()
                         .expectStatus().isBadRequest()
-                        .expectBody(String.class)
-                        .returnResult().getResponseBody()
+                        .expectBody(ErrorResponse.class)
+                        .returnResult().getResponseBody())
+                        .message
         ).contains("User is unable to remove self");
 
         val badUserId = createId();
         assertThat(
-                restTestClient.method(HttpMethod.DELETE)
+                Objects.requireNonNull(restTestClient.method(HttpMethod.DELETE)
                         .uri(API_PREFIX + "/account")
                         .header("cookie", jSessionId)
                         .body(new DeleteAccountsRequest(List.of(badUserId)))
                         .exchange()
                         .expectStatus().isNotFound()
-                        .expectBody(String.class)
-                        .returnResult().getResponseBody()
+                        .expectBody(ErrorResponse.class)
+                        .returnResult().getResponseBody())
+                        .message
         ).contains("User not found by id: " + badUserId);
     }
 
@@ -410,15 +424,16 @@ class AccountControllerTest {
                 UserRole.ROLE_USER
         );
         assertThat(
-                restTestClient.post()
+                Objects.requireNonNull(restTestClient.post()
                         .uri(API_PREFIX + "/account/create")
                         .header("cookie", jSessionId)
                         .body(createAccountRequest)
                         .exchange()
                         .expectStatus().isBadRequest()
-                        .expectBody(String.class)
+                        .expectBody(ErrorResponse.class)
                         .returnResult()
-                        .getResponseBody()
+                        .getResponseBody())
+                        .message
         ).contains("Account username can not be empty");
 
         createAccountRequest = new CreateAccountRequest(
@@ -429,15 +444,16 @@ class AccountControllerTest {
                 UserRole.ROLE_USER
         );
         assertThat(
-                restTestClient.post()
+                Objects.requireNonNull(restTestClient.post()
                         .uri(API_PREFIX + "/account/create")
                         .header("cookie", jSessionId)
                         .body(createAccountRequest)
                         .exchange()
                         .expectStatus().isBadRequest()
-                        .expectBody(String.class)
+                        .expectBody(ErrorResponse.class)
                         .returnResult()
-                        .getResponseBody()
+                        .getResponseBody())
+                        .message
         ).contains("Account name can not be empty");
 
         createAccountRequest = new CreateAccountRequest(
@@ -448,15 +464,16 @@ class AccountControllerTest {
                 UserRole.ROLE_USER
         );
         assertThat(
-                restTestClient.post()
+                Objects.requireNonNull(restTestClient.post()
                         .uri(API_PREFIX + "/account/create")
                         .header("cookie", jSessionId)
                         .body(createAccountRequest)
                         .exchange()
                         .expectStatus().isBadRequest()
-                        .expectBody(String.class)
+                        .expectBody(ErrorResponse.class)
                         .returnResult()
-                        .getResponseBody()
+                        .getResponseBody())
+                        .message
         ).contains("This username is taken, please select another user");
 
         createAccountRequest = new CreateAccountRequest(
@@ -467,15 +484,16 @@ class AccountControllerTest {
                 null // role can not be null - will trigger failure
         );
         assertThat(
-                restTestClient.post()
+                Objects.requireNonNull(restTestClient.post()
                         .uri(API_PREFIX + "/account/create")
                         .header("cookie", jSessionId)
                         .body(createAccountRequest)
                         .exchange()
                         .expectStatus().isBadRequest()
-                        .expectBody(String.class)
+                        .expectBody(ErrorResponse.class)
                         .returnResult()
-                        .getResponseBody()
+                        .getResponseBody())
+                        .message
         ).contains("Account access roles can not be empty");
     }
 

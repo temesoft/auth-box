@@ -63,7 +63,7 @@ class Oauth2ScopesControllerTest {
         assertThat(pageOfClients)
                 .isNotNull()
                 .containsKey("content")
-                .containsKey("page");
+                .containsKey("pageable");
     }
 
     @Test
