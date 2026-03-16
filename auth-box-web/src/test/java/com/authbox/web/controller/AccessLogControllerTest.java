@@ -2,7 +2,9 @@ package com.authbox.web.controller;
 
 import com.authbox.base.dao.AccessLogRepository;
 import com.authbox.base.model.AccessLog;
+import com.authbox.base.service.AccessLogService;
 import com.authbox.web.Application;
+import com.authbox.web.RestPage;
 import com.authbox.web.TestUtils;
 import lombok.val;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,8 +13,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.client.RestTestClient;
+import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
 import java.time.Instant;
@@ -104,31 +108,33 @@ public class AccessLogControllerTest {
                         .build()
         );
 
-        val logByRequestId =
-                objectMapper.readTree(
-                        restTestClient.get().uri(API_PREFIX + "/access-log/" + requestId)
-                                .header("cookie", jSessionId)
-                                .exchange()
-                                .returnResult()
-                                .getResponseBodyContent()
-                );
-        assertThat(logByRequestId).isNotNull();
-        assertThat(logByRequestId.get("page")).isNotNull();
-        val pageDetails = logByRequestId.get("page");
-        assertThat(pageDetails.get("totalElements")).isNotNull();
-        assertThat(pageDetails.get("totalElements").intValue()).isEqualTo(1);
-        assertThat(pageDetails.get("totalPages")).isNotNull();
-        assertThat(pageDetails.get("totalPages").intValue()).isEqualTo(1);
-        assertThat(logByRequestId.get("content")).isNotNull();
+        val responseType = new ParameterizedTypeReference<RestPage<AccessLogService.AccessLogDto>>() {
+        };
+        val accessLogPage = restTestClient.get()
+                .uri(API_PREFIX + "/access-log/" + requestId)
+                .header("cookie", jSessionId)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(responseType) // Pass the type reference here
+                .returnResult()
+                .getResponseBody();
+
+
+        assertThat(accessLogPage).isNotNull();
+        assertThat(accessLogPage.getPageable()).isNotNull();
+        assertThat(accessLogPage.getTotalElements()).isEqualTo(1);
+        assertThat(accessLogPage.getTotalPages()).isEqualTo(1);
+        assertThat(accessLogPage.getContent()).isNotEmpty();
     }
 
     @Test
     public void testGetIpDetails_Success() {
-        val ipDetailsResult = restTestClient.get().uri(API_PREFIX + "/access-log/ip/" + IP)
+        val ipDetails = restTestClient.get().uri(API_PREFIX + "/access-log/ip/" + IP)
                 .header("cookie", jSessionId)
                 .exchange()
-                .returnResult();
-        val ipDetails = objectMapper.readTree(ipDetailsResult.getResponseBodyContent());
+                .expectBody(JsonNode.class)
+                .returnResult()
+                .getResponseBody();
         assertThat(ipDetails).isNotNull();
         assertThat(ipDetails.get("country_code")).isNotNull();
         assertThat(ipDetails.get("country_code").stringValue()).isEqualTo("US");
@@ -142,11 +148,12 @@ public class AccessLogControllerTest {
 
     @Test
     public void testGetIpDetails_Empty() {
-        val ipDetailsResult = restTestClient.get().uri(API_PREFIX + "/access-log/ip/1.2.3.4")
+        val ipDetails = restTestClient.get().uri(API_PREFIX + "/access-log/ip/1.2.3.4")
                 .header("cookie", jSessionId)
                 .exchange()
-                .returnResult();
-        val ipDetails = objectMapper.readTree(ipDetailsResult.getResponseBodyContent());
+                .expectBody(JsonNode.class)
+                .returnResult()
+                .getResponseBody();
         assertThat(ipDetails).isNotNull();
         assertThat(ipDetails.toString()).isEqualTo("{}");
     }

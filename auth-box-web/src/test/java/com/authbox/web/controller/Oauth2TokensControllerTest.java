@@ -1,5 +1,6 @@
 package com.authbox.web.controller;
 
+import com.authbox.base.model.ErrorResponse;
 import com.authbox.web.Application;
 import com.authbox.web.TestUtils;
 import com.authbox.web.model.DeleteTokensRequest;
@@ -18,6 +19,7 @@ import org.springframework.test.web.servlet.client.RestTestClient;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static com.authbox.base.util.HashUtils.sha256;
 import static com.authbox.base.util.IdUtils.createId;
@@ -54,13 +56,14 @@ class Oauth2TokensControllerTest {
     void testGetOauth2TokensByClientId() {
         val badClientId = createId();
         assertThat(
-                restTestClient.get()
+                Objects.requireNonNull(restTestClient.get()
                         .uri(API_PREFIX + "/oauth2-token/client/" + badClientId)
                         .header("cookie", jSessionId)
                         .exchange()
                         .expectStatus().isNotFound()
-                        .expectBody(String.class)
-                        .returnResult().getResponseBody()
+                        .expectBody(ErrorResponse.class)
+                        .returnResult().getResponseBody())
+                        .message
         ).contains("Oauth client not found by id: " + badClientId);
 
         val pageOfTokens = restTestClient.get()
@@ -75,20 +78,21 @@ class Oauth2TokensControllerTest {
         assertThat(pageOfTokens)
                 .isNotNull()
                 .containsKey("content")
-                .containsKey("page");
+                .containsKey("pageable");
     }
 
     @Test
     void testGetOauth2TokensByUserId() {
         val badUserId = createId();
         assertThat(
-                restTestClient.get()
+                Objects.requireNonNull(restTestClient.get()
                         .uri(API_PREFIX + "/oauth2-token/user/" + badUserId)
                         .header("cookie", jSessionId)
                         .exchange()
                         .expectStatus().isNotFound()
-                        .expectBody(String.class)
-                        .returnResult().getResponseBody()
+                        .expectBody(ErrorResponse.class)
+                        .returnResult().getResponseBody())
+                        .message
         ).contains("Oauth user not found by id: " + badUserId);
 
         val pageOfTokens = restTestClient.get()
@@ -103,7 +107,7 @@ class Oauth2TokensControllerTest {
         assertThat(pageOfTokens)
                 .isNotNull()
                 .containsKey("content")
-                .containsKey("page");
+                .containsKey("pageable");
     }
 
     @Test
@@ -120,20 +124,21 @@ class Oauth2TokensControllerTest {
         assertThat(pageOfTokens)
                 .isNotNull()
                 .containsKey("content")
-                .containsKey("page");
+                .containsKey("pageable");
     }
 
     @Test
     void testGetOauth2TokenByHash() {
         val badHash = sha256(createId());
         assertThat(
-                restTestClient.get()
+                Objects.requireNonNull(restTestClient.get()
                         .uri(API_PREFIX + "/oauth2-token/hash/" + badHash)
                         .header("cookie", jSessionId)
                         .exchange()
                         .expectStatus().isNotFound()
-                        .expectBody(String.class)
-                        .returnResult().getResponseBody()
+                        .expectBody(ErrorResponse.class)
+                        .returnResult().getResponseBody())
+                        .message
         ).contains("Oauth token not found by hash: " + badHash);
 
         val token = restTestClient.get()
@@ -155,13 +160,14 @@ class Oauth2TokensControllerTest {
     void testGetOauth2TokenByToken() {
         val badToken = createId();
         assertThat(
-                restTestClient.get()
+                Objects.requireNonNull(restTestClient.get()
                         .uri(API_PREFIX + "/oauth2-token/token/" + badToken)
                         .header("cookie", jSessionId)
                         .exchange()
                         .expectStatus().isNotFound()
-                        .expectBody(String.class)
-                        .returnResult().getResponseBody()
+                        .expectBody(ErrorResponse.class)
+                        .returnResult().getResponseBody())
+                        .message
         ).contains("Oauth token not found by token value: " + badToken);
 
         val token = restTestClient.get()
@@ -183,13 +189,14 @@ class Oauth2TokensControllerTest {
     void testGetOauth2TokenById() {
         val badId = createId();
         assertThat(
-                restTestClient.get()
+                Objects.requireNonNull(restTestClient.get()
                         .uri(API_PREFIX + "/oauth2-token/id/" + badId)
                         .header("cookie", jSessionId)
                         .exchange()
                         .expectStatus().isNotFound()
-                        .expectBody(String.class)
-                        .returnResult().getResponseBody()
+                        .expectBody(ErrorResponse.class)
+                        .returnResult().getResponseBody())
+                        .message
         ).contains("Oauth token not found by id: " + badId);
 
         val token = restTestClient.get()

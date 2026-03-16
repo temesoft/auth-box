@@ -1,5 +1,6 @@
 package com.authbox.web.controller;
 
+import com.authbox.base.model.ErrorResponse;
 import com.authbox.web.Application;
 import com.authbox.web.TestUtils;
 import com.authbox.web.service.OrganizationService;
@@ -17,6 +18,7 @@ import org.springframework.test.web.servlet.client.RestTestClient;
 
 import java.time.Instant;
 import java.util.Map;
+import java.util.Objects;
 
 import static com.authbox.base.util.IdUtils.createId;
 import static com.authbox.web.TestConstants.VALID_ORGANIZATION_ID;
@@ -107,48 +109,52 @@ class OrganizationController2Test {
 
         val organizationDto = OrganizationService.OrganizationDto.builder()
                 .build();
-        assertThat(restTestClient.post()
+        assertThat(Objects.requireNonNull(restTestClient.post()
                 .uri(API_PREFIX + "/organization")
                 .header("cookie", jSessionId)
                 .body(organizationDto)
                 .exchange()
                 .expectStatus().isBadRequest()
-                .expectBody(String.class)
-                .returnResult().getResponseBody()
+                .expectBody(ErrorResponse.class)
+                .returnResult().getResponseBody())
+                .message
         ).contains("Invalid organization id");
 
         organizationDto.setId(createId());
-        assertThat(restTestClient.post()
+        assertThat(Objects.requireNonNull(restTestClient.post()
                 .uri(API_PREFIX + "/organization")
                 .header("cookie", jSessionId)
                 .body(organizationDto)
                 .exchange()
                 .expectStatus().isBadRequest()
-                .expectBody(String.class)
-                .returnResult().getResponseBody()
+                .expectBody(ErrorResponse.class)
+                .returnResult().getResponseBody())
+                .message
         ).contains("Invalid organization id");
 
         organizationDto.setId(VALID_ORGANIZATION_ID);
         organizationDto.setDomainPrefix("incorrect-domain-prefix");
-        assertThat(restTestClient.post()
+        assertThat(Objects.requireNonNull(restTestClient.post()
                 .uri(API_PREFIX + "/organization")
                 .header("cookie", jSessionId)
                 .body(organizationDto)
                 .exchange()
                 .expectStatus().isBadRequest()
-                .expectBody(String.class)
-                .returnResult().getResponseBody()
+                .expectBody(ErrorResponse.class)
+                .returnResult().getResponseBody())
+                .message
         ).contains("Domain prefix can only contain letters and numbers");
 
         organizationDto.setDomainPrefix("localhost");
-        assertThat(restTestClient.post()
+        assertThat(Objects.requireNonNull(restTestClient.post()
                 .uri(API_PREFIX + "/organization")
                 .header("cookie", jSessionId)
                 .body(organizationDto)
                 .exchange()
                 .expectStatus().isBadRequest()
-                .expectBody(String.class)
-                .returnResult().getResponseBody()
+                .expectBody(ErrorResponse.class)
+                .returnResult().getResponseBody())
+                .message
         ).contains("Organization name can not be empty");
 
         organizationDto.setName(organization.getName());

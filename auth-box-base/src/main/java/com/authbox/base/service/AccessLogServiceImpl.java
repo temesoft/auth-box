@@ -5,7 +5,6 @@ import com.authbox.base.dao.AccessLogDao;
 import com.authbox.base.model.AccessLog;
 import com.authbox.base.model.Organization;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.util.concurrent.Uninterruptibles;
 import io.micrometer.core.instrument.MeterRegistry;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -14,13 +13,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
 import java.time.Clock;
-import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 
@@ -30,7 +25,6 @@ import static com.authbox.base.dao.AccessLogDaoImpl.LIST_CRITERIA_REQUEST_ID;
 import static com.authbox.base.util.IdUtils.createId;
 import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static org.apache.commons.lang3.ArrayUtils.addFirst;
 import static org.apache.commons.lang3.ArrayUtils.isEmpty;
 
 @Slf4j
@@ -114,6 +108,11 @@ public class AccessLogServiceImpl implements AccessLogService, DisposableBean {
                 ),
                 PageRequest.of(0, 100)
         ).map(AccessLogDto::fromEntity);
+    }
+
+    @Override
+    public int clearAccessLogEntriesBeforeDate(final Instant date) {
+        return accessLogDao.deleteAllBeforeDate(date);
     }
 
     @VisibleForTesting
