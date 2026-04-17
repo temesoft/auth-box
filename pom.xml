@@ -36,7 +36,7 @@
         <zxing.version>3.5.4</zxing.version>
         <bouncycastle.version>1.83</bouncycastle.version>
         <commons-validator.version>1.10.1</commons-validator.version>
-        <guava.version>33.5.0-jre</guava.version>
+        <guava.version>33.6.0-jre</guava.version>
         <awaitility.version>4.3.0</awaitility.version>
         <test-pojo.version>1.0.6</test-pojo.version>
         <mockito.version>5.20.0</mockito.version>
