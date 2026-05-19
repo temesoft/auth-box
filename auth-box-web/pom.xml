@@ -12,7 +12,7 @@
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
 
-        <nimbusds.oauth2.version>11.37.1</nimbusds.oauth2.version>
+        <nimbusds.oauth2.version>11.37.2</nimbusds.oauth2.version>
         <webjars.locator.version>0.52</webjars.locator.version>
         <webjars.bootstrap.version>4.6.0</webjars.bootstrap.version>
         <webjars.jquery.version>3.7.1</webjars.jquery.version>
