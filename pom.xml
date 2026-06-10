@@ -30,7 +30,7 @@
         <quartz-plus.version>1.0.2</quartz-plus.version>
         <ksuid.version>1.1.4</ksuid.version>
         <h2.version>2.4.240</h2.version>
-        <errorprone.version>2.49.0</errorprone.version>
+        <errorprone.version>2.50.0</errorprone.version>
         <commons-io.version>2.22.0</commons-io.version>
         <jjwt.version>0.13.0</jjwt.version>
         <zxing.version>3.5.4</zxing.version>
