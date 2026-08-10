@@ -34,7 +34,7 @@
         <commons-io.version>2.22.0</commons-io.version>
         <jjwt.version>0.13.0</jjwt.version>
         <zxing.version>3.5.4</zxing.version>
-        <bouncycastle.version>1.84</bouncycastle.version>
+        <bouncycastle.version>1.85.2</bouncycastle.version>
         <commons-validator.version>1.11.0</commons-validator.version>
         <guava.version>33.6.0-jre</guava.version>
         <awaitility.version>4.3.0</awaitility.version>
